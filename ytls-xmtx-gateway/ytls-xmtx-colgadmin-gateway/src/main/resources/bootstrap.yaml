@@ -1,0 +1,16 @@
+logging:
+  level:
+    com.alibaba.cloud.nacos: DEBUG
+server:
+  port: 6661
+spring:
+  application: # 服务配置
+    name: colgadmin-gateway # 客户端网关
+  profiles:
+    active: dev
+  cloud:
+    nacos: # 注册发现
+      server-addr: 139.196.230.249:8848
+      config:
+        server-addr: 139.196.230.249:8848 # Nacos地址
+        file-extension: yaml # 文件后缀名
