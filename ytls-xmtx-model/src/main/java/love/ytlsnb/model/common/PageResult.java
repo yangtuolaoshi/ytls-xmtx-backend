@@ -6,6 +6,9 @@ import lombok.EqualsAndHashCode;
 /**
  * 表现层分页结果封装
  * @param <T>
+ *
+ * @author 金泓宇
+ * @date 2024/01/21
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

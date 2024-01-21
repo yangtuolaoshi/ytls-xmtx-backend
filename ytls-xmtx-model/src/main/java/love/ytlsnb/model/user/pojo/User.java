@@ -1,8 +1,9 @@
 package love.ytlsnb.model.user.pojo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 /**
  * 用户类
@@ -11,10 +12,12 @@ import java.time.LocalDateTime;
  * @date 2024/1/21
  */
 @Data
+@TableName("tb_user")
 public class User {
     /**
      * 主键ID
      */
+    @TableId(type = IdType.ASSIGN_UUID)
     private String id;
 
     /**
