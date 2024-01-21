@@ -4,6 +4,12 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+/**
+ * 用户类
+ *
+ * @author 金泓宇
+ * @date 2024/1/21
+ */
 @Data
 public class User {
     /**
