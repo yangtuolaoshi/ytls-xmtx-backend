@@ -5,6 +5,9 @@ import lombok.Data;
 /**
  * 表现层结果封装
  * @param <T>
+ *
+ * @author 金泓宇
+ * @date 2024/01/21
  */
 @Data
 public class Result<T> {
@@ -33,11 +36,11 @@ public class Result<T> {
         this.msg = msg;
     }
 
-    public Result<T> ok(T data) {
-        return new Result<>(200, data, "success...");
+    public static<T> Result<T> ok(T data) {
+        return new Result<>(200, data, "success");
     }
 
-    public Result<T> fail(Integer code, String msg) {
+    public static<T> Result<T> fail(Integer code, String msg) {
         return new Result<>(code, null, msg);
     }
 }
