@@ -8,6 +8,10 @@ package love.ytlsnb.common.constants;
  */
 public class ResultCodes {
     /**
+     * 客户端请求的语法错误，服务器无法理解
+     */
+    public static final int BAD_REQUEST = 400;
+    /**
      * 用户未登录 / 权限验证不通过
      */
     public static final int UNAUTHORIZED = 401;
