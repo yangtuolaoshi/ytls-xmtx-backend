@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * @author ula
  *
- * 用户登录数据传输对象
+ * 用户注册数据传输对象
  */
 @Data
 public class UserRegisterDTO {

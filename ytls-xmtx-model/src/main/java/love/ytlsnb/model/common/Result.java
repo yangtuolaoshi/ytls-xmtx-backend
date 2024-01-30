@@ -36,6 +36,9 @@ public class Result<T> {
         this.msg = msg;
     }
 
+    public static Result ok() {
+        return new Result<>(200, null, "success");
+    }
     public static<T> Result<T> ok(T data) {
         return new Result<>(200, data, "success");
     }

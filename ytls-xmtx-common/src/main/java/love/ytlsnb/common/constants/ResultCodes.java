@@ -15,6 +15,10 @@ public class ResultCodes {
      * 用户未登录 / 权限验证不通过
      */
     public static final int UNAUTHORIZED = 401;
+    /**
+     * 服务器理解请求客户端的请求，但是拒绝执行此请求
+     */
+    public static final int FORBIDDEN = 403;
 
     /**
      * 系统内部异常：一般用于未知异常

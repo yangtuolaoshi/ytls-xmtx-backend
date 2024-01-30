@@ -1,6 +1,8 @@
 package love.ytlsnb.user.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import love.ytlsnb.model.user.pojo.User;
+import love.ytlsnb.model.user.pojo.dto.UserLoginDTO;
 import love.ytlsnb.model.user.pojo.dto.UserRegisterDTO;
 
 /**
@@ -15,7 +17,12 @@ public interface UserService {
      * @param id 32位UUID
      * @return 用户基本信息
      */
-    User getById(Long id);
+    User selectById(Long id);
+    User selectByAccount(String account);
 
-    String register(UserRegisterDTO userRegisterDTO);
+    User selectInsensitiveUserById(Long id);
+
+
+    String  login(UserLoginDTO userLoginDTO, HttpServletRequest request);
+    void register(UserRegisterDTO userRegisterDTO);
 }

@@ -22,7 +22,7 @@ public class JwtUtil {
      * @param claims    设置的信息
      * @return
      */
-    public static String createJWT(String secretKey, long ttlMillis, Map<String, Object> claims) {
+    public static String createJwt(String secretKey, long ttlMillis, Map<String, Object> claims) {
 
         // 指定签名的时候使用的签名算法，也就是header那部分
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
@@ -50,7 +50,7 @@ public class JwtUtil {
      * @param token     加密后的token
      * @return
      */
-    public static Claims parseJWT(String secretKey, String token) {
+    public static Claims parseJwt(String secretKey, String token) {
 
         Claims claims = Jwts.parserBuilder()
                 // 设置签名时的密钥

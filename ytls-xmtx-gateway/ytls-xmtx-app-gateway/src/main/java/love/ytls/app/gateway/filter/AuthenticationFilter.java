@@ -64,15 +64,8 @@ public class AuthenticationFilter implements GlobalFilter {
 
         //9. 如果请求头中有令牌则解析令牌
         try {
-            // 解析参数
-            Claims claims = JwtUtil.parseJWT(jwtProperties.getUserSecretKey(), token);
-
-            // 查询用户数据
-            Long userId = Long.valueOf(claims.get(UserConstant.USER_ID).toString());
-            User user = userClient.getById(userId).getData();
-            // 字段脱敏
-            user.setPassword("");
-            UserHolder.saveUser(user);
+            // 解析令牌，校验是否是合法的令牌，是否过期
+            JwtUtil.parseJwt(jwtProperties.getUserSecretKey(), token);
         } catch (Exception e) {
             e.printStackTrace();
             //10. 解析jwt令牌出错, 说明令牌过期或者伪造等不合法情况出现
