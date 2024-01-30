@@ -192,7 +192,7 @@ public class UserServiceImpl implements UserService {
             // 默认属性，初始属性设置
             insertUser.setGender(UserConstant.DEFAULT_GENDER);
             insertUser.setAvatar(UserConstant.DEFAULT_AVATAR);
-            insertUser.setPoint(UserConstant.DEFAULT_POINT);
+            insertUser.setPoint(UserConstant.INITIAL_POINT);
             insertUser.setIdentified(UserConstant.UNIDENTIFIED);
             insertUser.setCreateTime(LocalDateTime.now());
             insertUser.setUpdateTime(LocalDateTime.now());

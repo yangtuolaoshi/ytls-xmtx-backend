@@ -14,12 +14,15 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("xmtx.jwt")
 public class JwtProperties {
     /**
-     * 用户端生成jwt令牌相关配置
+     * 生成jwt的密钥，最低32位
      */
     private String userSecretKey;
     /**
      * jwt令牌有效期
      */
     private long userTtl;
+    /**
+     * jwt在header中的参数KEY
+     */
     private String userTokenName;
 }
