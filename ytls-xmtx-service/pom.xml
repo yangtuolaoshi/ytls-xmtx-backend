@@ -13,6 +13,10 @@
     <packaging>pom</packaging>
     <modules>
         <module>ytls-xmtx-user</module>
+        <module>ytls-xmtx-coladmin</module>
+        <module>ytls-xmtx-quest</module>
+        <module>ytls-xmtx-school</module>
+        <module>ytls-xmtx-reward</module>
     </modules>
 
     <properties>

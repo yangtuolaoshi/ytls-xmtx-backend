@@ -8,9 +8,13 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="ytls-xmtx-common" />
+        <module name="ytls-xmtx-quest" />
         <module name="ytls-xmtx-user" />
         <module name="ytls-xmtx-feign-api" />
+        <module name="ytls-xmtx-coladmin" />
+        <module name="ytls-xmtx-school" />
         <module name="ytls-xmtx-colgadmin-gateway" />
+        <module name="ytls-xmtx-reward" />
         <module name="ytls-xmtx-model" />
         <module name="ytls-xmtx-app-gateway" />
       </profile>
@@ -20,11 +24,15 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="ytls-xmtx" options="" />
       <module name="ytls-xmtx-app-gateway" options="-parameters" />
+      <module name="ytls-xmtx-coladmin" options="-parameters" />
       <module name="ytls-xmtx-colgadmin-gateway" options="-parameters" />
       <module name="ytls-xmtx-common" options="-parameters" />
       <module name="ytls-xmtx-feign-api" options="-parameters" />
       <module name="ytls-xmtx-gateway" options="" />
       <module name="ytls-xmtx-model" options="-parameters" />
+      <module name="ytls-xmtx-quest" options="-parameters" />
+      <module name="ytls-xmtx-reward" options="-parameters" />
+      <module name="ytls-xmtx-school" options="-parameters" />
       <module name="ytls-xmtx-service" options="" />
       <module name="ytls-xmtx-user" options="-parameters" />
     </option>

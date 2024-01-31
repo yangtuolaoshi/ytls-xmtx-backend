@@ -13,11 +13,11 @@ public class UserConstant {
      */
     public static final String LOGIN_URL = "user/login";
     /**
-     * 用户ID常量
+     * 用户ID常量,用于数据库sql操作
      */
-    public static final String USER_ID = "user_id";
+    public static final String USER_ID = "user_d";
     /**
-     * 用户学号常量
+     * 用户学号常量,用于数据库sql操作
      */
     public static final String STUDENT_ID = "student_id";
     /**

@@ -1,7 +1,7 @@
 package love.ytlsnb.user;
 
 import jakarta.servlet.http.HttpServletRequest;
-import love.ytlsnb.model.user.pojo.dto.UserLoginDTO;
+import love.ytlsnb.model.user.dto.UserLoginDTO;
 import love.ytlsnb.user.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,11 +4,9 @@ import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.BCrypt;
-import cn.hutool.jwt.JWTUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import love.ytlsnb.common.constants.MessageConstant;
 import love.ytlsnb.common.constants.RedisConstant;
 import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.common.constants.UserConstant;
@@ -16,23 +14,21 @@ import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.JwtProperties;
 import love.ytlsnb.common.properties.UserProperties;
 import love.ytlsnb.common.utils.JwtUtil;
-import love.ytlsnb.model.user.pojo.User;
-import love.ytlsnb.model.user.pojo.dto.UserLoginDTO;
-import love.ytlsnb.model.user.pojo.dto.UserRegisterDTO;
+import love.ytlsnb.model.user.entity.User;
+import love.ytlsnb.model.user.dto.UserLoginDTO;
+import love.ytlsnb.model.user.dto.UserRegisterDTO;
 import love.ytlsnb.user.mapper.UserMapper;
 import love.ytlsnb.user.service.UserService;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -194,12 +190,9 @@ public class UserServiceImpl implements UserService {
             insertUser.setAvatar(UserConstant.DEFAULT_AVATAR);
             insertUser.setPoint(UserConstant.INITIAL_POINT);
             insertUser.setIdentified(UserConstant.UNIDENTIFIED);
-            insertUser.setCreateTime(LocalDateTime.now());
-            insertUser.setUpdateTime(LocalDateTime.now());
-            insertUser.setDeleted(UserConstant.UNDELETED);
 
-            log.info("插入用户：{}", insertUser);
             userMapper.insert(insertUser);
+            log.info("插入用户：{}", insertUser);
 
         } finally {
             //释放锁

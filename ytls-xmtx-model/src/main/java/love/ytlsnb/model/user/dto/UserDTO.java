@@ -1,4 +1,4 @@
-package love.ytlsnb.model.user.pojo.dto;
+package love.ytlsnb.model.user.dto;
 
 /**
  * @author ula

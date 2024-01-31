@@ -1,10 +1,10 @@
-package love.ytlsnb.model.user.pojo;
+package love.ytlsnb.model.user.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import love.ytlsnb.model.user.pojo.dto.UserRegisterDTO;
+import love.ytlsnb.model.user.dto.UserRegisterDTO;
 
 import java.time.LocalDateTime;
 
@@ -65,39 +65,35 @@ public class User {
     /**
      * 用户学校ID
      */
-    @TableField("school_id")
     private Long schoolId;
     /**
      * 用户部门ID
      */
-    @TableField("dept_id")
     private Long deptId;
     /**
      * 用户班级ID
      */
-    @TableField("class_id")
     private Long classId;
     /**
      * 创建时间
      */
-    @TableField("create_time")
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
     /**
      * 修改时间
      */
-    @TableField("update_time")
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
     /**
      * 是否删除
      */
-    @TableLogic(value = "0", delval = "1")
-    @TableField("is_deleted")
+    @TableField(value = "is_deleted", fill = FieldFill.INSERT)
     private Byte deleted;
 
-    public User(UserRegisterDTO userRegisterDTO){
-        this.studentId=userRegisterDTO.getStudentId();
-        this.nickname= userRegisterDTO.getNickname();
-        this.password= userRegisterDTO.getPassword();
-        this.phone= userRegisterDTO.getPhone();
+    public User(UserRegisterDTO userRegisterDTO) {
+        this.studentId = userRegisterDTO.getStudentId();
+        this.nickname = userRegisterDTO.getNickname();
+        this.password = userRegisterDTO.getPassword();
+        this.phone = userRegisterDTO.getPhone();
     }
 }

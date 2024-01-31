@@ -1,9 +1,9 @@
 package love.ytlsnb.user.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import love.ytlsnb.model.user.pojo.User;
-import love.ytlsnb.model.user.pojo.dto.UserLoginDTO;
-import love.ytlsnb.model.user.pojo.dto.UserRegisterDTO;
+import love.ytlsnb.model.user.entity.User;
+import love.ytlsnb.model.user.dto.UserLoginDTO;
+import love.ytlsnb.model.user.dto.UserRegisterDTO;
 
 /**
  * 用户基本信息业务层

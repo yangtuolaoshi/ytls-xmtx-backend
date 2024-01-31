@@ -4,9 +4,9 @@ package love.ytlsnb.user.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.model.common.Result;
-import love.ytlsnb.model.user.pojo.User;
-import love.ytlsnb.model.user.pojo.dto.UserLoginDTO;
-import love.ytlsnb.model.user.pojo.dto.UserRegisterDTO;
+import love.ytlsnb.model.user.entity.User;
+import love.ytlsnb.model.user.dto.UserLoginDTO;
+import love.ytlsnb.model.user.dto.UserRegisterDTO;
 import love.ytlsnb.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -20,12 +20,8 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/user")
-@RefreshScope// 必须加，从配置中心中获取配置
 @Slf4j
 public class UserController {
-//    @Value("${pattern.format}")
-//    private String format;
-
     @Autowired
     private UserService userService;
 

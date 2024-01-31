@@ -10,7 +10,7 @@ import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.common.properties.JwtProperties;
 import love.ytlsnb.common.utils.JwtUtil;
 import love.ytlsnb.common.utils.UserHolder;
-import love.ytlsnb.model.user.pojo.User;
+import love.ytlsnb.model.user.entity.User;
 import love.ytlsnb.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
