@@ -1,7 +1,7 @@
 package love.ytlsnb.quest.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import love.ytlsnb.model.quest.entity.Quest;
+import love.ytlsnb.model.quest.po.Quest;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

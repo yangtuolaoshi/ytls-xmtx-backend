@@ -1,4 +1,4 @@
-package love.ytlsnb.model.quest.entity;
+package love.ytlsnb.model.quest.po;
 
 /**
  * @author ula

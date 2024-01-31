@@ -1,6 +1,6 @@
 package love.ytlsnb.common.utils;
 
-import love.ytlsnb.model.user.entity.User;
+import love.ytlsnb.model.user.po.User;
 
 /**
  * APP用户状态保存

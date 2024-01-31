@@ -1,7 +1,7 @@
 package love.ytlsnb.user.service;
 
 import jakarta.servlet.http.HttpServletRequest;
-import love.ytlsnb.model.user.entity.User;
+import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.dto.UserLoginDTO;
 import love.ytlsnb.model.user.dto.UserRegisterDTO;
 

@@ -1,4 +1,4 @@
-package love.ytlsnb.model.user.entity;
+package love.ytlsnb.model.user.po;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
