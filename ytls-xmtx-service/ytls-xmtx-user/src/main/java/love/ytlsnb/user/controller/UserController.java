@@ -3,13 +3,17 @@ package love.ytlsnb.user.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.user.dto.UserQueryDTO;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.dto.UserLoginDTO;
 import love.ytlsnb.model.user.dto.UserRegisterDTO;
 import love.ytlsnb.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 用户基本信息控制器层
@@ -24,10 +28,17 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/{id}")
-    public Result<User> getById(@PathVariable Long id) {
-        log.info("查询用户，id:{}", id);
-        return Result.ok(userService.selectById(id));
+    @GetMapping("/list")
+    public Result<List<User>> list(UserQueryDTO userQueryDTO) {
+        log.info("查询用户，userQueryDTO:{}", userQueryDTO);
+        return Result.ok(userService.list(userQueryDTO));
+    }
+
+    @PostMapping("/login")
+    public Result<String> login(@RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) {
+        log.info("用户登录：{}", userLoginDTO);
+        String jwt = userService.login(userLoginDTO, request);
+        return Result.ok(jwt);
     }
 
     @PostMapping("/register")
@@ -37,10 +48,33 @@ public class UserController {
         return Result.ok();
     }
 
-    @PostMapping("/login")
-    public Result<String> login(@RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) {
-        log.info("用户登录：{}", userLoginDTO);
-        String jwt = userService.login(userLoginDTO, request);
-        return Result.ok(jwt);
+    @GetMapping("/user/{id}")
+    public Result<User> selectById(@PathVariable Long id) {
+        log.info("查询用户，id:{}", id);
+        return Result.ok(userService.selectById(id));
+    }
+
+    /**
+     * 用户签到接口，当用户不能签到时理应不能访问该接口
+     *
+     * @return 用户签到的结果
+     */
+    @PostMapping("/sign")
+    public Result sign() {
+        if (userService.sign()) {
+            return Result.ok();
+        } else {
+            return Result.fail(ResultCodes.FORBIDDEN, "您今日已签到");
+        }
+    }
+
+    /**
+     * 用户签到接口，当用户不能签到时理应不能访问该接口
+     *
+     * @return 用户签到的结果
+     */
+    @GetMapping("/sign")
+    public Result<Boolean> getSignStatus() {
+        return Result.ok(userService.isSigned());
     }
 }

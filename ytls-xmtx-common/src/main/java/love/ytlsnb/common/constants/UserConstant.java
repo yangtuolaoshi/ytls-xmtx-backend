@@ -77,6 +77,14 @@ public class UserConstant {
      */
     public static final Long INITIAL_POINT = 0L;
     /**
+     * 用户认证字段常量(对应po中的字段)
+     */
+    public static final String IS_IDENTIFIED_JAVA = "identified";
+    /**
+     * 用户认证字段常量(对应数据库中的字段)
+     */
+    public static final String IS_IDENTIFIED = "is_identified";
+    /**
      * 用户未认证
      */
     public static final Byte UNIDENTIFIED = 0;
@@ -84,6 +92,18 @@ public class UserConstant {
      * 用户已认证
      */
     public static final Byte IDENTIFIED = 1;
+    /**
+     * 学校主键字段常量
+     */
+    public static final String SCHOOL_ID="school_id";
+    /**
+     * 学院主键字段常量
+     */
+    public static final String DEPT_ID="dept_id";
+    /**
+     * 班级主键字段常量
+     */
+    public static final String CLASS_ID="class_id";
     /**
      * 用户未删除
      */

@@ -26,12 +26,6 @@ import reactor.core.publisher.Mono;
 public class AuthenticationFilter implements GlobalFilter {
     @Autowired
     private JwtProperties jwtProperties;
-    /**
-     * 因为存在循环依赖问题，这里采用Lazy加载模式
-     */
-    @Autowired
-    @Lazy
-    private UserClient userClient;
 
     /**
      * 鉴权过滤器 验证token

@@ -34,6 +34,10 @@
             <artifactId>ytls-xmtx-common</artifactId>
         </dependency>
         <dependency>
+            <groupId>love.ytls-nb</groupId>
+            <artifactId>ytls-xmtx-feign-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
         </dependency>

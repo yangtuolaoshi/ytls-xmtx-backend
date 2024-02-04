@@ -87,6 +87,7 @@ public class User {
     /**
      * 是否删除
      */
+    @TableLogic
     @TableField(value = "is_deleted", fill = FieldFill.INSERT)
     private Byte deleted;
 

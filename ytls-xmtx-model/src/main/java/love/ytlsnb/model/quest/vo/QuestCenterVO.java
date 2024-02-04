@@ -1,4 +1,4 @@
-package love.ytlsnb.model.quest.po;
+package love.ytlsnb.model.quest.vo;
 
 import com.baomidou.mybatisplus.annotation.*;
 
@@ -6,9 +6,9 @@ import java.time.LocalDateTime;
 
 /**
  * @author ula
- * @date 2024/1/30 21:01
+ * @date 2024/2/4 16:51
  */
-public class Quest {
+public class QuestCenterVO {
     /**
      * 任务主键
      */
@@ -39,17 +39,9 @@ public class Quest {
      */
     private String locationName;
     /**
-     * 任务所需物品
-     */
-    private String requiredItems;
-    /**
      * 任务奖励
      */
     private Integer reward;
-    /**
-     * 任务状态
-     */
-    private Byte status;
     /**
      * 任务结束时间
      */
@@ -59,31 +51,7 @@ public class Quest {
      */
     private Long schoolId;
     /**
-     * 任务的父结点
+     * 任务完成状态
      */
-    private Long parentId;
-    /**
-     * 任务左值
-     */
-    private Long left;
-    /**
-     * 任务右值
-     */
-    private Long right;
-    /**
-     * 创建时间
-     */
-    @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
-    /**
-     * 修改时间
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updateTime;
-    /**
-     * 是否删除
-     */
-    @TableLogic
-    @TableField(value = "is_deleted", fill = FieldFill.INSERT)
-    private Byte deleted;
+    private Byte status;
 }

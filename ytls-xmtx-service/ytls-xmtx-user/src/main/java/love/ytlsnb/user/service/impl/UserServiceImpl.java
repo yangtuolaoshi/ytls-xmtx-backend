@@ -1,10 +1,13 @@
 package love.ytlsnb.user.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.DesensitizedUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.common.constants.RedisConstant;
@@ -14,6 +17,8 @@ import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.JwtProperties;
 import love.ytlsnb.common.properties.UserProperties;
 import love.ytlsnb.common.utils.JwtUtil;
+import love.ytlsnb.common.utils.UserHolder;
+import love.ytlsnb.model.user.dto.UserQueryDTO;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.dto.UserLoginDTO;
 import love.ytlsnb.model.user.dto.UserRegisterDTO;
@@ -26,7 +31,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -38,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 @Slf4j
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -116,6 +125,24 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * 根据传入的数据传输对象中的非空属性进行用户查询
+     *
+     * @param userQueryDTO 用来查询的数据
+     * @return 查询到的数据
+     */
+    @Override
+    public List<User> list(UserQueryDTO userQueryDTO) {
+        Map<String, Object> map = BeanUtil.beanToMap(userQueryDTO, true, true);
+
+        // 特殊字段处理
+        Object isIdentified = map.get(UserConstant.IS_IDENTIFIED_JAVA);
+        if (isIdentified != null) {
+            map.remove(UserConstant.IS_IDENTIFIED_JAVA);
+            map.put(UserConstant.IS_IDENTIFIED, isIdentified);
+        }
+        return listByMap(map);
+    }
 
     /**
      * 用户注册
@@ -199,6 +226,51 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public boolean sign() {
+        // 检查是否已经签到
+        if (this.isSigned()) {
+            // 已签到
+            return false;
+        }
+        // 未签到过，进行签到
+        User user = UserHolder.getUser();
+        String signKey = RedisConstant.USER_SIGN_LOCK_PREFIX + user.getId();
+        RLock signLock = redissonClient.getLock(signKey);
+        try {
+            boolean success = signLock.tryLock();
+            if (!success) {
+                throw new BusinessException(ResultCodes.FORBIDDEN, "请勿进行重复签到");
+            }
+            // 进行签到
+            String signHistoryKey = RedisConstant.USER_SIGN_PREFIX +
+                    LocalDate.now().format(DateTimeFormatter.ofPattern(RedisConstant.USER_SIGN_PERMOUTH_PATTERN)) +
+                    user.getId();
+            int dayOfMonth = LocalDate.now().getDayOfMonth();
+            redisTemplate.opsForValue().setBit(signHistoryKey, dayOfMonth, true);
+            return true;
+        } finally {
+            signLock.unlock();
+        }
+    }
+
+    /**
+     * 用于获取用户今日的签到状态
+     *
+     * @return 用户的签到状态，true：已签到 false：未签到
+     */
+    @Override
+    public boolean isSigned() {
+        // 检查是否已经签到
+        User user = UserHolder.getUser();
+        String signHistoryKey = RedisConstant.USER_SIGN_PREFIX +
+                LocalDate.now().format(DateTimeFormatter.ofPattern(RedisConstant.USER_SIGN_PERMOUTH_PATTERN)) +
+                user.getId();
+        int dayOfMonth = LocalDate.now().getDayOfMonth();
+        Boolean sign = redisTemplate.opsForValue().getBit(signHistoryKey, dayOfMonth);
+        return Boolean.TRUE.equals(sign);
+    }
+
     /**
      * 用户登录
      *
@@ -267,13 +339,17 @@ public class UserServiceImpl implements UserService {
                                     TimeUnit.MILLISECONDS);
                     return jwt;
                 } else {
-                    // 需要登录的账号和用户已经登录过的账号不相同
+                    // 需要登录的账号和用户已经登录过的账号不相同，同时需要登录的账号已经登陆
                     throw new BusinessException(ResultCodes.FORBIDDEN, "账户已登录");
                 }
             }
         } finally {
             // 释放锁
-            lock.unlock();
+            try {
+                lock.unlock();
+            } catch (Exception e) {
+                log.error("释放锁失败:{},锁已经释放", loginLockName);
+            }
         }
     }
 }
