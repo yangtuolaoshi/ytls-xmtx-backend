@@ -1,5 +1,6 @@
 package love.ytlsnb.common.utils;
 
+import cn.hutool.core.thread.ThreadFactoryBuilder;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -13,9 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 /**
@@ -100,7 +99,12 @@ public class CacheClient {
         return r;
     }
 
-    private static final ExecutorService CACHE_REBUILD_EXECUTOR = Executors.newFixedThreadPool(10);
+    // TODO 这是抄的，学完了再看看要不要改
+    private static final ExecutorService CACHE_REBUILD_EXECUTOR = new ThreadPoolExecutor(
+            3, 10,
+            0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(1024), new ThreadFactoryBuilder()
+            .setNamePrefix("cache-pool").build(), new ThreadPoolExecutor.AbortPolicy());
 
     /**
      * 热点数据的查询，会对数据进行封装，设置逻辑过期时间，逻辑过期后进行异步的缓存建立，用以解决缓存击穿问题
