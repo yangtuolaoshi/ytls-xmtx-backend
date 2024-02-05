@@ -22,6 +22,8 @@ import love.ytlsnb.model.user.dto.UserQueryDTO;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.dto.UserLoginDTO;
 import love.ytlsnb.model.user.dto.UserRegisterDTO;
+import love.ytlsnb.model.user.po.UserInfo;
+import love.ytlsnb.user.mapper.UserInfoMapper;
 import love.ytlsnb.user.mapper.UserMapper;
 import love.ytlsnb.user.service.UserService;
 import org.redisson.api.RLock;
@@ -49,6 +51,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     @Autowired
+    UserInfoMapper userInfoMapper;
+    @Autowired
     private UserMapper userMapper;
     @Autowired
     private UserProperties userProperties;
@@ -58,15 +62,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private JwtProperties jwtProperties;
     @Autowired
     private StringRedisTemplate redisTemplate;
-
-    @Override
-    public User selectById(Long id) {
-        if (id == null) {
-            return null;
-        } else {
-            return userMapper.selectById(id);
-        }
-    }
 
     /**
      * 根据传入账户名查找用户：账户可以使用户名或者手机号
@@ -115,7 +110,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setIdentified(null);
             user.setSchoolId(null);
             user.setDeptId(null);
-            user.setClassId(null);
+            user.setClazzId(null);
             // 用户数据库信息脱敏
             user.setCreateTime(null);
             user.setUpdateTime(null);
@@ -145,7 +140,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 用户注册
+     * 用户注册功能，新增用户和用户信息
      *
      * @param userRegisterDTO
      */
@@ -179,25 +174,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 使用当前学生的学号进行上锁
-        RLock rLock = redissonClient.getLock(RedisConstant.USER_REGISTER_LOCK_PREFIX + userRegisterDTO.getStudentId());
-        boolean success = rLock.tryLock();
-
-        // 并发校验，有多个请求进行同一用户创建，抛异常
-        if (!success) {
-            throw new BusinessException(ResultCodes.BAD_REQUEST, "用户已存在");
-        }
-
-        // 拿到锁后进行double check，避免并发时的冲突
-        selectOne = userMapper.selectOne(new QueryWrapper<User>()
-                .eq(UserConstant.PHONE, userRegisterDTO.getPhone())
-                .or()
-                .eq(UserConstant.STUDENT_ID, userRegisterDTO.getStudentId()));
-        // 用户已存在，报错
-        if (selectOne != null) {
-            throw new BusinessException(ResultCodes.BAD_REQUEST, "用户已存在");
-        }
-
+        String userRegisterKey = RedisConstant.USER_REGISTER_LOCK_PREFIX + userRegisterDTO.getStudentId();
+        RLock rLock = redissonClient.getLock(userRegisterKey);
         try {
+            boolean success = rLock.tryLock();
+
+            // 并发校验，有多个请求进行同一用户创建，抛异常
+            if (!success) {
+                throw new BusinessException(ResultCodes.BAD_REQUEST, "用户已存在");
+            }
+            // 拿到锁后进行double check，避免并发时的冲突
+            selectOne = userMapper.selectOne(new QueryWrapper<User>()
+                    .eq(UserConstant.PHONE, userRegisterDTO.getPhone())
+                    .or()
+                    .eq(UserConstant.STUDENT_ID, userRegisterDTO.getStudentId()));
+            // 用户已存在，报错
+            if (selectOne != null) {
+                throw new BusinessException(ResultCodes.BAD_REQUEST, "用户已存在");
+            }
+
             // 新增用户数据
             User insertUser = new User(userRegisterDTO);
 
@@ -220,9 +215,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userMapper.insert(insertUser);
             log.info("插入用户：{}", insertUser);
 
+            // 插入用户详情信息
+            UserInfo insertUserInfo = new UserInfo();
+            insertUserInfo.setUserId(insertUser.getId());
+            userInfoMapper.insert(insertUserInfo);
+            log.info("插入用户详情:{}", insertUserInfo);
         } finally {
             //释放锁
-            rLock.unlock();
+            try {
+                rLock.unlock();
+            } catch (Exception e) {
+                log.error("释放锁失败:{},锁已经释放", userRegisterKey);
+            }
         }
     }
 
@@ -250,7 +254,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             redisTemplate.opsForValue().setBit(signHistoryKey, dayOfMonth, true);
             return true;
         } finally {
-            signLock.unlock();
+            // 释放锁
+            try {
+                signLock.unlock();
+            } catch (Exception e) {
+                log.error("释放锁失败:{},锁已经释放", signKey);
+            }
         }
     }
 

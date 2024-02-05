@@ -16,12 +16,6 @@ import java.util.List;
  * @date 2024/01/21
  */
 public interface UserService  extends IService<User> {
-    /**
-     * 根据ID查询单个用户
-     * @param id 32位UUID
-     * @return 用户基本信息
-     */
-    User selectById(Long id);
     User selectByAccount(String account);
 
     User selectInsensitiveUserById(Long id);

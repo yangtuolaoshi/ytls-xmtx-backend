@@ -73,7 +73,7 @@ public class User {
     /**
      * 用户班级ID
      */
-    private Long classId;
+    private Long clazzId;
     /**
      * 创建时间
      */

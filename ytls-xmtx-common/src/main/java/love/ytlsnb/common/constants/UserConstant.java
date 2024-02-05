@@ -103,7 +103,7 @@ public class UserConstant {
     /**
      * 班级主键字段常量
      */
-    public static final String CLASS_ID="class_id";
+    public static final String CLAZZ_ID="clazz_id";
     /**
      * 用户未删除
      */

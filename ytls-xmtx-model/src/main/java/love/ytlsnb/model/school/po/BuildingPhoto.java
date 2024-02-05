@@ -7,24 +7,25 @@ import java.time.LocalDateTime;
 
 /**
  * @author ula
- * @date 2024/1/30 20:24
+ * @date 2024/2/5 9:24
  */
 @Data
-@TableName("tb_school")
-public class School {
+@TableName("tb_building_photo")
+public class BuildingPhoto {
     /**
-     * 学校主键
+     * 学校建筑图片主键
      */
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     /**
-     * 学校名
+     * 学校建筑主键
      */
-    private String schoolName;
+    private Long buildingId;
     /**
-     * 学校标识
+     * 相关照片地址
      */
-    private String icon;
+    private String photo;
+    // TODO is_default字段
     /**
      * 创建时间
      */
