@@ -1,9 +1,10 @@
 package love.ytlsnb.school.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import love.ytlsnb.model.school.po.Building;
+import love.ytlsnb.model.school.po.Location;
 import love.ytlsnb.school.mapper.BuildingMapper;
 import love.ytlsnb.school.service.BuildingService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -11,5 +12,7 @@ import org.springframework.stereotype.Service;
  * @date 2024/2/5 9:38
  */
 @Service
-public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Building> implements BuildingService {
+public class BuildingServiceImpl extends ServiceImpl<BuildingMapper, Location> implements BuildingService {
+    @Autowired
+    private BuildingMapper buildingMapper;
 }

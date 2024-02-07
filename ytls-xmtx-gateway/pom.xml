@@ -10,7 +10,9 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
-        <module>ytls-xmtx-colgadmin-gateway</module>
+        <module>ytls-xmtx-app-gateway</module>
+        <module>ytls-xmtx-coladmin-gateway</module>
+        <module>ytls-xmtx-admin-gateway</module>
     </modules>
 
     <artifactId>ytls-xmtx-gateway</artifactId>

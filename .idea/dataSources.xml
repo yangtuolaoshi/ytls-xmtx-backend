@@ -8,11 +8,11 @@
       <jdbc-url>jdbc:mysql://sh-cdb-l0mn910i.sql.tencentcdb.com:63660</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="@192.168.5.137" uuid="d3cfdfa9-641d-447f-8f4f-33de28125c54">
+    <data-source source="LOCAL" name="192.168.5.138" uuid="46690c65-05ee-40a5-b653-749d597e42c3">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://192.168.5.137:3306</jdbc-url>
+      <jdbc-url>jdbc:mysql://192.168.5.138:3306</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

@@ -1,4 +1,4 @@
-package love.ytlsnb.model.school.po;
+package love.ytlsnb.model.reward.po;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
@@ -7,24 +7,25 @@ import java.time.LocalDateTime;
 
 /**
  * @author ula
- * @date 2024/2/5 9:26
+ * @date 2024/2/6 14:37
  */
 @Data
-@TableName("tb_student_photo")
-public class StudentPhoto {
+@TableName("tb_reward_photo")
+public class RewardPhoto {
     /**
-     * 学生照片主键
+     * 奖品照片主键
      */
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     /**
-     * 所属学生学号
+     * 关联的奖品主键
      */
-    private String studentId;
+    private Long rewardId;
     /**
-     * 照片地址
+     * 奖品照片存储地址
      */
     private String photo;
+    // TODO default
     /**
      * 创建时间
      */

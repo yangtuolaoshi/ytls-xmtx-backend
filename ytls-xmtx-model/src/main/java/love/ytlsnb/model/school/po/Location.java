@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
  * @date 2024/2/5 9:24
  */
 @Data
-@TableName("tb_building")
-public class Building {
+@TableName("tb_location")
+public class Location {
     /**
      * 学校建筑主键
      */
@@ -20,7 +20,7 @@ public class Building {
     /**
      * 建筑名
      */
-    private String buildingName;
+    private String locationName;
     /**
      * 学校建筑的经度
      */

@@ -8,8 +8,11 @@
     <file url="file://$PROJECT_DIR$/ytls-xmtx-feign-api/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ytls-xmtx-gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ytls-xmtx-gateway/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ytls-xmtx-gateway/ytls-xmtx-admin-gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ytls-xmtx-gateway/ytls-xmtx-app-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ytls-xmtx-gateway/ytls-xmtx-coladmin-gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ytls-xmtx-gateway/ytls-xmtx-colgadmin-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/ytls-xmtx-gateway/ytls-xmtx-school-gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ytls-xmtx-model/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ytls-xmtx-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ytls-xmtx-service/src/main/resources" charset="UTF-8" />

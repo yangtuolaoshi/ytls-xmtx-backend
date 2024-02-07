@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import love.ytlsnb.model.user.po.UserInfo;
 import love.ytlsnb.user.mapper.UserInfoMapper;
 import love.ytlsnb.user.service.UserInfoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,4 +13,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements UserInfoService {
+    @Autowired
+    private UserInfoMapper userInfoMapper;
 }

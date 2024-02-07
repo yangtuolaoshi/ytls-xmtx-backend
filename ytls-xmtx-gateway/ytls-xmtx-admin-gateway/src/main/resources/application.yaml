@@ -1,0 +1,20 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: admin-service				# 当前路由id，唯一标识
+          uri: lb://admin-service   		# 当前路由所对应的服务访问地址：
+            # lb://{服务名} 可做负载均衡
+          # http://{ip} 单个服务直接访问
+          predicates:
+            - Path=/api/admin/**   			# 请求的拦截规则：路径为/user开头的请求均由此路由处理
+xmtx:
+  cache:
+    null-ttl: 30000   # 三十秒
+  jwt:
+    user-secret-key: abcdefghabcdefghabcdefghabcdefgh   # 32位
+    user-ttl: 1800000   # 三十分钟
+    user-token-name: Authentication
+  user:
+    student-id-param1: 3    # 用户学号脱敏保留前几位
+    student-id-param2: 4    # 用户学号脱敏保留后几位

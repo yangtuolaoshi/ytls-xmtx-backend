@@ -15,7 +15,7 @@ public class UserConstant {
     /**
      * 用户ID常量,用于数据库sql操作
      */
-    public static final String USER_ID = "user_d";
+    public static final String USER_ID = "user_id";
     /**
      * 用户学号常量,用于数据库sql操作
      */
@@ -44,6 +44,10 @@ public class UserConstant {
      * 用户密码常量
      */
     public static final String PASSWORD = "password";
+    /**
+     * 用户密码脱敏后常量
+     */
+    public static final String INSENSITIVE_PASSWORD = "********";
     /**
      * 用户密码最大长度
      */

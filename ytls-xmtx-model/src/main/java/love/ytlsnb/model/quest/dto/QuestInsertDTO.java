@@ -1,22 +1,14 @@
-package love.ytlsnb.model.quest.po;
+package love.ytlsnb.model.quest.dto;
 
 import com.baomidou.mybatisplus.annotation.*;
-import lombok.Data;
 
 import java.time.LocalDateTime;
 
 /**
  * @author ula
- * @date 2024/1/30 21:01
+ * @date 2024/2/6 15:25
  */
-@Data
-@TableName("tb_quest")
-public class Quest {
-    /**
-     * 任务主键
-     */
-    @TableId(type = IdType.ASSIGN_ID)
-    private Long id;
+public class QuestInsertDTO {
     /**
      * 任务标题
      */
@@ -50,10 +42,6 @@ public class Quest {
      */
     private Integer reward;
     /**
-     * 任务状态
-     */
-    private Byte status;
-    /**
      * 任务时限（秒）：与任务结束时间最多存在一个属性
      */
     private Integer timeLimit;
@@ -69,28 +57,4 @@ public class Quest {
      * 任务的父结点
      */
     private Long parentId;
-    /**
-     * 任务左值
-     */
-    private Long left;
-    /**
-     * 任务右值
-     */
-    private Long right;
-    /**
-     * 创建时间
-     */
-    @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
-    /**
-     * 修改时间
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updateTime;
-    /**
-     * 是否删除
-     */
-    @TableLogic
-    @TableField(value = "is_deleted", fill = FieldFill.INSERT)
-    private Byte deleted;
 }

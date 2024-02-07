@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Bean;
  */
 @SpringBootConfiguration
 public class RedisConfiguration {
-    public static final String REDISSON_ADDRESS_PREFIX = "redis://";
-    public static final String REDISSON_ADDRESS_SEPARATER = ":";
+    private static final String REDISSON_ADDRESS_PREFIX = "redis://";
+    private static final String REDISSON_ADDRESS_SEPARATER = ":";
     @Autowired
     RedisProperties redisProperties;
 

@@ -7,25 +7,36 @@ import java.time.LocalDateTime;
 
 /**
  * @author ula
- * @date 2024/2/5 9:24
+ * @date 2024/2/6 16:22
  */
 @Data
-@TableName("tb_building_photo")
-public class BuildingPhoto {
+@TableName("tb_admin")
+public class Admin {
     /**
-     * 学校建筑图片主键
+     * 管理员账号主键
      */
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     /**
-     * 学校建筑主键
+     * 用户名
      */
-    private Long buildingId;
+    private String username;
     /**
-     * 相关照片地址
+     * 密码
      */
-    private String photo;
-    // TODO is_default字段
+    private String password;
+    /**
+     * 账号权限
+     */
+    private Byte privilege;
+    /**
+     * 账号状态
+     */
+    private Byte status;
+    /**
+     * 学院所属学校主键
+     */
+    private Long schoolId;
     /**
      * 创建时间
      */

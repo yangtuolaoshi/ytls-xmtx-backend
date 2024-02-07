@@ -14,7 +14,6 @@
         <module>ytls-xmtx-service</module>
         <module>ytls-xmtx-feign-api</module>
         <module>ytls-xmtx-gateway</module>
-        <module>ytls-xmtx-gateway/ytls-xmtx-app-gateway</module>
     </modules>
 
     <parent>

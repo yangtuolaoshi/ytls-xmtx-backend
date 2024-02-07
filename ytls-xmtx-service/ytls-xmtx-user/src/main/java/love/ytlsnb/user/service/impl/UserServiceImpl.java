@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     @Autowired
-    UserInfoMapper userInfoMapper;
+    private UserInfoMapper userInfoMapper;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -101,7 +101,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     userProperties.getStudentIdParam2());
             user.setStudentId(afterStudentId);
             // 密码脱敏
-            user.setPassword("********");
+            user.setPassword(UserConstant.INSENSITIVE_PASSWORD);
             // 手机号脱敏
             user.setPhone(DesensitizedUtil.mobilePhone(user.getPhone()));
             // 积分脱敏
@@ -305,7 +305,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         claims.put(UserConstant.USER_ID, user.getId());
         String jwt = JwtUtil.createJwt(jwtProperties.getUserSecretKey(), jwtProperties.getUserTtl(), claims);
         log.info("生成的JWT令牌：{}", jwt);
-        // jwt令牌中的签名，用来验证重复登录时是否是同一用户登录
+        // jwt令牌中的签名，存储进redis用于进行用户账号的唯一登录
         String newSignature = jwt.substring(jwt.lastIndexOf('.') + 1);
 
         // 尝试登录
@@ -319,39 +319,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 // 多人同时登录同一账号
                 throw new BusinessException(ResultCodes.FORBIDDEN, "可能有其他用户正在登录您的账号，请检查您的账号");
             }
-            // redis中的签名
-            String loginedSignature = redisTemplate.opsForValue().get(RedisConstant.USER_LOGIN_PREFIX + user.getId());
-            if (StrUtil.isBlankIfStr(loginedSignature)) {
-                // redis中没有数据，用户未登录
-                redisTemplate.opsForValue()
-                        .set(RedisConstant.USER_LOGIN_PREFIX + user.getId(),
-                                newSignature,
-                                jwtProperties.getUserTtl(),
-                                TimeUnit.MILLISECONDS);
-                return jwt;
-            } else {
-                // redis中有数据，用户已登录
-                // 获取请求头中的jwt令牌
-                String token = request.getHeader(jwtProperties.getUserTokenName());
-                if (StrUtil.isBlankIfStr(token)) {
-                    // 当前请求的用户是第一次进行登录操作，但需要登录的账号已经被登录
-                    throw new BusinessException(ResultCodes.FORBIDDEN, "账户已登录");
-                }
-                // 当前请求的用户进行重复登录操作，验证需要登录的账号和用户已经登录过的账号是否相同
-                String requestSignature = token.substring(token.lastIndexOf('.') + 1);
-                if (requestSignature.equals(loginedSignature)) {
-                    // 同一用户进行重新登陆，刷新ttl并重新下发jwt
-                    redisTemplate.opsForValue()
-                            .set(RedisConstant.USER_LOGIN_PREFIX + user.getId(),
-                                    newSignature,
-                                    jwtProperties.getUserTtl(),
-                                    TimeUnit.MILLISECONDS);
-                    return jwt;
-                } else {
-                    // 需要登录的账号和用户已经登录过的账号不相同，同时需要登录的账号已经登陆
-                    throw new BusinessException(ResultCodes.FORBIDDEN, "账户已登录");
-                }
-            }
+            redisTemplate.opsForValue()
+                    .set(RedisConstant.USER_LOGIN_PREFIX + user.getId(),
+                            newSignature,
+                            jwtProperties.getUserTtl(),
+                            TimeUnit.MILLISECONDS);
+            return jwt;
         } finally {
             // 释放锁
             try {
