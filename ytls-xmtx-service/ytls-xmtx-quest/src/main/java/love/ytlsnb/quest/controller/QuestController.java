@@ -1,6 +1,7 @@
 package love.ytlsnb.quest.controller;
 
 
+import cn.hutool.core.bean.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.quest.dto.QuestInsertDTO;
@@ -22,10 +23,12 @@ import java.util.List;
 @RequestMapping("/quest")
 public class QuestController {
     @Autowired
-    private QuestService userService;
+    private QuestService questService;
 
     @PostMapping("quest")
     public Result addQuest(@RequestBody QuestInsertDTO questInsertDTO) {
+        log.info("新增任务:{}",questInsertDTO);
+        questService.insert(questInsertDTO);
         return Result.ok();
     }
 }

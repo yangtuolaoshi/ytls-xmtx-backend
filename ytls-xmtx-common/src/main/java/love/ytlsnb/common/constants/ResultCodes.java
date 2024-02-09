@@ -8,6 +8,10 @@ package love.ytlsnb.common.constants;
  */
 public class ResultCodes {
     /**
+     * 请求成功。一般用于GET与POST请求
+     */
+    public static final int OK = 200;
+    /**
      * 客户端请求的语法错误，服务器无法理解
      */
     public static final int BAD_REQUEST = 400;

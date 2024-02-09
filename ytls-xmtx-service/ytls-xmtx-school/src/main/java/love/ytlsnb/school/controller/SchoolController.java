@@ -3,9 +3,13 @@ package love.ytlsnb.school.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.common.constants.ResultCodes;
+import love.ytlsnb.common.utils.AdminHolder;
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.quest.dto.QuestInsertDTO;
 import love.ytlsnb.model.school.dto.AdminLoginDTO;
+import love.ytlsnb.model.school.dto.AdminRegisterDTO;
 import love.ytlsnb.model.school.dto.BuildingInsertDTO;
+import love.ytlsnb.model.school.po.Admin;
 import love.ytlsnb.model.school.po.School;
 import love.ytlsnb.school.service.AdminService;
 import love.ytlsnb.school.service.BuildingService;
@@ -33,7 +37,6 @@ public class SchoolController {
     @GetMapping("list")
     public Result<List<School>> list() {
         List<School> list = schoolService.list();
-
         return Result.ok(list);
     }
 
@@ -45,9 +48,16 @@ public class SchoolController {
     }
 
     @PostMapping("login")
-    public Result login(@RequestBody AdminLoginDTO adminLoginDTO, HttpServletRequest request) {
+    public Result<String> login(@RequestBody AdminLoginDTO adminLoginDTO, HttpServletRequest request) {
         log.info("管理员登录:{}", adminLoginDTO);
-        adminService.login(adminLoginDTO,request);
+        String jwt = adminService.login(adminLoginDTO, request);
+        return Result.ok(jwt);
+    }
+
+    @PostMapping("register")
+    public Result register(@RequestBody AdminRegisterDTO adminRegisterDTO) {
+        log.info("管理员注册:{}", adminRegisterDTO);
+        adminService.register(adminRegisterDTO);
         return Result.ok();
     }
 }

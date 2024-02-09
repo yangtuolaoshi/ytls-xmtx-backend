@@ -2,6 +2,7 @@ package love.ytlsnb.model.quest.po;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
  * @date 2024/1/30 21:01
  */
 @Data
+@ToString
 @TableName("tb_quest")
 public class Quest {
     /**
@@ -72,11 +74,11 @@ public class Quest {
     /**
      * 任务左值
      */
-    private Long left;
+    private Long leftValue;
     /**
      * 任务右值
      */
-    private Long right;
+    private Long rightValue;
     /**
      * 创建时间
      */

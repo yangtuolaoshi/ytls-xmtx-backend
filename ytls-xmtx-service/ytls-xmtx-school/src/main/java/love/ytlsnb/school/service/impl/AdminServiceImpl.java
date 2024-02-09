@@ -1,6 +1,8 @@
 package love.ytlsnb.school.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +15,7 @@ import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.JwtProperties;
 import love.ytlsnb.common.utils.JwtUtil;
 import love.ytlsnb.model.school.dto.AdminLoginDTO;
+import love.ytlsnb.model.school.dto.AdminRegisterDTO;
 import love.ytlsnb.model.school.po.Admin;
 import love.ytlsnb.model.user.dto.UserLoginDTO;
 import love.ytlsnb.model.user.po.User;
@@ -23,6 +26,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -65,7 +69,12 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
             throw new BusinessException(ResultCodes.UNAUTHORIZED, "账号不存在");
         }
 
-        // 账户存在，提前创建jwt令牌
+        // 账户存在，校验密码
+        if(!BCrypt.checkpw(adminLoginDTO.getPassword(),admin.getPassword())){
+            // 密码错误
+            throw new BusinessException(ResultCodes.UNAUTHORIZED,"密码错误");
+        }
+        // 提前创建jwt令牌
         Map<String, Object> claims = new HashMap<>();
         claims.put(SchoolConstant.ADMIN_ID, admin.getId());
         String jwt = JwtUtil.createJwt(jwtProperties.getAdminSecretKey(), jwtProperties.getAdminTtl(), claims);
@@ -74,8 +83,8 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         String newSignature = jwt.substring(jwt.lastIndexOf('.') + 1);
 
         // 尝试登录
-        String adminLoginLockName = RedisConstant.ADMIN_LOGIN_LOCK_PREFIX + admin.getId();
-        RLock lock = redissonClient.getLock(adminLoginLockName);
+        String adminLoginLockKey = RedisConstant.ADMIN_LOGIN_LOCK_PREFIX + admin.getId();
+        RLock lock = redissonClient.getLock(adminLoginLockKey);
 
         try {
             // 上锁，同一时间只允许管理员账号在一处地方进行登录操作
@@ -104,15 +113,15 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
 
     @Override
     public Admin selectInsensitiveAdminById(Long adminId) {
-        if (adminId==null){
+        if (adminId == null) {
             throw new NullPointerException("传入管理员账号ID为空");
         }
         Admin admin = adminMapper.selectOne(new QueryWrapper<Admin>()
-                .eq(SchoolConstant.ID,adminId)
-                .eq(SchoolConstant.STATUS,SchoolConstant.NORMAL));
+                .eq(SchoolConstant.ID, adminId)
+                .eq(SchoolConstant.STATUS, SchoolConstant.ENABLED));
 
-        if(admin==null){
-            throw new BusinessException(ResultCodes.UNAUTHORIZED,"管理员账号不存在/状态异常");
+        if (admin == null) {
+            throw new BusinessException(ResultCodes.UNAUTHORIZED, "管理员账号不存在/状态异常");
         }
 
         admin.setPassword(SchoolConstant.INSENSITIVE_PASSWORD);
@@ -120,5 +129,54 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         admin.setUpdateTime(null);
         admin.setDeleted(null);
         return admin;
+    }
+
+    @Override
+    @Transactional
+    public void register(AdminRegisterDTO adminRegisterDTO) {
+        // 校验参数
+        if (BeanUtil.hasNullField(adminRegisterDTO)) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "传入参数不完整");
+        }
+
+        String username = adminRegisterDTO.getUsername();
+        Admin selectOne = adminMapper.selectOne(new QueryWrapper<Admin>()
+                .eq(SchoolConstant.USERNAME, username));
+        if (selectOne != null) {
+            throw new BusinessException(ResultCodes.FORBIDDEN, "账号名称已存在");
+        }
+
+        // 对写入操作进行上锁
+        String adminRegisterLockKey = SchoolConstant.ADMIN_REGISTER_LOCK_PREFIX + adminRegisterDTO.getUsername();
+        RLock lock = redissonClient.getLock(adminRegisterLockKey);
+        try {
+            boolean success = lock.tryLock();
+            if (!success) {
+                // 多人使用同一用户名进行注册
+                throw new BusinessException(ResultCodes.FORBIDDEN, "账号名称已存在");
+            }
+
+            // 获取锁成功，进行double check
+            selectOne = adminMapper.selectOne(new QueryWrapper<Admin>()
+                    .eq(SchoolConstant.USERNAME, username));
+            if (selectOne != null) {
+                throw new BusinessException(ResultCodes.FORBIDDEN, "账号名称已存在");
+            }
+
+            Admin admin = new Admin();
+            BeanUtil.copyProperties(adminRegisterDTO, admin);
+
+            // 密码加盐加密
+            admin.setPassword(BCrypt.hashpw(admin.getPassword()));
+            // 设置属性初始值
+            admin.setStatus(SchoolConstant.DISABLED);
+            adminMapper.insert(admin);
+        } finally {
+            try {
+                lock.unlock();
+            } catch (Exception e) {
+                log.error("释放锁失败:{},锁已经释放", adminRegisterLockKey);
+            }
+        }
     }
 }

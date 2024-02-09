@@ -1,13 +1,9 @@
 spring:
-  cloud:
-    gateway:
-      routes:
-        - id: user-service				# 当前路由id，唯一标识
-          uri: lb://user-service   		# 当前路由所对应的服务访问地址：
-            # lb://{服务名} 可做负载均衡
-          # http://{ip} 单个服务直接访问
-          predicates:
-            - Path=/api/user/**   			# 请求的拦截规则：路径为/user开头的请求均由此路由处理
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://sh-cdb-l0mn910i.sql.tencentcdb.com:63660/ytls_xmtx_quest?useSSL=false
+    username: dev
+    password: yangtuo233
   data:
     redis:
       host: 139.196.230.249

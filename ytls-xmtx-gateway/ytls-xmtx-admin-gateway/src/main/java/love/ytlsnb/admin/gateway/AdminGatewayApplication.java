@@ -1,4 +1,4 @@
-package love.ytls.app.gateway;
+package love.ytlsnb.admin.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,16 +6,14 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
 
 /**
- * 用户APP网关启动类
- *
- * @author 金泓宇
- * @date 2024/01/21
+ * @author ula
+ * @date 2024/2/7 13:54
  */
 @SpringBootApplication
 @EnableDiscoveryClient
-@ComponentScan({"love.ytlsnb.common.properties","love.ytls.app.gateway"})
-public class AppGatewayApplication {
+@ComponentScan(basePackages = {"love.ytlsnb.common.properties", "love.ytlsnb.admin.gateway"})
+public class AdminGatewayApplication {
     public static void main(String[] args) {
-        SpringApplication.run(AppGatewayApplication.class, args);
+        SpringApplication.run(AdminGatewayApplication.class, args);
     }
 }

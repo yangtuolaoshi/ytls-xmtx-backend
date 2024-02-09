@@ -11,9 +11,9 @@ import java.util.List;
 
 @FeignClient("user-service")
 public interface UserClient {
-    @GetMapping("/{id}")
+    @GetMapping("/api/user/user/{id}")
     Result<User> getById(@PathVariable Long id);
 
-    @GetMapping("list")
+    @GetMapping("/api/user/list")
     Result<List<User>> list(UserQueryDTO userQueryDTO);
 }

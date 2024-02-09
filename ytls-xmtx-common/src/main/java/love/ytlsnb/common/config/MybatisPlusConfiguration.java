@@ -1,18 +1,18 @@
-package love.ytlsnb.user.config;
+package love.ytlsnb.common.config;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
-import love.ytlsnb.user.handler.MybatisPlusMetaObjectHandler;
+import love.ytlsnb.common.handler.MybatisPlusMetaObjectHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * @author ula
- * @date 2024/1/31 17:55
+ * @date 2024/2/9 11:02
  */
 @Configuration
 public class MybatisPlusConfiguration {
     @Bean
-    public MetaObjectHandler metaObjectHandler(){
+    public MetaObjectHandler metaObjectHandler() {
         return new MybatisPlusMetaObjectHandler();
     }
 }

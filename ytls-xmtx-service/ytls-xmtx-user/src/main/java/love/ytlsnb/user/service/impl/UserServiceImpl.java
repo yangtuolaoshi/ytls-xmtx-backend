@@ -149,8 +149,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void register(UserRegisterDTO userRegisterDTO) {
         // 校验传入参数
         // 空参校验
-        if (StrUtil.isBlankIfStr(userRegisterDTO.getStudentId()) ||
-                StrUtil.isBlankIfStr(userRegisterDTO.getPhone())) {
+        if (BeanUtil.hasNullField(userRegisterDTO)) {
             throw new BusinessException(ResultCodes.BAD_REQUEST, "用户注册信息不全");
         }
         // 数据长度校验
@@ -170,7 +169,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(UserConstant.STUDENT_ID, userRegisterDTO.getStudentId()));
         // 用户已存在，报错
         if (selectOne != null) {
-            throw new BusinessException(ResultCodes.BAD_REQUEST, "用户已存在");
+            throw new BusinessException(ResultCodes.FORBIDDEN, "用户已存在");
         }
 
         // 使用当前学生的学号进行上锁
@@ -181,7 +180,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
             // 并发校验，有多个请求进行同一用户创建，抛异常
             if (!success) {
-                throw new BusinessException(ResultCodes.BAD_REQUEST, "用户已存在");
+                throw new BusinessException(ResultCodes.FORBIDDEN, "用户已存在");
             }
             // 拿到锁后进行double check，避免并发时的冲突
             selectOne = userMapper.selectOne(new QueryWrapper<User>()
@@ -190,7 +189,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     .eq(UserConstant.STUDENT_ID, userRegisterDTO.getStudentId()));
             // 用户已存在，报错
             if (selectOne != null) {
-                throw new BusinessException(ResultCodes.BAD_REQUEST, "用户已存在");
+                throw new BusinessException(ResultCodes.FORBIDDEN, "用户已存在");
             }
 
             // 新增用户数据
@@ -300,7 +299,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ResultCodes.UNAUTHORIZED, "用户不存在");
         }
 
-        // 用户存在，提前创建jwt令牌
+        // 用户存在，校验密码
+        if(!BCrypt.checkpw(userLoginDTO.getPassword(),user.getPassword())){
+            // 密码错误
+            throw new BusinessException(ResultCodes.UNAUTHORIZED,"密码错误");
+        }
+        // 提前创建jwt令牌
         Map<String, Object> claims = new HashMap<>();
         claims.put(UserConstant.USER_ID, user.getId());
         String jwt = JwtUtil.createJwt(jwtProperties.getUserSecretKey(), jwtProperties.getUserTtl(), claims);

@@ -3,6 +3,7 @@ package love.ytlsnb.school.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
 import love.ytlsnb.model.school.dto.AdminLoginDTO;
+import love.ytlsnb.model.school.dto.AdminRegisterDTO;
 import love.ytlsnb.model.school.po.Admin;
 
 /**
@@ -13,4 +14,6 @@ public interface AdminService extends IService<Admin> {
     String  login(AdminLoginDTO adminLoginDTO, HttpServletRequest request);
 
     Admin selectInsensitiveAdminById(Long adminId);
+
+    void register(AdminRegisterDTO adminRegisterDTO);
 }

@@ -1,21 +1,19 @@
-package love.ytlsnb.user.handler;
+package love.ytlsnb.common.handler;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.common.constants.PojoConstant;
 import love.ytlsnb.common.constants.UserConstant;
 import org.apache.ibatis.reflection.MetaObject;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 /**
  * @author ula
- * @date 2024/1/31 17:30
+ * @date 2024/2/9 11:00
  */
 @Slf4j
 public class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
-
     /**
      * 新增时自动注入对象的createTime、updateTime和deleted
      */

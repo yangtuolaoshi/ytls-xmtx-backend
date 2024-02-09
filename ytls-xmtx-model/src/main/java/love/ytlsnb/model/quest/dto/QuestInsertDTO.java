@@ -1,6 +1,8 @@
 package love.ytlsnb.model.quest.dto;
 
 import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -8,6 +10,8 @@ import java.time.LocalDateTime;
  * @author ula
  * @date 2024/2/6 15:25
  */
+@Data
+@ToString
 public class QuestInsertDTO {
     /**
      * 任务标题
@@ -50,7 +54,7 @@ public class QuestInsertDTO {
      */
     private LocalDateTime endTime;
     /**
-     * 任务所属学校主键
+     * 任务所属的学校ID
      */
     private Long schoolId;
     /**

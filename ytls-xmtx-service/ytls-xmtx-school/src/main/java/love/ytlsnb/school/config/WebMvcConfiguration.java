@@ -1,7 +1,7 @@
-package love.ytlsnb.user.config;
+package love.ytlsnb.school.config;
 
 import love.ytlsnb.common.json.JacksonObjectMapper;
-import love.ytlsnb.user.intercepter.UserHolderIntercepter;
+import love.ytlsnb.school.intercepter.AdminHolderIntercepter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -13,23 +13,23 @@ import java.util.List;
 
 /**
  * @author ula
+ * @date 2024/2/7 14:53
  */
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
     @Autowired
-    UserHolderIntercepter userHolderIntercepter;
+    AdminHolderIntercepter adminHolderIntercepter;
 
     /**
-     * 注册用户态保存拦截器
+     * 学校管理端账户保存拦截器
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(userHolderIntercepter)
-                .addPathPatterns("/user/**")
-                .excludePathPatterns("/user/register")
-                .excludePathPatterns("/user/login");
+        registry.addInterceptor(adminHolderIntercepter)
+                .addPathPatterns("/school/**")
+                .excludePathPatterns("/school/register")
+                .excludePathPatterns("/school/login");
     }
-
     /**
      * 处理 Bean 对象与 JSON的转换，会添加一个转换器，可以处理对象中 LocalDateTime这一类消息的转换
      *

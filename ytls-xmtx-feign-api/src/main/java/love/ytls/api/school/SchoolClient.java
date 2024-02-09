@@ -13,6 +13,6 @@ import java.util.List;
  */
 @FeignClient("school-service")
 public interface SchoolClient {
-    @GetMapping("list")
+    @GetMapping("/api/school/list")
     Result<List<School>> list();
 }
