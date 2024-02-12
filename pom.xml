@@ -14,7 +14,6 @@
         <module>ytls-xmtx-service</module>
         <module>ytls-xmtx-feign-api</module>
         <module>ytls-xmtx-gateway</module>
-        <module>ytls-xmtx-gateway/ytls-xmtx-app-gateway</module>
     </modules>
 
     <parent>
@@ -30,7 +29,10 @@
         <!--依赖版本管理-->
         <lombok.version>1.18.30</lombok.version>
         <hutool.version>5.8.5</hutool.version>
+        <jjwt>0.11.5</jjwt>
         <spring.boot.version>3.1.6</spring.boot.version>
+        <redis.version>3.1.6</redis.version>
+        <redisson.version>3.24.3</redisson.version>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
         <spring.cloud.version>2022.0.3</spring.cloud.version>
         <spring.cloud.bootstrap>3.1.1</spring.cloud.bootstrap>
@@ -57,6 +59,16 @@
             <dependency>
                 <groupId>love.ytls-nb</groupId>
                 <artifactId>ytls-xmtx-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>love.ytls-nb</groupId>
+                <artifactId>ytls-xmtx-app-gateway</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>love.ytls-nb</groupId>
+                <artifactId>ytls-xmtx-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -91,6 +103,18 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-redis</artifactId>
+                <version>${redis.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.redisson/redisson -->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
             <!--spring cloud alibaba-->
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
@@ -110,6 +134,23 @@
                 <version>${hutool.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
@@ -120,11 +161,11 @@
                 <artifactId>druid</artifactId>
                 <version>${druid.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-starter-jdbc</artifactId>-->
-<!--                <version>${jdbc.verson}</version>-->
-<!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>org.springframework.boot</groupId>-->
+            <!--                <artifactId>spring-boot-starter-jdbc</artifactId>-->
+            <!--                <version>${jdbc.verson}</version>-->
+            <!--            </dependency>-->
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>

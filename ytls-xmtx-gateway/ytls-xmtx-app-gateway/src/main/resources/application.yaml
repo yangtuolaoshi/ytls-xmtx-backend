@@ -1,0 +1,32 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-service				# 当前路由id，唯一标识
+          uri: lb://user-service   		# 当前路由所对应的服务访问地址：
+            # lb://{服务名} 可做负载均衡
+          # http://{ip} 单个服务直接访问
+          predicates:
+            - Path=/api/user/**   			# 请求的拦截规则：路径为/user开头的请求均由此路由处理
+  data:
+    redis:
+      host: 139.196.230.249
+      password: yangtuo233
+      port: 6379
+      database: 0
+logging:
+  level:
+    love.ytlsnb.quest.mapper: debug
+xmtx:
+  cache:
+    null-ttl: 30000   # 三十秒
+  jwt:
+    user-secret-key: abcdefghabcdefghabcdefghabcdefgh   # 32位
+    user-ttl: 1800000000   # 三十分钟*1000
+    user-token-name: Authentication
+    admin-secret-key: abcdefghabcdefghabcdefghabcdefgh   # 32位
+    admin-ttl: 1800000000   # 三十分钟*1000
+    admin-token-name: Authentication
+  user:
+    student-id-param1: 3    # 用户学号脱敏保留前几位
+    student-id-param2: 4    # 用户学号脱敏保留后几位

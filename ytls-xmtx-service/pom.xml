@@ -13,6 +13,10 @@
     <packaging>pom</packaging>
     <modules>
         <module>ytls-xmtx-user</module>
+        <module>ytls-xmtx-coladmin</module>
+        <module>ytls-xmtx-quest</module>
+        <module>ytls-xmtx-school</module>
+        <module>ytls-xmtx-reward</module>
     </modules>
 
     <properties>
@@ -26,12 +30,32 @@
             <artifactId>ytls-xmtx-model</artifactId>
         </dependency>
         <dependency>
+            <groupId>love.ytls-nb</groupId>
+            <artifactId>ytls-xmtx-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>love.ytls-nb</groupId>
+            <artifactId>ytls-xmtx-feign-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

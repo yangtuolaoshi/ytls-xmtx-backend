@@ -10,6 +10,9 @@
     <option name="ignoredFiles">
       <set>
         <option value="$PROJECT_DIR$/ytls-xmtx-app-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/ytls-xmtx-gateway/ytls-xmtx-colgadmin-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/ytls-xmtx-gateway/ytls-xmtx-school-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/ytls-xmtx-service/ytls-xmtx-college/pom.xml" />
         <option value="$PROJECT_DIR$/ytls-xmtx-user/pom.xml" />
       </set>
     </option>

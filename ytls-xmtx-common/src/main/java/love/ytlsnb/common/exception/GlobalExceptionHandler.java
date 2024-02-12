@@ -26,6 +26,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public Result<Object> doBusinessException(BusinessException e) {
+        System.out.println(e.getMessage());
         e.printStackTrace();
         return Result.fail(e.getCode(), e.getMessage());
     }

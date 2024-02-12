@@ -2,7 +2,7 @@ logging:
   level:
     com.alibaba.cloud.nacos: DEBUG
 server:
-  port: 6662
+  port: 6663
   servlet:
     context-path: /api
 spring:

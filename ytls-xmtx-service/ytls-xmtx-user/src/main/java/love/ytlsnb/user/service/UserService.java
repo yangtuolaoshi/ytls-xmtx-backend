@@ -1,6 +1,13 @@
 package love.ytlsnb.user.service;
 
-import love.ytlsnb.model.user.pojo.User;
+import com.baomidou.mybatisplus.extension.service.IService;
+import jakarta.servlet.http.HttpServletRequest;
+import love.ytlsnb.model.user.dto.UserQueryDTO;
+import love.ytlsnb.model.user.po.User;
+import love.ytlsnb.model.user.dto.UserLoginDTO;
+import love.ytlsnb.model.user.dto.UserRegisterDTO;
+
+import java.util.List;
 
 /**
  * 用户基本信息业务层
@@ -8,11 +15,18 @@ import love.ytlsnb.model.user.pojo.User;
  * @author 金泓宇
  * @date 2024/01/21
  */
-public interface UserService {
-    /**
-     * 根据ID查询单个用户
-     * @param id 32位UUID
-     * @return 用户基本信息
-     */
-    User getById(String id);
+public interface UserService  extends IService<User> {
+    User selectByAccount(String account);
+
+    User selectInsensitiveUserById(Long id);
+
+    List<User> list(UserQueryDTO userQueryDTO);
+
+
+    String  login(UserLoginDTO userLoginDTO, HttpServletRequest request);
+    void register(UserRegisterDTO userRegisterDTO);
+
+    boolean sign();
+
+    boolean isSigned();
 }
