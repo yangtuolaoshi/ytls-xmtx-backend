@@ -3,9 +3,7 @@ package love.ytls.api.quest;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.quest.po.Quest;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author ula
@@ -15,4 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface QuestClient {
     @PostMapping("/api/quest/quest")
     Result addQuest(@RequestBody Quest quest);
+
+    @GetMapping("/api/quest/root/{schoolId}")
+    public Result<Quest> getRootQuest(@PathVariable Long schoolId);
 }

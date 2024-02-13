@@ -30,6 +30,7 @@
         <lombok.version>1.18.30</lombok.version>
         <hutool.version>5.8.5</hutool.version>
         <jjwt>0.11.5</jjwt>
+        <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
         <spring.boot.version>3.1.6</spring.boot.version>
         <redis.version>3.1.6</redis.version>
         <redisson.version>3.24.3</redisson.version>
@@ -149,6 +150,11 @@
                 <artifactId>jjwt-jackson</artifactId>
                 <version>${jjwt}</version>
                 <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun.oss</groupId>
+                <artifactId>aliyun-sdk-oss</artifactId>
+                <version>${aliyun.sdk.oss}</version>
             </dependency>
             <dependency>
                 <groupId>mysql</groupId>

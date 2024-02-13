@@ -211,14 +211,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             insertUser.setPoint(UserConstant.INITIAL_POINT);
             insertUser.setIdentified(UserConstant.UNIDENTIFIED);
 
-            userMapper.insert(insertUser);
-            log.info("插入用户：{}", insertUser);
-
             // 插入用户详情信息
             UserInfo insertUserInfo = new UserInfo();
-            insertUserInfo.setUserId(insertUser.getId());
             userInfoMapper.insert(insertUserInfo);
             log.info("插入用户详情:{}", insertUserInfo);
+
+            insertUser.setUserInfoId(insertUserInfo.getId());
+            userMapper.insert(insertUser);
+            log.info("插入用户：{}", insertUser);
         } finally {
             //释放锁
             try {

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * @date 2024/2/5 9:24
  */
 @Data
-@TableName("tb_building_photo")
+@TableName("tb_location_photo")
 public class LocationPhoto {
     /**
      * 学校建筑图片主键
@@ -25,7 +25,10 @@ public class LocationPhoto {
      * 相关照片地址
      */
     private String photo;
-
+    /**
+     * 是否是默认照片
+     */
+    private Byte cover;
     /**
      * 创建时间
      */

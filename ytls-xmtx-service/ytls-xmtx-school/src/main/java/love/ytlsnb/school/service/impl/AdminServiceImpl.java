@@ -147,7 +147,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         }
 
         // 对写入操作进行上锁
-        String adminRegisterLockKey = SchoolConstant.ADMIN_REGISTER_LOCK_PREFIX + adminRegisterDTO.getUsername();
+        String adminRegisterLockKey = RedisConstant.ADMIN_REGISTER_LOCK_PREFIX + adminRegisterDTO.getUsername();
         RLock lock = redissonClient.getLock(adminRegisterLockKey);
         try {
             boolean success = lock.tryLock();

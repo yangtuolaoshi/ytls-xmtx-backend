@@ -4,11 +4,15 @@ import lombok.Data;
 
 /**
  * @author ula
- *
+ * <p>
  * 用户注册数据传输对象
  */
 @Data
 public class UserRegisterDTO {
+    /**
+     * 学校ID
+     */
+    private Long schoolId;
     /**
      * 学号
      */

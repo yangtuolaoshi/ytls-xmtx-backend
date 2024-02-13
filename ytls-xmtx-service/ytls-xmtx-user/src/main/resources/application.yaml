@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://sh-cdb-l0mn910i.sql.tencentcdb.com:63660/ytls-xmtx-user?useSSL=false
+    url: jdbc:mysql://sh-cdb-l0mn910i.sql.tencentcdb.com:63660/ytls_xmtx_user?useSSL=false&useUnicode=true&characterEncoding=utf-8
     username: dev
     password: yangtuo233
   data:
@@ -26,3 +26,8 @@ xmtx:
   user:
     student-id-param1: 3    # 用户学号脱敏保留前几位
     student-id-param2: 4    # 用户学号脱敏保留后几位
+  alioss:
+    endpoint: 'oss-cn-nanjing.aliyuncs.com'
+    access-key-id: 'LTAI5tPBEfZuD7iRfGt2J42G'
+    access-key-secret: '0Bc03RPrBff6cSiYVjdy9PdjFErr4Z'
+    bucket-name: 'xmtx-wwxula'

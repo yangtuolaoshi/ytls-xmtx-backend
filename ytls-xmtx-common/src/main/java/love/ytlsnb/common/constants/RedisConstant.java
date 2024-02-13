@@ -17,4 +17,7 @@ public class RedisConstant {
     public static final String SCHOOL_RANKING_LIST_TOTAL_PREFIX = "school:ranking-list:total:";
     public static final String ADMIN_LOGIN_LOCK_PREFIX = "lock:admin:login:";
     public static final String ADMIN_LOGIN_PREFIX = "admin:login:";
+    public static final String ADMIN_REGISTER_LOCK_PREFIX = "lock:admin:register:";
+    public static final String QUEST_LOCATION_PREFIX = "lock:quest:location:";
+    ;
 }

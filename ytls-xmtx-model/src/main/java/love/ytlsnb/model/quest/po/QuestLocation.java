@@ -1,4 +1,4 @@
-package love.ytlsnb.model.school.po;
+package love.ytlsnb.model.quest.po;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
@@ -7,30 +7,30 @@ import java.time.LocalDateTime;
 
 /**
  * @author ula
- * @date 2024/2/5 9:24
+ * @date 2024/2/12 11:02
  */
 @Data
-@TableName("tb_location")
-public class Location {
+@TableName("tb_quest_location")
+public class QuestLocation {
     /**
-     * 学校建筑主键
+     * 任务主键
      */
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     /**
-     * 关联的学校主键
+     * 对应学校数据库中的Location主键
      */
-    private Long schoolId;
+    private Long locationId;
     /**
-     * 建筑名
+     * 任务地点名
      */
     private String locationName;
     /**
-     * 学校建筑的经度
+     * 任务地点经度
      */
     private String longitude;
     /**
-     * 学校建筑的维度
+     * 任务地点纬度
      */
     private String latitude;
     /**

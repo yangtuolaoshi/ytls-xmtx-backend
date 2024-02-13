@@ -18,9 +18,6 @@ spring:
       password: yangtuo233
       port: 6379
       database: 0
-logging:
-  level:
-    love.ytlsnb.quest.mapper: debug
 xmtx:
   cache:
     null-ttl: 30000   # 三十秒

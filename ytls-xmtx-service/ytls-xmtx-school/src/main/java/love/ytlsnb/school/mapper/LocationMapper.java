@@ -9,5 +9,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @date 2024/2/5 9:23
  */
 @Mapper
-public interface BuildingMapper extends BaseMapper<Location> {
+public interface LocationMapper extends BaseMapper<Location> {
 }

@@ -99,7 +99,6 @@ public class CacheClient {
         return r;
     }
 
-    // TODO 这是抄的，学完了再看看要不要改
     private static final ExecutorService CACHE_REBUILD_EXECUTOR = new ThreadPoolExecutor(
             3, 10,
             0L, TimeUnit.MILLISECONDS,
