@@ -30,9 +30,10 @@
         <lombok.version>1.18.30</lombok.version>
         <hutool.version>5.8.5</hutool.version>
         <jjwt>0.11.5</jjwt>
-        <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
-        <dysmsapi20170525>2.0.24</dysmsapi20170525>
-        <facebody20191230>3.0.8</facebody20191230>
+        <aliyun.oss.version>3.10.2</aliyun.oss.version>
+        <aliyun.dysmsapi.version>2.0.24</aliyun.dysmsapi.version>
+        <aliyun.facebody.version>3.0.8</aliyun.facebody.version>
+        <aliyun.ocr.version>2.0.0</aliyun.ocr.version>
         <thumbnailator>0.4.20</thumbnailator>
         <spring.boot.version>3.1.6</spring.boot.version>
         <redis.version>3.1.6</redis.version>
@@ -157,18 +158,24 @@
             <dependency>
                 <groupId>com.aliyun.oss</groupId>
                 <artifactId>aliyun-sdk-oss</artifactId>
-                <version>${aliyun.sdk.oss}</version>
+                <version>${aliyun.oss.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.aliyun</groupId>
                 <artifactId>dysmsapi20170525</artifactId>
-                <version>${dysmsapi20170525}</version>
+                <version>${aliyun.dysmsapi.version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/com.aliyun/facebody20191230 -->
             <dependency>
                 <groupId>com.aliyun</groupId>
                 <artifactId>facebody20191230</artifactId>
-                <version>${facebody20191230}</version>
+                <version>${aliyun.facebody.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.aliyun/ocr20191230 -->
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>ocr20191230</artifactId>
+                <version>${aliyun.ocr.version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/net.coobird/thumbnailator -->
             <dependency>
@@ -176,7 +183,6 @@
                 <artifactId>thumbnailator</artifactId>
                 <version>${thumbnailator}</version>
             </dependency>
-
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>

@@ -29,4 +29,6 @@ public interface UserService  extends IService<User> {
     boolean sign();
 
     boolean isSigned();
+
+    void sendShortMessage(String phone) throws Exception;
 }

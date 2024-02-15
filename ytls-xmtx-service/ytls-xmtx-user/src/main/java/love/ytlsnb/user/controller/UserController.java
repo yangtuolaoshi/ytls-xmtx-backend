@@ -59,7 +59,7 @@ public class UserController {
             // 获取出入流
             InputStream inputStream = multipartFile.getInputStream();
             // 创建一个临时输出流
-            ByteArrayOutputStream outputStream =new ByteArrayOutputStream();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             // 判断文件大小
             if (multipartFile.getSize() > photoProperties.getMaxSize() * 1024 * 1024) {
                 // 文件大小过大，进行压缩
@@ -67,15 +67,15 @@ public class UserController {
                 // 因为这里计算采用的线性函数计算，而实际的压缩质量与outputQuality并非线性关系，但多次测试下发现能够保证最终大小小于maxSize
                 float ratio = photoProperties.getMaxSize() * 1024 * 1024 / multipartFile.getSize();
                 Thumbnails.of(inputStream)
-                        .size(4096,4096)
+                        .size(4096, 4096)
                         .outputQuality(ratio)
                         .toOutputStream(outputStream);
                 // 更新输入流
                 inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-            }else{
+            } else {
                 // 控制文件分辨率
                 Thumbnails.of(inputStream)
-                        .size(4096,4096)
+                        .size(4096, 4096)
                         .toOutputStream(outputStream);
                 // 更新输入流
                 inputStream = new ByteArrayInputStream(outputStream.toByteArray());
@@ -98,14 +98,14 @@ public class UserController {
 
     @PostMapping("/login")
     public Result<String> login(@RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) {
-        log.info("用户登录：{}", userLoginDTO);
+        log.info("用户登录:{}", userLoginDTO);
         String jwt = userService.login(userLoginDTO, request);
         return Result.ok(jwt);
     }
 
     @PostMapping("/register")
     public Result register(@RequestBody UserRegisterDTO userRegisterDTO) {
-        log.info("用户注册：{}", userRegisterDTO);
+        log.info("用户注册:{}", userRegisterDTO);
         userService.register(userRegisterDTO);
         return Result.ok();
     }
@@ -144,5 +144,19 @@ public class UserController {
     @GetMapping("/sign")
     public Result<Boolean> getSignStatus() {
         return Result.ok(userService.isSigned());
+    }
+
+    /**
+     * 向指定手机号发送验证码
+     *
+     * @param phone 路径参数，指定的手机号
+     * @return 发送成功返回的结果
+     * @throws Exception 发送失败的异常
+     */
+    @GetMapping("/code/{phone}")
+    private Result sendShortMessage(@PathVariable String phone) throws Exception {
+        log.info("发送验证码:{}", phone);
+        userService.sendShortMessage(phone);
+        return Result.ok();
     }
 }

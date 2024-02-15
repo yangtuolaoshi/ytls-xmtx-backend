@@ -75,7 +75,7 @@ public class AuthenticationFilter implements GlobalFilter {
             String userSignature = token.substring(token.lastIndexOf('.') + 1);
             if (redisSignature != null && !userSignature.equals(redisSignature)) {
                 // 有其他用户登录账户，当前jwt令牌已失效
-                response.setStatusCode(HttpStatus.BAD_REQUEST);
+                response.setStatusCode(HttpStatus.UNAUTHORIZED);
                 // 返回
                 return response.setComplete();
             }

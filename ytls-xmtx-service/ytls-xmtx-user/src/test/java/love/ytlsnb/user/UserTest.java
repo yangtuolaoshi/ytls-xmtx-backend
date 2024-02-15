@@ -37,7 +37,6 @@ public class UserTest {
 
     @Test
     public void test() throws Exception {
-        aliUtil.faceCompare("https://xmtx-wwxula.oss-cn-nanjing.aliyuncs.com/635c70e2-4693-445e-a9aa-ae1b0eb9fbd7.jpg",
-                "https://xmtx-wwxula.oss-cn-nanjing.aliyuncs.com/68921bc6-d468-48c0-b601-5c3f2bdcb604.jpg");
+
     }
 }

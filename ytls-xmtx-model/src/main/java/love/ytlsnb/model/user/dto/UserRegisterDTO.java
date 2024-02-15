@@ -10,22 +10,6 @@ import lombok.Data;
 @Data
 public class UserRegisterDTO {
     /**
-     * 学校ID
-     */
-    private Long schoolId;
-    /**
-     * 学号
-     */
-    private String studentId;
-    /**
-     * 昵称
-     */
-    private String nickname;
-    /**
-     * 密码，长度限制32位
-     */
-    private String password;
-    /**
      * 手机号，长度限制11位
      */
     private String phone;

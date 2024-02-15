@@ -41,10 +41,6 @@ public class User {
      */
     private String password;
     /**
-     * 性别：0未设置 1男 2女
-     */
-    private Byte gender;
-    /**
      * 头像
      */
     private String avatar;
@@ -95,9 +91,6 @@ public class User {
     private Byte deleted;
 
     public User(UserRegisterDTO userRegisterDTO) {
-        this.studentId = userRegisterDTO.getStudentId();
-        this.nickname = userRegisterDTO.getNickname();
-        this.password = userRegisterDTO.getPassword();
         this.phone = userRegisterDTO.getPhone();
     }
 }
