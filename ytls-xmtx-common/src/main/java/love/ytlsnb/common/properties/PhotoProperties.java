@@ -5,21 +5,23 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * @author ula
- * @date 2024/2/13 9:59
+ * @date 2024/2/14 16:49
  */
 @Data
 @Component
 @RefreshScope
-@ConfigurationProperties(prefix = "xmtx.ali.oss")
-public class AliOssProperties {
+@ConfigurationProperties(prefix = "xmtx.photo")
+public class PhotoProperties {
     /**
-     * 阿里云OSS的域名
+     * 上传图片后转存的最大值
      */
-    private String endpoint;
+    private Float maxSize;
     /**
-     * OSS中存储数据的bucketName
+     * 支持的图片类型
      */
-    private String bucketName;
+    private List<String> supportedTypes;
 }

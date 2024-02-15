@@ -31,6 +31,9 @@
         <hutool.version>5.8.5</hutool.version>
         <jjwt>0.11.5</jjwt>
         <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
+        <dysmsapi20170525>2.0.24</dysmsapi20170525>
+        <facebody20191230>3.0.8</facebody20191230>
+        <thumbnailator>0.4.20</thumbnailator>
         <spring.boot.version>3.1.6</spring.boot.version>
         <redis.version>3.1.6</redis.version>
         <redisson.version>3.24.3</redisson.version>
@@ -156,6 +159,24 @@
                 <artifactId>aliyun-sdk-oss</artifactId>
                 <version>${aliyun.sdk.oss}</version>
             </dependency>
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>dysmsapi20170525</artifactId>
+                <version>${dysmsapi20170525}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.aliyun/facebody20191230 -->
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>facebody20191230</artifactId>
+                <version>${facebody20191230}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/net.coobird/thumbnailator -->
+            <dependency>
+                <groupId>net.coobird</groupId>
+                <artifactId>thumbnailator</artifactId>
+                <version>${thumbnailator}</version>
+            </dependency>
+
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>

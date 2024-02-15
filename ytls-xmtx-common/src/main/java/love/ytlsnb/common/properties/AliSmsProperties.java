@@ -7,19 +7,27 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author ula
- * @date 2024/2/13 9:59
+ * @date 2024/2/13 14:19
  */
 @Data
 @Component
 @RefreshScope
-@ConfigurationProperties(prefix = "xmtx.ali.oss")
-public class AliOssProperties {
+@ConfigurationProperties(prefix = "xmtx.ali.sms")
+public class AliSmsProperties {
     /**
-     * 阿里云OSS的域名
+     * 阿里云SMS的域名
      */
     private String endpoint;
     /**
-     * OSS中存储数据的bucketName
+     * 短信声明：类似一个标题
      */
-    private String bucketName;
+    private String signName;
+    /**
+     * 短信模板号
+     */
+    private String templateCode;
+    /**
+     * 验证码长度
+     */
+    private Integer codeLength;
 }

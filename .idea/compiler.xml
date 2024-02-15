@@ -21,6 +21,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="ytls-xmtx-colgadmin-gateway" target="17" />
       <module name="ytls-xmtx-school-gateway" target="17" />
     </bytecodeTargetLevel>
   </component>
