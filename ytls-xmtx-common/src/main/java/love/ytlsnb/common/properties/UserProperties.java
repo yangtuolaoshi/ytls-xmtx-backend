@@ -20,4 +20,12 @@ public class UserProperties {
      */
     private Integer studentIdParam1;
     private Integer studentIdParam2;
+    /**
+     * 用户手机验证码的有效时间（毫秒）
+     */
+    private Long phoneCodeTtl;
+    /**
+     * 用户重新发送验证码的间隔时间（毫秒）
+     */
+    private Long resendCodeTimeInterval;
 }

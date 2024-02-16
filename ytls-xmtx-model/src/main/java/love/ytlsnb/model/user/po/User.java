@@ -24,7 +24,10 @@ public class User {
      */
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
-
+    /**
+     * 主键ID
+     */
+    private Long userInfoId;
     /**
      * 学号
      */
@@ -37,10 +40,6 @@ public class User {
      * 密码，采用Bcrypt加密，用户输入数据限制32位
      */
     private String password;
-    /**
-     * 性别：0未设置 1男 2女
-     */
-    private Byte gender;
     /**
      * 头像
      */
@@ -92,9 +91,6 @@ public class User {
     private Byte deleted;
 
     public User(UserRegisterDTO userRegisterDTO) {
-        this.studentId = userRegisterDTO.getStudentId();
-        this.nickname = userRegisterDTO.getNickname();
-        this.password = userRegisterDTO.getPassword();
         this.phone = userRegisterDTO.getPhone();
     }
 }

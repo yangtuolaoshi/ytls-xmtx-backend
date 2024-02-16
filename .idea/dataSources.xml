@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="@sh-cdb-l0mn910i.sql.tencentcdb.com" uuid="d34bf5cb-691d-4c5f-8f99-a528b55c634b">
+    <data-source source="LOCAL" name="@sh-cdb-l0mn910i.sql.tencentcdb.com" uuid="13dc4981-17b1-42f1-ab75-f96e0f48cb56">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://sh-cdb-l0mn910i.sql.tencentcdb.com:63660?useUnicode=true&amp;characterEnconding=UTF-8</jdbc-url>
+      <jdbc-url>jdbc:mysql://sh-cdb-l0mn910i.sql.tencentcdb.com:63660</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="192.168.5.138" uuid="46690c65-05ee-40a5-b653-749d597e42c3">
+    <data-source source="LOCAL" name="@localhost" uuid="96f089b3-54a8-442c-b2ea-3dc0ae303777">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://192.168.5.138:3306</jdbc-url>
+      <jdbc-url>jdbc:mysql://localhost:3306</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

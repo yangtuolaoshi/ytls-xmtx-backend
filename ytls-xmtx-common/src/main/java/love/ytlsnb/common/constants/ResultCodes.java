@@ -23,7 +23,10 @@ public class ResultCodes {
      * 服务器理解请求客户端的请求，但是拒绝执行此请求
      */
     public static final int FORBIDDEN = 403;
-
+    /**
+     * 服务器无法根据客户端请求的内容特性完成请求
+     */
+    public static final int NOT_ACCEPTABLE = 406;
     /**
      * 系统内部异常：一般用于未知异常
      */

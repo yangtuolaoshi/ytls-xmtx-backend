@@ -45,5 +45,5 @@ public class SchoolConstant {
      * 网关用来鉴别注册操作的字符串常量
      */
     public static final String REGISTER_URL = "school/register";
-    public static final String ADMIN_REGISTER_LOCK_PREFIX = "lock:admin:register:";
+    public static final String LOCATION_ID = "location_id";
 }

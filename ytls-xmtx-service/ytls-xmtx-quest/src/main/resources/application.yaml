@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://sh-cdb-l0mn910i.sql.tencentcdb.com:63660/ytls_xmtx_quest?useSSL=false
+    url: jdbc:mysql://sh-cdb-l0mn910i.sql.tencentcdb.com:63660/ytls_xmtx_quest?useSSL=false&useUnicode=true&characterEncoding=utf-8
     username: dev
     password: yangtuo233
   data:

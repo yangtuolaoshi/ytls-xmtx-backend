@@ -3,6 +3,7 @@ package love.ytlsnb.model.user.po;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -18,21 +19,29 @@ public class UserInfo {
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     /**
-     * 用户主键
-     */
-    private Long userId;
-    /**
      * 用户的真实姓名
      */
     private String name;
     /**
+     * 用户性别：0 默认未设置 1 男 2 女
+     */
+    private Byte gender;
+    /**
+     * 民族
+     */
+    private String nationality;
+    /**
+     * 出生日期
+     */
+    private LocalDate birthDate;
+    /**
+     * 身份证地址
+     */
+    private String address;
+    /**
      * 用户的身份证号
      */
-    private String idCard;
-    /**
-     * 用户生日
-     */
-    private LocalDateTime birthday;
+    private String idNumber;
     /**
      * 用户的真实照片
      */

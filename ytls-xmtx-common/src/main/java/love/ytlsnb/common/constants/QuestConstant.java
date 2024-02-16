@@ -22,6 +22,10 @@ public class QuestConstant {
      */
     public static final String SCHOOL_ID = "school_id";
     /**
+     * 任务所属学校ID字段常量
+     */
+    public static final String SCHOOL_ID_JAVA = "schoolId";
+    /**
      * 任务父结点ID字段常量
      */
     public static final String PARENT_ID = "parent_id";
@@ -45,4 +49,7 @@ public class QuestConstant {
      * 新增根节点的右值
      */
     public static final Long ROOT_QUEST_RIGHT = 2L;
+    public static final String LOCATION_ID = "location_id";
+    public static final Byte COVER = 1;
+    public static final Byte COMMON = 0;
 }
