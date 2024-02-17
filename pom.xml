@@ -30,7 +30,11 @@
         <lombok.version>1.18.30</lombok.version>
         <hutool.version>5.8.5</hutool.version>
         <jjwt>0.11.5</jjwt>
+        <!--OSS-SDK-->
         <aliyun.oss.version>3.10.2</aliyun.oss.version>
+        <jaxb-api.version>2.3.1</jaxb-api.version>
+        <activision.version>1.1.1</activision.version>
+        <jaxb-runtime.version>2.3.3</jaxb-runtime.version>
         <aliyun.dysmsapi.version>2.0.24</aliyun.dysmsapi.version>
         <aliyun.facebody.version>3.0.8</aliyun.facebody.version>
         <aliyun.ocr.version>2.0.0</aliyun.ocr.version>
@@ -159,6 +163,21 @@
                 <groupId>com.aliyun.oss</groupId>
                 <artifactId>aliyun-sdk-oss</artifactId>
                 <version>${aliyun.oss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>${jaxb-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.activation</groupId>
+                <artifactId>activation</artifactId>
+                <version>${activision.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>${jaxb-runtime.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.aliyun</groupId>
