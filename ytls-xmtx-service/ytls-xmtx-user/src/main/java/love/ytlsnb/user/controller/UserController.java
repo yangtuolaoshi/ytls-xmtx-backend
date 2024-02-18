@@ -8,6 +8,7 @@ import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.PhotoProperties;
 import love.ytlsnb.common.utils.AliUtil;
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.user.dto.UserInsertDTO;
 import love.ytlsnb.model.user.dto.UserQueryDTO;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.dto.UserLoginDTO;
@@ -44,7 +45,7 @@ public class UserController {
     @Autowired
     private PhotoProperties photoProperties;
 
-    @PostMapping("upload")
+    @PostMapping("/upload")
     public Result<String> upload(MultipartFile multipartFile) {
         log.info("正在上传文件 {} 至阿里云云端", multipartFile);
 
@@ -88,6 +89,13 @@ public class UserController {
             log.error("文件上传失败 ->", e);
             return Result.fail(ResultCodes.SERVER_ERROR, "文件上传异常");
         }
+    }
+
+    @PostMapping("/user")
+    private Result addUser(@RequestBody UserInsertDTO userInsertDTO) {
+        log.info("新增用户数据:{}", userInsertDTO);
+        userService.addUser(userInsertDTO);
+        return Result.ok();
     }
 
     @GetMapping("/list")

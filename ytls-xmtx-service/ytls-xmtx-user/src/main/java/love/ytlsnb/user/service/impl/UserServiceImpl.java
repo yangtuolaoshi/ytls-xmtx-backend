@@ -16,6 +16,7 @@ import love.ytlsnb.common.properties.UserProperties;
 import love.ytlsnb.common.utils.AliUtil;
 import love.ytlsnb.common.utils.JwtUtil;
 import love.ytlsnb.common.utils.UserHolder;
+import love.ytlsnb.model.user.dto.UserInsertDTO;
 import love.ytlsnb.model.user.dto.UserQueryDTO;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.dto.UserLoginDTO;
@@ -271,6 +272,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return Boolean.TRUE.equals(sign);
     }
 
+    /**
+     * 向指定的电话号码发送验证码
+     *
+     * @param phone 指定的电话号
+     * @throws Exception 发送验证码失败的异常
+     */
     @Override
     public void sendShortMessage(String phone) throws Exception {
         // 校验手机号
@@ -288,6 +295,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String code = aliUtil.sendShortMessage(phone);
         // 存储验证码
         redisTemplate.opsForValue().set(phoneCodeKey, code, userProperties.getPhoneCodeTtl(), TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * 根据传入参数新增用户数据，内部只会校验数据库内唯一的属性值是否已经被注册，不会校验参数合法性
+     *
+     * @param userInsertDTO 用户新增数据传输对象
+     * @throws Exception 新增失败的异常
+     */
+    @Override
+    @Transactional
+    public void addUser(UserInsertDTO userInsertDTO){
+        // 校验是否可以新增用户数据
+        // 校验身份证号
+        String idNumber = userInsertDTO.getIdNumber();
+        if (idNumber != null) {
+            UserInfo selectOne = userInfoMapper.selectOne(new QueryWrapper<UserInfo>()
+                    .eq(UserConstant.ID_NUMBER, idNumber));
+            if (selectOne != null) {
+                throw new BusinessException(ResultCodes.FORBIDDEN, "当前身份证号已注册过账号");
+            }
+        }
+        // 校验手机号是否已经被注册
+        String phone = userInsertDTO.getPhone();
+        User selectOne = userMapper.selectOne(new QueryWrapper<User>()
+                .eq(UserConstant.PHONE, phone));
+        if (selectOne != null) {
+            throw new BusinessException(ResultCodes.FORBIDDEN, "当前手机号已被注册");
+        }
+        User user = BeanUtil.copyProperties(userInsertDTO, User.class);
+        UserInfo userInfo = BeanUtil.copyProperties(userInsertDTO, UserInfo.class);
+        userInfoMapper.insert(userInfo);
+        user.setUserInfoId(userInfo.getId());
+        userMapper.insert(user);
     }
 
     /**

@@ -12,6 +12,7 @@ public class UserConstant {
      * 网关用来鉴别登录操作的常量
      */
     public static final String LOGIN_URL = "user/login";
+    //-------------------------User-------------------------
     /**
      * 用户ID常量,用于数据库sql操作
      */
@@ -99,15 +100,15 @@ public class UserConstant {
     /**
      * 学校主键字段常量
      */
-    public static final String SCHOOL_ID="school_id";
+    public static final String SCHOOL_ID = "school_id";
     /**
      * 学院主键字段常量
      */
-    public static final String DEPT_ID="dept_id";
+    public static final String DEPT_ID = "dept_id";
     /**
      * 班级主键字段常量
      */
-    public static final String CLAZZ_ID="clazz_id";
+    public static final String CLAZZ_ID = "clazz_id";
     /**
      * 用户未删除
      */
@@ -116,4 +117,9 @@ public class UserConstant {
      * 用户已删除
      */
     public static final Byte DELETED = 1;
+    //-------------------------UserInfo-------------------------
+    /**
+     * 用户身份证号
+     */
+    public static final String ID_NUMBER = "id_number";
 }

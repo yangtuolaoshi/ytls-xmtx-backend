@@ -54,7 +54,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
      *
      * @param adminLoginDTO 封装学校管理人员的登录账户，密码
      * @param request       用户请求对象，用于获取用户的jwt令牌
-     * @return
+     * @return 登录成功的JWT令牌
      */
     @Override
     public String login(AdminLoginDTO adminLoginDTO, HttpServletRequest request) {
@@ -70,9 +70,9 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         }
 
         // 账户存在，校验密码
-        if(!BCrypt.checkpw(adminLoginDTO.getPassword(),admin.getPassword())){
+        if (!BCrypt.checkpw(adminLoginDTO.getPassword(), admin.getPassword())) {
             // 密码错误
-            throw new BusinessException(ResultCodes.UNAUTHORIZED,"密码错误");
+            throw new BusinessException(ResultCodes.UNAUTHORIZED, "密码错误");
         }
         // 提前创建jwt令牌
         Map<String, Object> claims = new HashMap<>();
@@ -82,7 +82,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         // jwt令牌中的签名,用来做唯一登录校验
         String newSignature = jwt.substring(jwt.lastIndexOf('.') + 1);
 
-        // 尝试登录
+        // 登录
         String adminLoginLockKey = RedisConstant.ADMIN_LOGIN_LOCK_PREFIX + admin.getId();
         RLock lock = redissonClient.getLock(adminLoginLockKey);
 
@@ -94,11 +94,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
                 throw new BusinessException(ResultCodes.FORBIDDEN, "多人登录同一管理员账号");
             }
             // 登录，记录当前登录对应的签名
-            redisTemplate.opsForValue()
-                    .set(RedisConstant.ADMIN_LOGIN_PREFIX + admin.getId(),
-                            newSignature,
-                            jwtProperties.getAdminTtl(),
-                            TimeUnit.MILLISECONDS);
+            redisTemplate.opsForValue().set(RedisConstant.ADMIN_LOGIN_PREFIX + admin.getId(), newSignature, jwtProperties.getAdminTtl(), TimeUnit.MILLISECONDS);
             return jwt;
 
         } finally {
@@ -111,14 +107,18 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         }
     }
 
+    /**
+     * 根据传入管理员ID查找并返回脱敏后的管理员信息
+     *
+     * @param adminId 待查找的管理员ID
+     * @return 脱敏后的管理员信息
+     */
     @Override
     public Admin selectInsensitiveAdminById(Long adminId) {
         if (adminId == null) {
             throw new NullPointerException("传入管理员账号ID为空");
         }
-        Admin admin = adminMapper.selectOne(new QueryWrapper<Admin>()
-                .eq(SchoolConstant.ID, adminId)
-                .eq(SchoolConstant.STATUS, SchoolConstant.ENABLED));
+        Admin admin = adminMapper.selectOne(new QueryWrapper<Admin>().eq(SchoolConstant.ID, adminId).eq(SchoolConstant.STATUS, SchoolConstant.ENABLED));
 
         if (admin == null) {
             throw new BusinessException(ResultCodes.UNAUTHORIZED, "管理员账号不存在/状态异常");
@@ -139,9 +139,9 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
             throw new BusinessException(ResultCodes.BAD_REQUEST, "传入参数不完整");
         }
 
+        // 用户名校验
         String username = adminRegisterDTO.getUsername();
-        Admin selectOne = adminMapper.selectOne(new QueryWrapper<Admin>()
-                .eq(SchoolConstant.USERNAME, username));
+        Admin selectOne = adminMapper.selectOne(new QueryWrapper<Admin>().eq(SchoolConstant.USERNAME, username));
         if (selectOne != null) {
             throw new BusinessException(ResultCodes.FORBIDDEN, "账号名称已存在");
         }
@@ -157,8 +157,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
             }
 
             // 获取锁成功，进行double check
-            selectOne = adminMapper.selectOne(new QueryWrapper<Admin>()
-                    .eq(SchoolConstant.USERNAME, username));
+            selectOne = adminMapper.selectOne(new QueryWrapper<Admin>().eq(SchoolConstant.USERNAME, username));
             if (selectOne != null) {
                 throw new BusinessException(ResultCodes.FORBIDDEN, "账号名称已存在");
             }

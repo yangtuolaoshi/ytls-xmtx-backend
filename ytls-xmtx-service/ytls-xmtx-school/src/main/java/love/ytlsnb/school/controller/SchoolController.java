@@ -9,11 +9,13 @@ import love.ytlsnb.model.school.dto.LocationInsertDTO;
 import love.ytlsnb.model.school.po.Location;
 import love.ytlsnb.model.school.po.School;
 import love.ytlsnb.model.school.vo.LocationVO;
+import love.ytlsnb.model.user.dto.UserInsertDTO;
 import love.ytlsnb.school.service.AdminService;
 import love.ytlsnb.school.service.LocationService;
 import love.ytlsnb.school.service.SchoolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -45,6 +47,7 @@ public class SchoolController {
         adminService.register(adminRegisterDTO);
         return Result.ok();
     }
+
     @GetMapping("list")
     public Result<List<School>> list() {
         List<School> list = schoolService.list();
@@ -59,8 +62,22 @@ public class SchoolController {
     }
 
     @GetMapping("location/{locationId}")
-    public Result<LocationVO> getWholeLocationById(@PathVariable Long locationId){
-        log.info("查询学校地点:{}",locationId);
+    public Result<LocationVO> getWholeLocationById(@PathVariable Long locationId) {
+        log.info("查询学校地点:{}", locationId);
         return Result.ok(locationService.getWholeLocationById(locationId));
+    }
+
+    @PostMapping("user")
+    public Result addUser(@RequestBody UserInsertDTO userInsertDTO) throws Exception {
+        log.info("新增用户数据:{}", userInsertDTO);
+        schoolService.addUser(userInsertDTO);
+        return Result.ok();
+    }
+
+    @PostMapping("user/batch")
+    public Result addUserBatch(MultipartFile multipartFile) throws Exception {
+        log.info("批量新增用户数据");
+        schoolService.addUserBatch(multipartFile);
+        return Result.ok();
     }
 }

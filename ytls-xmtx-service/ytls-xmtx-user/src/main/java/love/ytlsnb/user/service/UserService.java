@@ -2,6 +2,7 @@ package love.ytlsnb.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
+import love.ytlsnb.model.user.dto.UserInsertDTO;
 import love.ytlsnb.model.user.dto.UserQueryDTO;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.dto.UserLoginDTO;
@@ -31,4 +32,6 @@ public interface UserService  extends IService<User> {
     boolean isSigned();
 
     void sendShortMessage(String phone) throws Exception;
+
+    void addUser(UserInsertDTO userInsertDTO);
 }
