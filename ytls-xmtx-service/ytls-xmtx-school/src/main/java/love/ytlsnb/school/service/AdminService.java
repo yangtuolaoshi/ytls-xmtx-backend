@@ -5,6 +5,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import love.ytlsnb.model.school.dto.AdminLoginDTO;
 import love.ytlsnb.model.school.dto.AdminRegisterDTO;
 import love.ytlsnb.model.school.po.Admin;
+import love.ytlsnb.model.user.dto.UserInsertDTO;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 /**
  * @author ula
@@ -16,4 +20,9 @@ public interface AdminService extends IService<Admin> {
     Admin selectInsensitiveAdminById(Long adminId);
 
     void register(AdminRegisterDTO adminRegisterDTO);
+
+
+    void addUser(UserInsertDTO userInsertDTO) throws Exception;
+
+    void addUserBatch(MultipartFile multipartFile) throws IOException;
 }

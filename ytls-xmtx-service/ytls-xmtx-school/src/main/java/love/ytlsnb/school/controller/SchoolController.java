@@ -25,72 +25,10 @@ import java.util.List;
 public class SchoolController {
     @Autowired
     private SchoolService schoolService;
-    @Autowired
-    private DeptService deptService;
-    @Autowired
-    private ClazzService clazzService;
-    @Autowired
-    private LocationService locationService;
-    @Autowired
-    private AdminService adminService;
-
-    @PostMapping("login")
-    public Result<String> login(@RequestBody AdminLoginDTO adminLoginDTO, HttpServletRequest request) {
-        log.info("管理员登录:{}", adminLoginDTO);
-        String jwt = adminService.login(adminLoginDTO, request);
-        return Result.ok(jwt);
-    }
-
-    @PostMapping("register")
-    public Result register(@RequestBody AdminRegisterDTO adminRegisterDTO) {
-        log.info("管理员注册:{}", adminRegisterDTO);
-        adminService.register(adminRegisterDTO);
-        return Result.ok();
-    }
 
     @GetMapping("list")
     public Result<List<School>> list() {
         List<School> list = schoolService.list();
         return Result.ok(list);
-    }
-
-    @PostMapping("/dept")
-    public Result addDept(@RequestBody DeptInsertDTO deptInsertDTO) {
-        log.info("新增学院:{}", deptInsertDTO);
-        deptService.addDept(deptInsertDTO);
-        return Result.ok();
-    }
-    @PostMapping("/clazz")
-    public Result addDept(@RequestBody ClazzInsertDTO clazzInsertDTO) {
-        log.info("新增班级:{}", clazzInsertDTO);
-        clazzService.addClazz(clazzInsertDTO);
-        return Result.ok();
-    }
-
-    @PostMapping("location")
-    public Result addLocation(@RequestBody LocationInsertDTO locationInsertDTO) {
-        log.info("新增学校建筑");
-        // TODO 新增学校建筑逻辑
-        return Result.ok();
-    }
-
-    @GetMapping("location/{locationId}")
-    public Result<LocationVO> getWholeLocationById(@PathVariable Long locationId) {
-        log.info("查询学校地点:{}", locationId);
-        return Result.ok(locationService.getWholeLocationById(locationId));
-    }
-
-    @PostMapping("user")
-    public Result addUser(@RequestBody UserInsertDTO userInsertDTO) throws Exception {
-        log.info("新增用户数据:{}", userInsertDTO);
-        schoolService.addUser(userInsertDTO);
-        return Result.ok();
-    }
-
-    @PostMapping("user/batch")
-    public Result addUserBatch(MultipartFile multipartFile) throws Exception {
-        log.info("批量新增用户数据");
-        schoolService.addUserBatch(multipartFile);
-        return Result.ok();
     }
 }

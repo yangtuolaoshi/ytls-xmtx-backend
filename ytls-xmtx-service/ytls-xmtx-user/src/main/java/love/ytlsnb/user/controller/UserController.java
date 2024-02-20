@@ -32,14 +32,12 @@ import java.util.UUID;
  * @author 金泓宇
  * @date 2024/01/21
  */
+@Slf4j
 @RestController
 @RequestMapping("/user")
-@Slf4j
 public class UserController {
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserInfoService userInfoService;
     @Autowired
     private AliUtil aliUtil;
     @Autowired
@@ -91,7 +89,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/user")
+    @PostMapping
     private Result addUser(@RequestBody UserInsertDTO userInsertDTO) {
         log.info("新增用户数据:{}", userInsertDTO);
         userService.addUser(userInsertDTO);
@@ -118,16 +116,10 @@ public class UserController {
         return Result.ok();
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/{id}")
     public Result<User> getUserById(@PathVariable Long id) {
         log.info("查询用户，id:{}", id);
         return Result.ok(userService.getById(id));
-    }
-
-    @GetMapping("/userInfo/{id}")
-    public Result<UserInfo> getUserInfoById(@PathVariable Long id) {
-        log.info("查询用户，id:{}", id);
-        return Result.ok(userInfoService.getById(id));
     }
 
     /**

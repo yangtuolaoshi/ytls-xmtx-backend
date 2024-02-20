@@ -13,8 +13,4 @@ import java.io.IOException;
  * @date 2024/2/3 14:57
  */
 public interface SchoolService extends IService<School> {
-
-    void addUser(UserInsertDTO userInsertDTO) throws Exception;
-
-    void addUserBatch(MultipartFile multipartFile) throws IOException;
 }

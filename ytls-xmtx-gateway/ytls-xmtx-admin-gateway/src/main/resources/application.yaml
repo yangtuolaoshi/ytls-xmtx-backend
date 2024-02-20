@@ -7,7 +7,8 @@ spring:
             # lb://{服务名} 可做负载均衡
           # http://{ip} 单个服务直接访问
           predicates:
-            - Path=/api/school/**   			# 请求的拦截规则：路径为/admin开头的请求均由此路由处理
+            - Path=/api/school/**   			# 请求的拦截规则：路径为/school开头的请求均由此路由处理
+            - Path=/api/admin/**   			# 请求的拦截规则：路径为/admin开头的请求均由此路由处理
         - id: quest-service				# 当前路由id，唯一标识
           uri: lb://quest-service   		# 当前路由所对应的服务访问地址：
           predicates:
