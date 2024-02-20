@@ -5,9 +5,11 @@ import lombok.ToString;
 
 /**
  * @author ula
- * @date 2024/2/5 9:42
+ * @date 2024/2/18 10:03
  */
 @Data
 @ToString
-public class LocationInsertDTO {
+public class ClazzInsertDTO {
+    private Long deptId;
+    private String clazzName;
 }

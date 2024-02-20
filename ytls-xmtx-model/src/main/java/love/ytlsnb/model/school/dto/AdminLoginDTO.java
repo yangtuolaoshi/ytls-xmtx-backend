@@ -2,6 +2,7 @@ package love.ytlsnb.model.school.dto;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
  * @date 2024/2/6 16:25
  */
 @Data
+@ToString
 public class AdminLoginDTO {
     /**
      * 用户名

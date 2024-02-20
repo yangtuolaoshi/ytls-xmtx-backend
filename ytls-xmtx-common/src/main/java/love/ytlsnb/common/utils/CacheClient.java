@@ -60,6 +60,21 @@ public class CacheClient {
     }
 
     /**
+     * 解决了缓存穿透的缓存查询，缓存未命中会直接查询数据库，根据数据库的查询结果设置空缓存或者缓存数据（使用默认缓存时长）
+     *
+     * @param keyPrefix  缓存数据在Redis中的存储key的前缀
+     * @param id         缓存数据的主键
+     * @param resultType 查询数据的具体类型
+     * @param dbFallback 缓存未命中的降级策略
+     * @param <R>        查询数据的类型
+     * @param <ID>       查询数据的主键
+     * @return 查询到的结果，可能为null
+     */
+    public <R, ID> R query(String keyPrefix, ID id, Class<R> resultType, Function<ID, R> dbFallback) {
+        return query(keyPrefix, id, resultType, dbFallback, cacheProperties.getDefaultTtl(), TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * 解决了缓存穿透的缓存查询，缓存未命中会直接查询数据库，根据数据库的查询结果设置空缓存或者缓存数据
      *
      * @param keyPrefix  缓存数据在Redis中的存储key的前缀
@@ -103,7 +118,21 @@ public class CacheClient {
             3, 10,
             0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(1024), new ThreadFactoryBuilder()
-            .setNamePrefix("cache-pool").build(), new ThreadPoolExecutor.AbortPolicy());
+            .setNamePrefix("cache-pool-").build(), new ThreadPoolExecutor.AbortPolicy());
+    /**
+     * 热点数据的查询，会对数据进行封装，设置逻辑过期时间，逻辑过期后进行异步的缓存建立，用以解决缓存击穿问题
+     *
+     * @param keyPrefix  缓存数据在Redis中的存储key的前缀
+     * @param id         缓存数据的主键
+     * @param resultType 查询数据的具体类型
+     * @param dbFallback 缓存未命中的降级策略
+     * @param <R>        查询数据的类型
+     * @param <ID>       查询数据的主键
+     * @return 查询到的结果，可能为null
+     */
+    public <R, ID> R queryWithLogicalExpiration(String keyPrefix, ID id, Class<R> resultType, Function<ID, R> dbFallback) {
+        return queryWithLogicalExpiration(keyPrefix, id, resultType, dbFallback, cacheProperties.getDefaultTtl(), TimeUnit.MILLISECONDS);
+    }
 
     /**
      * 热点数据的查询，会对数据进行封装，设置逻辑过期时间，逻辑过期后进行异步的缓存建立，用以解决缓存击穿问题
@@ -134,8 +163,12 @@ public class CacheClient {
 
             // 数据已过期，异步进行缓存重建
             RLock lock = redissonClient.getLock(RedisConstant.LOCK_PREFIX + key);
-            boolean success = lock.tryLock();
-            if (success) {
+            try {
+                boolean success = lock.tryLock();
+                if (!success) {
+                    // 返回过期数据
+                    return JSONUtil.toBean((JSONObject) redisData.getData(), resultType);
+                }
                 // double check
                 value = redisTemplate.opsForValue().get(key);
                 redisData = JSONUtil.toBean(value, RedisData.class);
@@ -145,58 +178,71 @@ public class CacheClient {
                     return JSONUtil.toBean((JSONObject) redisData.getData(), resultType);
                 }
 
-                try {
-                    // 缓存重建任务提交
-                    CACHE_REBUILD_EXECUTOR.submit(() -> {
-                        R r = dbFallback.apply(id);
-                        if (r != null) {
-                            setWithLogicalExpiration(key, r, ttl, unit);
-                        }
+                // 缓存重建任务提交
+                CACHE_REBUILD_EXECUTOR.submit(() -> {
+                    R r = dbFallback.apply(id);
+                    log.info("正在异步建立缓存:{}",r);
+                    if (r != null) {
+                        setWithLogicalExpiration(key, r, ttl, unit);
+                    } else {
                         // 数据库中数据被删除，设置空缓存
                         redisTemplate.opsForValue().set(key, "", ttl, unit);
-                    });
-                } finally {
+                    }
+                });
+
+                // 返回过期数据
+                return JSONUtil.toBean((JSONObject) redisData.getData(), resultType);
+            } finally {
+                try {
                     lock.unlock();
+                } catch (Exception e) {
+                    log.error("释放锁失败:{},锁已经释放", lock);
                 }
             }
-            // 返回过期数据
-            return JSONUtil.toBean((JSONObject) redisData.getData(), resultType);
         } else {
             // 查出数据为空，一般需要设置逻辑过期的数据会在项目启动时加载，所以项目启动后在数据存在的情况下只会有一次查出数据为空
             if (value != null) {
                 // 查出数据为空字符串，表示目前数据库中没有数据
                 return null;
             }
-
             // 查出数据为null，该项数据没有经数据库查询过，这里同样进行异步缓存建立
             RLock lock = redissonClient.getLock(RedisConstant.LOCK_PREFIX + key);
-            // 多线程下仅允许一个线程提交缓存重建任务
-            boolean success = lock.tryLock();
-            if (success) {
+            try {
+                // 多线程下仅允许一个线程提交缓存重建任务
+                boolean success = lock.tryLock();
+                if (!success) {
+                    return null;
+                }
                 // double check
                 value = redisTemplate.opsForValue().get(key);
-                RedisData redisData = JSONUtil.toBean(value, RedisData.class);
-                Long expirationTime = redisData.getExpirationTime();
-                if (expirationTime > System.currentTimeMillis()) {
-                    // 新建立的缓存，直接返回
-                    return JSONUtil.toBean((JSONObject) redisData.getData(), resultType);
+                if (value != null) {
+                    // 有线程建立过缓存了
+                    RedisData redisData = JSONUtil.toBean(value, RedisData.class);
+                    Long expirationTime = redisData.getExpirationTime();
+                    if (expirationTime > System.currentTimeMillis()) {
+                        // 新建立的缓存，直接返回
+                        return JSONUtil.toBean((JSONObject) redisData.getData(), resultType);
+                    }
                 }
-
-                try {
-                    // 缓存重建任务提交
-                    CACHE_REBUILD_EXECUTOR.submit(() -> {
-                        R r = dbFallback.apply(id);
-                        if (r != null) {
-                            setWithLogicalExpiration(key, r, ttl, unit);
-                        }
+                // 缓存重建任务提交
+                CACHE_REBUILD_EXECUTOR.submit(() -> {
+                    R r = dbFallback.apply(id);
+                    log.info("正在异步建立缓存:{}",r);
+                    if (r != null) {
+                        setWithLogicalExpiration(key, r, ttl, unit);
+                    } else {
                         // 数据库中也没有数据，设置空缓存
                         redisTemplate.opsForValue().set(key, "", ttl, unit);
-                    });
-                } finally {
+                    }
+                });
+                return null;
+            } finally {
+                try {
                     lock.unlock();
+                } catch (Exception e) {
+                    log.error("释放锁失败:{},锁已经释放", lock);
                 }
             }
-            return null;
         }
     }
 }

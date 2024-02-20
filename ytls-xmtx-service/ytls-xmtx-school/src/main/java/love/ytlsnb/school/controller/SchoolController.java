@@ -3,16 +3,12 @@ package love.ytlsnb.school.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.model.common.Result;
-import love.ytlsnb.model.school.dto.AdminLoginDTO;
-import love.ytlsnb.model.school.dto.AdminRegisterDTO;
-import love.ytlsnb.model.school.dto.LocationInsertDTO;
+import love.ytlsnb.model.school.dto.*;
 import love.ytlsnb.model.school.po.Location;
 import love.ytlsnb.model.school.po.School;
 import love.ytlsnb.model.school.vo.LocationVO;
 import love.ytlsnb.model.user.dto.UserInsertDTO;
-import love.ytlsnb.school.service.AdminService;
-import love.ytlsnb.school.service.LocationService;
-import love.ytlsnb.school.service.SchoolService;
+import love.ytlsnb.school.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +25,10 @@ import java.util.List;
 public class SchoolController {
     @Autowired
     private SchoolService schoolService;
+    @Autowired
+    private DeptService deptService;
+    @Autowired
+    private ClazzService clazzService;
     @Autowired
     private LocationService locationService;
     @Autowired
@@ -52,6 +52,19 @@ public class SchoolController {
     public Result<List<School>> list() {
         List<School> list = schoolService.list();
         return Result.ok(list);
+    }
+
+    @PostMapping("/dept")
+    public Result addDept(@RequestBody DeptInsertDTO deptInsertDTO) {
+        log.info("新增学院:{}", deptInsertDTO);
+        deptService.addDept(deptInsertDTO);
+        return Result.ok();
+    }
+    @PostMapping("/clazz")
+    public Result addDept(@RequestBody ClazzInsertDTO clazzInsertDTO) {
+        log.info("新增班级:{}", clazzInsertDTO);
+        clazzService.addClazz(clazzInsertDTO);
+        return Result.ok();
     }
 
     @PostMapping("location")
