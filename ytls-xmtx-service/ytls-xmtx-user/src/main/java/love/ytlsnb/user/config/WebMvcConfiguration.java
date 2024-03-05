@@ -1,5 +1,6 @@
 package love.ytlsnb.user.config;
 
+import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.common.json.JacksonObjectMapper;
 import love.ytlsnb.user.intercepter.UserHolderIntercepter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(userHolderIntercepter)
-                .addPathPatterns("/user/**")
-                .excludePathPatterns("/user/register")
-                .excludePathPatterns("/user/login");
+                .addPathPatterns(UserConstant.USER_ALL_URL);
     }
 
     /**

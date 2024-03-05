@@ -12,7 +12,7 @@ spring:
       database: 0
 logging:
   level:
-    love.ytlsnb.school.mapper: debug
+    love.ytlsnb: debug
 xmtx:
   cache:
     null-ttl: 30000   # 三十秒
@@ -21,9 +21,9 @@ xmtx:
     user-secret-key: abcdefghabcdefghabcdefghabcdefgh   # 32位
     user-ttl: 1800000000   # 三十分钟*1000
     user-token-name: Authentication
-    admin-secret-key: abcdefghabcdefghabcdefghabcdefgh   # 32位
-    admin-ttl: 1800000000   # 三十分钟*1000
-    admin-token-name: Authentication
+    coladmin-secret-key: abcdefghabcdefghabcdefghabcdefgh   # 32位
+    coladmin-ttl: 1800000000   # 三十分钟*1000
+    coladmin-token-name: Authentication
   user:
     student-id-param1: 3    # 用户学号脱敏保留前几位
     student-id-param2: 4    # 用户学号脱敏保留后几位

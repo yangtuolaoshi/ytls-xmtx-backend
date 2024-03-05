@@ -29,13 +29,13 @@ public class JwtProperties {
     /**
      * 学校管理员账号生成jwt的密钥，最低32位
      */
-    private String adminSecretKey;
+    private String coladminSecretKey;
     /**
      * 学校管理员账号的jwt令牌有效期
      */
-    private long adminTtl;
+    private long coladminTtl;
     /**
      * 学校管理员账号的jwt在header中的参数KEY
      */
-    private String adminTokenName;
+    private String coladminTokenName;
 }

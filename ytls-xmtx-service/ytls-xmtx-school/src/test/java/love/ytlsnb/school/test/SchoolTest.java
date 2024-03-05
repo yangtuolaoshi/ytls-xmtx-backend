@@ -1,6 +1,9 @@
 package love.ytlsnb.school.test;
 
 import cn.hutool.core.thread.ThreadFactoryBuilder;
+import love.ytls.api.user.UserClient;
+import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.school.service.SchoolService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +22,10 @@ import java.util.concurrent.TimeUnit;
 public class SchoolTest {
     @Autowired
     private SchoolService schoolService;
-    private static final ExecutorService CACHE_REBUILD_EXECUTOR = new ThreadPoolExecutor(
-            3, 10,
-            0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>(1024), new ThreadFactoryBuilder()
-            .setNamePrefix("cache-pool").build(), new ThreadPoolExecutor.AbortPolicy());
+    @Autowired
+    private UserClient userClient;
     @Test
-    public void test() throws InterruptedException {
-
+    public void test() {
+        Result<User> byId = userClient.getById(1758018823723806722L);
     }
 }

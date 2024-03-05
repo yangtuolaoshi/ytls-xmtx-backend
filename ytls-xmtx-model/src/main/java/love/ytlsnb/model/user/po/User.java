@@ -33,7 +33,7 @@ public class User {
      */
     private String studentId;
     /**
-     * 昵称
+     * 昵称：可重复
      */
     private String nickname;
     /**

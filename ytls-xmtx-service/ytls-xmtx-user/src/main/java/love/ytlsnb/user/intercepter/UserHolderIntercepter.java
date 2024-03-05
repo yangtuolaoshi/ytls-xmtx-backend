@@ -13,6 +13,7 @@ import love.ytlsnb.common.utils.UserHolder;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -30,14 +31,13 @@ public class UserHolderIntercepter implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         log.info("正在保存用户信息");
         String token = request.getHeader(jwtProperties.getUserTokenName());
-        // token为空，无权限（正常情况下不可能）
+        // token为空，为远程调用，直接放行
         if(StrUtil.isBlankIfStr(token)){
-            response.setStatus(ResultCodes.UNAUTHORIZED);
-            return false;
+            return true;
         }
         Claims claims = JwtUtil.parseJwt(jwtProperties.getUserSecretKey(), token);
         Long userId = (Long) claims.get(UserConstant.USER_ID);
-        User user=userService.selectInsensitiveUserById(userId);
+        User user=userService.getById(userId);
         UserHolder.saveUser(user);
         return true;
     }

@@ -11,8 +11,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>ytls-xmtx-app-gateway</module>
-        <module>ytls-xmtx-coladmin-gateway</module>
         <module>ytls-xmtx-admin-gateway</module>
+        <module>ytls-xmtx-coladmin-gateway</module>
     </modules>
 
     <artifactId>ytls-xmtx-gateway</artifactId>

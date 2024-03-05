@@ -1,4 +1,4 @@
-package love.ytlsnb.model.school.dto;
+package love.ytlsnb.model.coladmin.dto;
 
 import lombok.Data;
 import lombok.ToString;
@@ -9,7 +9,7 @@ import lombok.ToString;
  */
 @Data
 @ToString
-public class AdminRegisterDTO {
+public class ColadminRegisterDTO {
     /**
      * 管理员账户用户名（唯一）
      */

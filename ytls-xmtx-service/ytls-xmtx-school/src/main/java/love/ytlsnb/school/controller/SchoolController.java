@@ -21,14 +21,21 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("school")
+@RequestMapping("/school")
 public class SchoolController {
     @Autowired
     private SchoolService schoolService;
 
-    @GetMapping("list")
+    @GetMapping("/list")
     public Result<List<School>> list() {
         List<School> list = schoolService.list();
         return Result.ok(list);
+    }
+
+    @GetMapping("/{schoolId}")
+    public Result<School> getSchoolById(@PathVariable String schoolId) {
+        log.info("根据学校Id获取学校数据:{}", schoolId);
+        School byId = schoolService.getById(schoolId);
+        return Result.ok(byId);
     }
 }

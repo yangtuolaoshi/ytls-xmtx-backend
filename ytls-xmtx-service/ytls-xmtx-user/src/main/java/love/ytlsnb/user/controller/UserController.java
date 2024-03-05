@@ -43,6 +43,13 @@ public class UserController {
     @Autowired
     private PhotoProperties photoProperties;
 
+    @PostMapping("/batch")
+    public Result addUserBatch(MultipartFile multipartFile) throws IOException {
+        log.info("通过Excel批量新增用户数据:{}", multipartFile);
+        userService.addUserBatch(multipartFile);
+        return Result.ok();
+    }
+
     @PostMapping("/upload")
     public Result<String> upload(MultipartFile multipartFile) {
         log.info("正在上传文件 {} 至阿里云云端", multipartFile);
@@ -63,7 +70,7 @@ public class UserController {
             if (multipartFile.getSize() > photoProperties.getMaxSize() * 1024 * 1024) {
                 // 文件大小过大，进行压缩
                 // 计算压缩比：注意，经过赋值这里计算的压缩比之后还是并不保证文件大小为maxSize，
-                // 因为这里计算采用的线性函数计算，而实际的压缩质量与outputQuality并非线性关系，但多次测试下发现能够保证最终大小小于maxSize
+                // 因为这里计算采用的线性函数计算，而实际的压缩质量与outputQuality并非线性关系，但测试下发现能够保证最终大小小于maxSize（能用）
                 float ratio = photoProperties.getMaxSize() * 1024 * 1024 / multipartFile.getSize();
                 Thumbnails.of(inputStream)
                         .size(4096, 4096)
@@ -87,13 +94,6 @@ public class UserController {
             log.error("文件上传失败 ->", e);
             return Result.fail(ResultCodes.SERVER_ERROR, "文件上传异常");
         }
-    }
-
-    @PostMapping
-    private Result addUser(@RequestBody UserInsertDTO userInsertDTO) {
-        log.info("新增用户数据:{}", userInsertDTO);
-        userService.addUser(userInsertDTO);
-        return Result.ok();
     }
 
     @GetMapping("/list")
@@ -154,9 +154,42 @@ public class UserController {
      * @throws Exception 发送失败的异常
      */
     @GetMapping("/code/{phone}")
-    private Result sendShortMessage(@PathVariable String phone) throws Exception {
+    public Result sendShortMessage(@PathVariable String phone) throws Exception {
         log.info("发送验证码:{}", phone);
         userService.sendShortMessage(phone);
+        return Result.ok();
+    }
+
+    /**
+     * @param idCard 代表身份证的OSS存储路径
+     * @return
+     */
+    @PostMapping("/idCard")
+    public Result uploadIdCard(@RequestBody String idCard) throws Exception {
+        log.info("上传身份证:{}", idCard);
+        userService.uploadIdCard(idCard);
+        return Result.ok();
+    }
+
+    /**
+     * @param admissionLetter 代表用户录取通知书的OSS存储路径
+     * @return
+     */
+    @PostMapping("/admissionLetter")
+    public Result uploadAdmissionLetter(@RequestBody String admissionLetter) throws Exception {
+        log.info("上传录取通知书:{}", admissionLetter);
+        userService.uploadAdmissionLetter(admissionLetter);
+        return Result.ok();
+    }
+
+    /**
+     * @param realPhoto 用户上传的真实照片
+     * @return
+     */
+    @PostMapping("/realPhoto")
+    public Result uploadRealPhoto(@RequestBody String realPhoto) throws Exception {
+        log.info("上传真实照片:{}", realPhoto);
+        userService.uploadRealPhoto(realPhoto);
         return Result.ok();
     }
 }

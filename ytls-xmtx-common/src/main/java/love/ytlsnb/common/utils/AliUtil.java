@@ -139,7 +139,6 @@ public class AliUtil {
                 .setPhoneNumbers(phoneNumber);
         RuntimeOptions runtimeOptions = new RuntimeOptions();
         try {
-            // 复制代码运行请自行打印 API 的返回值
             client.sendSmsWithOptions(sendSmsRequest, runtimeOptions);
             return code;
         } catch (TeaException teaException) {
@@ -151,15 +150,13 @@ public class AliUtil {
 
     /**
      * 人脸比对接口，若为同一个人则正常执行，若不为同一个人或者原照片与目标照片不为同一个人或者两张照片中含不合法照片，则抛出异常
-     * （注意，内部会调用faceDetect进行照片检测，会增加耗时，可优化逻辑减少此处时间损耗）
+     * （内部不做图片校验，调用者需要先行处理）
      *
      * @param source 进行人脸对比的源照片
      * @param target 进行人脸对比的目标照片
      * @throws Exception 比对失败的异常
      */
     public void faceCompare(String source, String target) throws Exception {
-        faceDetect(source);
-        faceDetect(target);
         Config config = new Config();
         config.setAccessKeyId(aliProperties.getAccessKeyId())
                 .setAccessKeySecret(aliProperties.getAccessKeySecret())

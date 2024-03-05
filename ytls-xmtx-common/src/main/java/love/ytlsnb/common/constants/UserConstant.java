@@ -1,22 +1,36 @@
 package love.ytlsnb.common.constants;
 
+import java.util.List;
+
 /**
  * @author ula
  */
 public class UserConstant {
     /**
-     * 网关用来鉴别注册操作的常量
+     * 拦截器用来鉴别用户操作的常量
+     */
+    public static final String USER_ALL_URL = "user/**";
+    /**
+     * 网关和拦截器用来鉴别注册操作的常量
      */
     public static final String REGISTER_URL = "user/register";
     /**
-     * 网关用来鉴别登录操作的常量
+     * 网关和拦截器用来鉴别登录操作的常量
      */
     public static final String LOGIN_URL = "user/login";
+    /**
+     * 网关和拦截器用来鉴别发送验证码操作的常量
+     */
+    public static final String GETCODE_URL = "user/code";
     //-------------------------User-------------------------
     /**
      * 用户ID常量,用于数据库sql操作
      */
     public static final String USER_ID = "user_id";
+    /**
+     * 用户信息ID常量,用于数据库sql操作
+     */
+    public static final String USER_INFO_ID = "user_info_id";
     /**
      * 用户学号常量,用于数据库sql操作
      */
@@ -40,7 +54,7 @@ public class UserConstant {
     /**
      * 默认生成用户名的随机字符串长度
      */
-    public static final Integer DEFAULT_NICKNAME_LENGTH = 10;
+    public static final Integer DEFAULT_NICKNAME_LENGTH = 6;
     /**
      * 用户密码常量
      */

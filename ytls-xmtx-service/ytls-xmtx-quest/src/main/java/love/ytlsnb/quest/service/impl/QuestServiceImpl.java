@@ -1,7 +1,6 @@
 package love.ytlsnb.quest.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.ListUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -12,15 +11,12 @@ import love.ytlsnb.common.constants.QuestConstant;
 import love.ytlsnb.common.constants.RedisConstant;
 import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.common.exception.BusinessException;
-import love.ytlsnb.common.utils.AdminHolder;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.quest.dto.QuestInsertDTO;
 import love.ytlsnb.model.quest.po.Quest;
 import love.ytlsnb.model.quest.po.QuestLocation;
 import love.ytlsnb.model.quest.po.QuestLocationPhoto;
 import love.ytlsnb.model.quest.vo.QuestVO;
-import love.ytlsnb.model.school.po.Admin;
-import love.ytlsnb.model.school.po.Location;
 import love.ytlsnb.model.school.vo.LocationVO;
 import love.ytlsnb.quest.mapper.QuestLocationMapper;
 import love.ytlsnb.quest.mapper.QuestLocationPhotoMapper;

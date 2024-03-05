@@ -2,7 +2,7 @@ logging:
   level:
     com.alibaba.cloud.nacos: DEBUG
 server:
-  port: 6662
+  port: 6661
 spring:
   application: # 服务配置
     name: coladmin-gateway # 客户端网关

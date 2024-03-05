@@ -47,9 +47,9 @@ public class UserInfo {
      */
     private String realPhoto;
     /**
-     * 用户的学校认证照片
+     * 用户的录取通知书照片
      */
-    private String authenticationPhoto;
+    private String admissionLetterPhoto;
     /**
      * 用户的学校名
      */

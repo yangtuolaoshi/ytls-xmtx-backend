@@ -1,4 +1,4 @@
-package love.ytlsnb.user.config;
+package love.ytlsnb.common.config;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author ula
+ * @date 2024/2/28 20:29
  */
-@SpringBootConfiguration
+@Configuration
 public class RedisConfiguration {
     public static final String REDISSON_ADDRESS_PREFIX = "redis://";
     public static final String REDISSON_ADDRESS_SEPARATER = ":";

@@ -1,10 +1,7 @@
-package love.ytlsnb.model.school.dto;
+package love.ytlsnb.model.coladmin.dto;
 
-import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.ToString;
-
-import java.time.LocalDateTime;
 
 /**
  * @author ula
@@ -12,7 +9,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @ToString
-public class AdminLoginDTO {
+public class ColadminLoginDTO {
     /**
      * 用户名
      */

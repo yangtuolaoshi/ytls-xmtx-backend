@@ -25,7 +25,6 @@ public class RewardPhoto {
      * 奖品照片存储地址
      */
     private String photo;
-    // TODO default
     /**
      * 创建时间
      */
