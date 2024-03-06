@@ -260,7 +260,9 @@ public class QuestServiceImpl implements QuestService {
     public Boolean deleteById(Long id) {
         // 查询这个任务还有没有子任务
         Quest quest = questMapper.selectById(id);
-        if (quest == null) return false;
+        if (quest == null) {
+            return false;
+        }
         Integer leftValue = quest.getLeftValue();
         Integer rightValue = quest.getRightValue();
         if (rightValue - leftValue > 1) {// 只需要判断左右值之差是否为1

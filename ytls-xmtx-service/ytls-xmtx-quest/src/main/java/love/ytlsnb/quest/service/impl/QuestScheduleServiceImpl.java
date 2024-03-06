@@ -169,7 +169,9 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
     public Boolean deleteById(Long id) {
         // TODO 删除其下所有照片
         QuestSchedule questSchedule = questScheduleMapper.selectById(id);
-        if (questSchedule == null) return false;
+        if (questSchedule == null) {
+            return false;
+        }
         LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(QuestSchedule::getQuestId, questSchedule.getQuestId());
         List<QuestSchedule> questSchedules = questScheduleMapper.selectList(queryWrapper);
