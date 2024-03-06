@@ -23,13 +23,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result<Object> doException(Exception e) {
         e.printStackTrace();
+        log.error("An unexpected exception occurred...");
         return Result.fail(SERVER_ERROR, "系统开小差了，请稍后再试...");
     }
 
     @ExceptionHandler(BusinessException.class)
     public Result<Object> doBusinessException(BusinessException e) {
         log.error(e.getMessage());
-        e.printStackTrace();
         return Result.fail(e.getCode(), e.getMessage());
     }
 }

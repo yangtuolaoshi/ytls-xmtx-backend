@@ -1,34 +1,31 @@
 package love.ytlsnb.quest.test;
 
-import cn.hutool.core.bean.BeanUtil;
-import love.ytlsnb.common.constants.PojoConstant;
-import love.ytlsnb.model.quest.vo.QuestVO;
-import love.ytlsnb.model.school.po.Location;
-import love.ytlsnb.model.school.po.LocationPhoto;
-import love.ytlsnb.model.school.vo.LocationVO;
+import love.ytlsnb.model.quest.dto.QuestDTO;
+import love.ytlsnb.quest.service.QuestService;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.ArrayList;
 
 /**
  * @author ula
  * @date 2024/2/12 16:01
  */
+@SpringBootTest
 public class QuestTest {
-    @Test
-    public void test1(){
-        LocationVO locationVO = new LocationVO();
-        QuestVO questVO = new QuestVO();
-        ArrayList<String> photos = new ArrayList<>();
-        photos.add("aaa");
-        photos.add("bbb");
-        photos.add("ccc");
-        locationVO.setPhotos(photos);
-        locationVO.setId(13413541L);
+    @Autowired
+    private QuestService questService;
 
-        BeanUtil.copyProperties(locationVO,questVO);
-        System.out.println(locationVO);
-        System.out.println(questVO);
-    }
+//    @Test
+//    public void testGetPageByCondition() {
+//        questService.getPageByCondition(null, 0, 5);
+//    }
+//
+//    @Test
+//    public void testAdd() {
+//        QuestDTO questAddDTO = new QuestDTO();
+//        questAddDTO.setQuestTitle("主线任务1");
+//        questAddDTO.setType(0);
+//        questAddDTO.setQuestStatus(1);
+//        System.out.println(questService.add(questAddDTO));
+//    }
 }

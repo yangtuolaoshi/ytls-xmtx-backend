@@ -31,11 +31,20 @@ interface OSSOperation {
  */
 @Slf4j
 public class OSSUtil {
-    public static OSS ossClient;
+    /**
+     * OSS客户端
+     */
+    private static final OSS ossClient;
+
+    public static final String END_POINT = "oss-rg-china-mainland.aliyuncs.com";
+
+    /**
+     * 任务服务桶名称
+     */
+    public static final String QUEST_BUCKET = "ytls-xmtx";
 
     static {
         // yourEndpoint填写Bucket所在地域对应的Endpoint。
-        String endpoint = "oss-rg-china-mainland.aliyuncs.com";
         // 从环境变量中获取访问凭证。运行本代码示例之前，请先配置环境变量。
         EnvironmentVariableCredentialsProvider credentialsProvider = null;
         try {
@@ -44,7 +53,7 @@ public class OSSUtil {
             e.printStackTrace();
         }
         // 创建OSSClient实例。
-        ossClient = new OSSClientBuilder().build(endpoint, credentialsProvider);
+        ossClient = new OSSClientBuilder().build(END_POINT, credentialsProvider);
     }
 
     /**
