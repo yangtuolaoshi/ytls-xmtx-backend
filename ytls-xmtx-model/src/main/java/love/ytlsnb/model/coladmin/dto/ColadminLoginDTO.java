@@ -1,16 +1,15 @@
-package love.ytlsnb.model.school.dto;
+package love.ytlsnb.model.coladmin.dto;
 
-import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
-
-import java.time.LocalDateTime;
+import lombok.ToString;
 
 /**
  * @author ula
  * @date 2024/2/6 16:25
  */
 @Data
-public class AdminLoginDTO {
+@ToString
+public class ColadminLoginDTO {
     /**
      * 用户名
      */

@@ -17,4 +17,8 @@ public class CacheProperties {
      * 空值在redis中的存储时长（毫秒）
      */
     private Long nullTtl;
+    /**
+     * 值在redis中的默认存储时长（毫秒）
+     */
+    private Long defaultTtl;
 }

@@ -1,0 +1,60 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://sh-cdb-l0mn910i.sql.tencentcdb.com:63660/ytls_xmtx_user?useSSL=false&useUnicode=true&characterEncoding=utf-8
+    username: dev
+    password: yangtuo233
+  data:
+    redis:
+      host: 139.196.230.249
+      password: yangtuo233
+      port: 6379
+      database: 0
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+logging:
+  level:
+    love.ytlsnb.user.mapper: debug
+xmtx:
+  cache:
+    null-ttl: 30000   # 三十秒
+    default-ttl: 1800000  # 三十分钟
+  jwt:
+    user-secret-key: abcdefghabcdefghabcdefghabcdefgh   # 32位
+    user-ttl: 1800000000   # 三十分钟*1000
+    user-token-name: Authentication
+    coladmin-secret-key: abcdefghabcdefghabcdefghabcdefgh   # 32位
+    coladmin-ttl: 1800000000   # 三十分钟*1000
+    coladmin-token-name: Authentication
+  user:
+    student-id-param1: 3    # 用户学号脱敏保留前几位
+    student-id-param2: 4    # 用户学号脱敏保留后几位
+    phone-code-ttl: 864000000 # 单位毫秒，测试阶段：十天（三十分钟：1800000）
+    resend-code-time-interval: 60000 # 一分钟，单位毫秒
+  ali:
+    access-key-id: 'LTAI5tPBEfZuD7iRfGt2J42G'
+    access-key-secret: '0Bc03RPrBff6cSiYVjdy9PdjFErr4Z'
+    oss:
+      endpoint: 'oss-cn-nanjing.aliyuncs.com'
+      bucket-name: 'xmtx-wwxula'
+    sms:
+      endpoint: 'dysmsapi.aliyuncs.com'
+      signName: '新苗同学'                # 必须是存在于阿里云的签名
+      templateCode: 'SMS_465130937'
+      codeLength: 6
+    face:
+      endpoint: 'facebody.cn-shanghai.aliyuncs.com'
+      score-threshold: 85
+      blur-threshold: 85
+      fnf-threshold: 85
+      mask-threshold: 85
+      confidence-threshold: 61 # 误识率在1/1000，1/10000，1/100000的情况下分别对应置信度阈值：61.0,69.0,75.0
+    ocr:
+      endpoint: 'ocr.cn-shanghai.aliyuncs.com'
+  photo:
+    max-size: 3     # 单位MB
+    supported-types: # 格式为：“.xxx”
+      - .jpg
+      - .png

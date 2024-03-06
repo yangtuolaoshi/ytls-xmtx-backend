@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 public class UserLoginDTO {
     /**
-     * 登录的账号：学号/手机号 长度限制16位
+     * 登录的账号：手机号（11位）/身份证号 长度限制18位
      */
     private String account;
     /**

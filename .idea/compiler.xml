@@ -13,7 +13,6 @@
         <module name="ytls-xmtx-user" />
         <module name="ytls-xmtx-feign-api" />
         <module name="ytls-xmtx-coladmin-gateway" />
-        <module name="ytls-xmtx-coladmin" />
         <module name="ytls-xmtx-school" />
         <module name="ytls-xmtx-reward" />
         <module name="ytls-xmtx-model" />
@@ -21,6 +20,8 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="ytls-xmtx-coladmin" target="17" />
+      <module name="ytls-xmtx-coladmin-gateway (1)" target="17" />
       <module name="ytls-xmtx-colgadmin-gateway" target="17" />
       <module name="ytls-xmtx-school-gateway" target="17" />
     </bytecodeTargetLevel>
@@ -32,6 +33,7 @@
       <module name="ytls-xmtx-app-gateway" options="-parameters" />
       <module name="ytls-xmtx-coladmin" options="-parameters" />
       <module name="ytls-xmtx-coladmin-gateway" options="-parameters" />
+      <module name="ytls-xmtx-coladmin-gateway (1)" options="-parameters" />
       <module name="ytls-xmtx-common" options="-parameters" />
       <module name="ytls-xmtx-feign-api" options="-parameters" />
       <module name="ytls-xmtx-gateway" options="" />

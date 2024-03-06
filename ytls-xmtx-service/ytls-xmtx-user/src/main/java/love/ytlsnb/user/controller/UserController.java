@@ -8,6 +8,7 @@ import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.PhotoProperties;
 import love.ytlsnb.common.utils.AliUtil;
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.user.dto.UserInsertDTO;
 import love.ytlsnb.model.user.dto.UserQueryDTO;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.dto.UserLoginDTO;
@@ -31,20 +32,25 @@ import java.util.UUID;
  * @author 金泓宇
  * @date 2024/01/21
  */
+@Slf4j
 @RestController
 @RequestMapping("/user")
-@Slf4j
 public class UserController {
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserInfoService userInfoService;
     @Autowired
     private AliUtil aliUtil;
     @Autowired
     private PhotoProperties photoProperties;
 
-    @PostMapping("upload")
+    @PostMapping("/batch")
+    public Result addUserBatch(MultipartFile multipartFile) throws IOException {
+        log.info("通过Excel批量新增用户数据:{}", multipartFile);
+        userService.addUserBatch(multipartFile);
+        return Result.ok();
+    }
+
+    @PostMapping("/upload")
     public Result<String> upload(MultipartFile multipartFile) {
         log.info("正在上传文件 {} 至阿里云云端", multipartFile);
 
@@ -64,7 +70,7 @@ public class UserController {
             if (multipartFile.getSize() > photoProperties.getMaxSize() * 1024 * 1024) {
                 // 文件大小过大，进行压缩
                 // 计算压缩比：注意，经过赋值这里计算的压缩比之后还是并不保证文件大小为maxSize，
-                // 因为这里计算采用的线性函数计算，而实际的压缩质量与outputQuality并非线性关系，但多次测试下发现能够保证最终大小小于maxSize
+                // 因为这里计算采用的线性函数计算，而实际的压缩质量与outputQuality并非线性关系，但测试下发现能够保证最终大小小于maxSize（能用）
                 float ratio = photoProperties.getMaxSize() * 1024 * 1024 / multipartFile.getSize();
                 Thumbnails.of(inputStream)
                         .size(4096, 4096)
@@ -110,16 +116,10 @@ public class UserController {
         return Result.ok();
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/{id}")
     public Result<User> getUserById(@PathVariable Long id) {
         log.info("查询用户，id:{}", id);
         return Result.ok(userService.getById(id));
-    }
-
-    @GetMapping("/userInfo/{id}")
-    public Result<UserInfo> getUserInfoById(@PathVariable Long id) {
-        log.info("查询用户，id:{}", id);
-        return Result.ok(userInfoService.getById(id));
     }
 
     /**
@@ -154,9 +154,42 @@ public class UserController {
      * @throws Exception 发送失败的异常
      */
     @GetMapping("/code/{phone}")
-    private Result sendShortMessage(@PathVariable String phone) throws Exception {
+    public Result sendShortMessage(@PathVariable String phone) throws Exception {
         log.info("发送验证码:{}", phone);
         userService.sendShortMessage(phone);
+        return Result.ok();
+    }
+
+    /**
+     * @param idCard 代表身份证的OSS存储路径
+     * @return
+     */
+    @PostMapping("/idCard")
+    public Result uploadIdCard(@RequestBody String idCard) throws Exception {
+        log.info("上传身份证:{}", idCard);
+        userService.uploadIdCard(idCard);
+        return Result.ok();
+    }
+
+    /**
+     * @param admissionLetter 代表用户录取通知书的OSS存储路径
+     * @return
+     */
+    @PostMapping("/admissionLetter")
+    public Result uploadAdmissionLetter(@RequestBody String admissionLetter) throws Exception {
+        log.info("上传录取通知书:{}", admissionLetter);
+        userService.uploadAdmissionLetter(admissionLetter);
+        return Result.ok();
+    }
+
+    /**
+     * @param realPhoto 用户上传的真实照片
+     * @return
+     */
+    @PostMapping("/realPhoto")
+    public Result uploadRealPhoto(@RequestBody String realPhoto) throws Exception {
+        log.info("上传真实照片:{}", realPhoto);
+        userService.uploadRealPhoto(realPhoto);
         return Result.ok();
     }
 }

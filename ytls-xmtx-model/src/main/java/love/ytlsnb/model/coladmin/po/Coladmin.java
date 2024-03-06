@@ -1,4 +1,4 @@
-package love.ytlsnb.model.school.po;
+package love.ytlsnb.model.coladmin.po;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
  * @date 2024/2/6 16:22
  */
 @Data
-@TableName("tb_admin")
-public class Admin {
+@TableName("tb_coladmin")
+public class Coladmin {
     /**
      * 管理员账号主键
      */

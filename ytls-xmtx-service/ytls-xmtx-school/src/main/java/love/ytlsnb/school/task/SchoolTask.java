@@ -12,27 +12,29 @@ import org.springframework.stereotype.Component;
 @Component
 public class SchoolTask {
     @Autowired
-    SchoolUtil schoolUtil;
+    private SchoolUtil schoolUtil;
 
     /**
      * 每月一号凌晨执行
      */
     @Scheduled(cron = "0 0 0 1 * ?")
-    public void updateRankingListTotal(){
+    public void updateRankingListTotal() {
         schoolUtil.updateRankingListTotal();
     }
+
     /**
      * 每周一凌晨执行
      */
     @Scheduled(cron = "0 0 0 ? * 1")
-    public void updateRankingListWeekly(){
+    public void updateRankingListWeekly() {
         schoolUtil.updateRankingListWeekly();
     }
+
     /**
      * 每天凌晨执行
      */
     @Scheduled(cron = "0 0 0 * * ?")
-    public void updateRankingListDayly(){
+    public void updateRankingListDayly() {
         schoolUtil.updateRankingListDayly();
     }
 }

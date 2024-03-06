@@ -1,7 +1,10 @@
 package love.ytls.api.school;
 
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.school.po.Clazz;
+import love.ytlsnb.model.school.po.Dept;
 import love.ytlsnb.model.school.po.School;
+import love.ytlsnb.model.school.po.StudentPhoto;
 import love.ytlsnb.model.school.vo.LocationVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +21,18 @@ public interface SchoolClient {
     @GetMapping("/api/school/list")
     Result<List<School>> list();
 
-    @GetMapping("/api/school/location/{locationId}")
-    public Result<LocationVO> getWholeLocationById(@PathVariable Long locationId);
+    @GetMapping("/api/location/{locationId}")
+    Result<LocationVO> getWholeLocationById(@PathVariable Long locationId);
+
+    @GetMapping("/api/studentPhoto/{userId}")
+    Result<StudentPhoto> getStudentPhoto(@PathVariable Long userId);
+
+    @GetMapping("/{schoolId}")
+    public Result<School> getSchoolById(@PathVariable Long schoolId);
+
+    @GetMapping("/list/{schoolId}")
+    public Result<List<Dept>> listDeptBySchoolId(@PathVariable Long schoolId);
+
+    @GetMapping("/list/{schoolId}")
+    public Result<List<Clazz>> listClazzBySchoolId(@PathVariable Long schoolId);
 }

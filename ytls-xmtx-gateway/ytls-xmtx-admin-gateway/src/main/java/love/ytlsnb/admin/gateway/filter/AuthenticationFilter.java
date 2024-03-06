@@ -1,28 +1,18 @@
 package love.ytlsnb.admin.gateway.filter;
 
-import cn.hutool.core.util.StrUtil;
-import io.jsonwebtoken.Claims;
-import love.ytlsnb.common.constants.RedisConstant;
-import love.ytlsnb.common.constants.SchoolConstant;
-import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.common.properties.JwtProperties;
-import love.ytlsnb.common.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 /**
  * @author ula
- * @date 2024/2/7 14:17
+ * @date 2024/3/5 19:53
  */
 @Order(0)
 @Component
@@ -34,6 +24,7 @@ public class AuthenticationFilter implements GlobalFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        /*
         // 获取请求
         ServerHttpRequest request = exchange.getRequest();
         // 获取响应
@@ -82,5 +73,7 @@ public class AuthenticationFilter implements GlobalFilter {
             // 返回
             return response.setComplete();
         }
+         */
+        return null;
     }
 }

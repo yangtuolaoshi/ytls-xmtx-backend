@@ -48,17 +48,17 @@ public class SchoolUtil {
             userQueryDTO.setIdentified(UserConstant.IDENTIFIED);
             userQueryDTO.setSchoolId(schoolId);
 
-            Result<List<User>> userListResult = userClient.list(userQueryDTO);
-            List<User> userList = userListResult.getData();
-
-            if (userList != null && userList.size() != 0) {
-                // 添加用户至redis
-                for (User user : userList) {
-                    redisTemplate.opsForZSet().add(RedisConstant.SCHOOL_RANKING_LIST_TOTAL_PREFIX + schoolId,
-                            user.getId().toString(),
-                            user.getPoint());
-                }
-            }
+//            Result<List<User>> userListResult = userClient.list(userQueryDTO);
+//            List<User> userList = userListResult.getData();
+//
+//            if (userList != null && userList.size() != 0) {
+//                // 添加用户至redis
+//                for (User user : userList) {
+//                    redisTemplate.opsForZSet().add(RedisConstant.SCHOOL_RANKING_LIST_TOTAL_PREFIX + schoolId,
+//                            user.getId().toString(),
+//                            user.getPoint());
+//                }
+//            }
         }
     }
 
@@ -77,18 +77,18 @@ public class SchoolUtil {
             userQueryDTO.setIdentified(UserConstant.IDENTIFIED);
             userQueryDTO.setSchoolId(schoolId);
 
-            Result<List<User>> userListResult = userClient.list(userQueryDTO);
-            List<User> userList = userListResult.getData();
-
-            if (userList != null && userList.size() != 0) {
-                // 添加用户信息至redis
-                for (User user : userList) {
-
-                    redisTemplate.opsForZSet().add(RedisConstant.SCHOOL_RANKING_LIST_TOTAL_PREFIX + schoolId,
-                            user.getId().toString(),
-                            user.getPoint());
-                }
-            }
+//            Result<List<User>> userListResult = userClient.list(userQueryDTO);
+//            List<User> userList = userListResult.getData();
+//
+//            if (userList != null && userList.size() != 0) {
+//                // 添加用户信息至redis
+//                for (User user : userList) {
+//
+//                    redisTemplate.opsForZSet().add(RedisConstant.SCHOOL_RANKING_LIST_TOTAL_PREFIX + schoolId,
+//                            user.getId().toString(),
+//                            user.getPoint());
+//                }
+//            }
         }
     }
 
@@ -107,17 +107,17 @@ public class SchoolUtil {
             userQueryDTO.setIdentified(UserConstant.IDENTIFIED);
             userQueryDTO.setSchoolId(schoolId);
 
-            Result<List<User>> userListResult = userClient.list(userQueryDTO);
-            List<User> userList = userListResult.getData();
-
-            if (userList != null && userList.size() != 0) {
-                // 添加用户至redis
-                for (User user : userList) {
-                    redisTemplate.opsForZSet().add(RedisConstant.SCHOOL_RANKING_LIST_TOTAL_PREFIX + schoolId,
-                            user.getId().toString(),
-                            user.getPoint());
-                }
-            }
+//            Result<List<User>> userListResult = userClient.list(userQueryDTO);
+//            List<User> userList = userListResult.getData();
+//
+//            if (userList != null && userList.size() != 0) {
+//                // 添加用户至redis
+//                for (User user : userList) {
+//                    redisTemplate.opsForZSet().add(RedisConstant.SCHOOL_RANKING_LIST_TOTAL_PREFIX + schoolId,
+//                            user.getId().toString(),
+//                            user.getPoint());
+//                }
+//            }
         }
     }
 }

@@ -7,15 +7,6 @@
         <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>
-    <option name="ignoredFiles">
-      <set>
-        <option value="$PROJECT_DIR$/ytls-xmtx-app-gateway/pom.xml" />
-        <option value="$PROJECT_DIR$/ytls-xmtx-gateway/ytls-xmtx-colgadmin-gateway/pom.xml" />
-        <option value="$PROJECT_DIR$/ytls-xmtx-gateway/ytls-xmtx-school-gateway/pom.xml" />
-        <option value="$PROJECT_DIR$/ytls-xmtx-service/ytls-xmtx-college/pom.xml" />
-        <option value="$PROJECT_DIR$/ytls-xmtx-user/pom.xml" />
-      </set>
-    </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />

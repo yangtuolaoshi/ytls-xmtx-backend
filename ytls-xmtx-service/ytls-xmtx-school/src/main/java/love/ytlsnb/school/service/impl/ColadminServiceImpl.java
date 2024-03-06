@@ -10,17 +10,15 @@ import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.common.constants.RedisConstant;
 import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.common.constants.SchoolConstant;
-import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.JwtProperties;
+import love.ytlsnb.common.utils.AliUtil;
 import love.ytlsnb.common.utils.JwtUtil;
-import love.ytlsnb.model.school.dto.AdminLoginDTO;
-import love.ytlsnb.model.school.dto.AdminRegisterDTO;
-import love.ytlsnb.model.school.po.Admin;
-import love.ytlsnb.model.user.dto.UserLoginDTO;
-import love.ytlsnb.model.user.po.User;
-import love.ytlsnb.school.mapper.AdminMapper;
-import love.ytlsnb.school.service.AdminService;
+import love.ytlsnb.model.coladmin.dto.ColadminLoginDTO;
+import love.ytlsnb.model.coladmin.dto.ColadminRegisterDTO;
+import love.ytlsnb.model.coladmin.po.Coladmin;
+import love.ytlsnb.school.mapper.ColadminMapper;
+import love.ytlsnb.school.service.ColadminService;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,62 +26,63 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author ula
- * @date 2024/2/6 16:28
+ * @date 2024/2/28 20:08
  */
 @Slf4j
 @Service
-public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements AdminService {
+public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> implements ColadminService {
     @Autowired
-    private AdminMapper adminMapper;
+    private ColadminMapper coladminMapper;
     @Autowired
     private JwtProperties jwtProperties;
     @Autowired
     private RedissonClient redissonClient;
     @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private AliUtil aliUtil;
 
     /**
      * 学校管理人员登录
      *
-     * @param adminLoginDTO 封装学校管理人员的登录账户，密码
-     * @param request       用户请求对象，用于获取用户的jwt令牌
-     * @return
+     * @param coladminLoginDTO 封装学校管理人员的登录账户，密码
+     * @param request          用户请求对象，用于获取用户的jwt令牌
+     * @return 登录成功的JWT令牌
      */
     @Override
-    public String login(AdminLoginDTO adminLoginDTO, HttpServletRequest request) {
+    public String login(ColadminLoginDTO coladminLoginDTO, HttpServletRequest request) {
         // 校验传入参数
-        if (StrUtil.isBlankIfStr(adminLoginDTO.getUsername()) || StrUtil.isBlankIfStr(adminLoginDTO.getPassword())) {
+        if (StrUtil.isBlankIfStr(coladminLoginDTO.getUsername()) || StrUtil.isBlankIfStr(coladminLoginDTO.getPassword())) {
             throw new BusinessException(ResultCodes.BAD_REQUEST, "登录账户登录信息不全");
         }
-        Admin admin = this.getOne(new QueryWrapper<Admin>().eq(SchoolConstant.USERNAME, adminLoginDTO.getUsername()));
+        Coladmin coladmin = this.getOne(new QueryWrapper<Coladmin>()
+                .eq(SchoolConstant.USERNAME, coladminLoginDTO.getUsername()));
 
         // 账号不存在
-        if (admin == null) {
+        if (coladmin == null) {
             throw new BusinessException(ResultCodes.UNAUTHORIZED, "账号不存在");
         }
 
         // 账户存在，校验密码
-        if(!BCrypt.checkpw(adminLoginDTO.getPassword(),admin.getPassword())){
+        if (!BCrypt.checkpw(coladminLoginDTO.getPassword(), coladmin.getPassword())) {
             // 密码错误
-            throw new BusinessException(ResultCodes.UNAUTHORIZED,"密码错误");
+            throw new BusinessException(ResultCodes.UNAUTHORIZED, "密码错误");
         }
         // 提前创建jwt令牌
         Map<String, Object> claims = new HashMap<>();
-        claims.put(SchoolConstant.ADMIN_ID, admin.getId());
-        String jwt = JwtUtil.createJwt(jwtProperties.getAdminSecretKey(), jwtProperties.getAdminTtl(), claims);
+        claims.put(SchoolConstant.COLADMIN_ID, coladmin.getId());
+        String jwt = JwtUtil.createJwt(jwtProperties.getColadminSecretKey(), jwtProperties.getColadminTtl(), claims);
         log.info("生成的JWT令牌：{}", jwt);
         // jwt令牌中的签名,用来做唯一登录校验
         String newSignature = jwt.substring(jwt.lastIndexOf('.') + 1);
 
-        // 尝试登录
-        String adminLoginLockKey = RedisConstant.ADMIN_LOGIN_LOCK_PREFIX + admin.getId();
+        // 登录
+        String adminLoginLockKey = RedisConstant.ADMIN_LOGIN_LOCK_PREFIX + coladmin.getId();
         RLock lock = redissonClient.getLock(adminLoginLockKey);
 
         try {
@@ -95,9 +94,9 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
             }
             // 登录，记录当前登录对应的签名
             redisTemplate.opsForValue()
-                    .set(RedisConstant.ADMIN_LOGIN_PREFIX + admin.getId(),
+                    .set(RedisConstant.ADMIN_LOGIN_PREFIX + coladmin.getId(),
                             newSignature,
-                            jwtProperties.getAdminTtl(),
+                            jwtProperties.getColadminTtl(),
                             TimeUnit.MILLISECONDS);
             return jwt;
 
@@ -111,43 +110,53 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         }
     }
 
+    /**
+     * 根据传入管理员ID查找并返回脱敏后的管理员信息
+     *
+     * @param adminId 待查找的管理员ID
+     * @return 脱敏后的管理员信息
+     */
     @Override
-    public Admin selectInsensitiveAdminById(Long adminId) {
+    public Coladmin selectInsensitiveAdminById(Long adminId) {
         if (adminId == null) {
             throw new NullPointerException("传入管理员账号ID为空");
         }
-        Admin admin = adminMapper.selectOne(new QueryWrapper<Admin>()
-                .eq(SchoolConstant.ID, adminId)
-                .eq(SchoolConstant.STATUS, SchoolConstant.ENABLED));
+        Coladmin coladmin = coladminMapper.selectOne(new QueryWrapper<Coladmin>().eq(SchoolConstant.ID, adminId).eq(SchoolConstant.STATUS, SchoolConstant.ENABLED));
 
-        if (admin == null) {
+        if (coladmin == null) {
             throw new BusinessException(ResultCodes.UNAUTHORIZED, "管理员账号不存在/状态异常");
         }
 
-        admin.setPassword(SchoolConstant.INSENSITIVE_PASSWORD);
-        admin.setCreateTime(null);
-        admin.setUpdateTime(null);
-        admin.setDeleted(null);
-        return admin;
+        coladmin.setPassword(SchoolConstant.INSENSITIVE_PASSWORD);
+        coladmin.setCreateTime(null);
+        coladmin.setUpdateTime(null);
+        coladmin.setDeleted(null);
+        return coladmin;
     }
 
+    /**
+     * 注册管理员账号，创建后需要手动赋予权限
+     *
+     * @param coladminRegisterDTO 管理员注册数据传输对象
+     */
     @Override
     @Transactional
-    public void register(AdminRegisterDTO adminRegisterDTO) {
+    public void register(ColadminRegisterDTO coladminRegisterDTO) {
         // 校验参数
-        if (BeanUtil.hasNullField(adminRegisterDTO)) {
+        if (BeanUtil.hasNullField(coladminRegisterDTO)) {
             throw new BusinessException(ResultCodes.BAD_REQUEST, "传入参数不完整");
         }
 
-        String username = adminRegisterDTO.getUsername();
-        Admin selectOne = adminMapper.selectOne(new QueryWrapper<Admin>()
+        // 用户名校验
+        String username = coladminRegisterDTO.getUsername();
+        Coladmin selectOne = coladminMapper.selectOne(new QueryWrapper<Coladmin>()
                 .eq(SchoolConstant.USERNAME, username));
         if (selectOne != null) {
             throw new BusinessException(ResultCodes.FORBIDDEN, "账号名称已存在");
         }
 
         // 对写入操作进行上锁
-        String adminRegisterLockKey = RedisConstant.ADMIN_REGISTER_LOCK_PREFIX + adminRegisterDTO.getUsername();
+        String adminRegisterLockKey = RedisConstant.ADMIN_REGISTER_LOCK_PREFIX + coladminRegisterDTO.getUsername();
         RLock lock = redissonClient.getLock(adminRegisterLockKey);
         try {
             boolean success = lock.tryLock();
@@ -157,20 +166,20 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
             }
 
             // 获取锁成功，进行double check
-            selectOne = adminMapper.selectOne(new QueryWrapper<Admin>()
+            selectOne = coladminMapper.selectOne(new QueryWrapper<Coladmin>()
                     .eq(SchoolConstant.USERNAME, username));
             if (selectOne != null) {
                 throw new BusinessException(ResultCodes.FORBIDDEN, "账号名称已存在");
             }
 
-            Admin admin = new Admin();
-            BeanUtil.copyProperties(adminRegisterDTO, admin);
+            Coladmin coladmin = new Coladmin();
+            BeanUtil.copyProperties(coladminRegisterDTO, coladmin);
 
             // 密码加盐加密
-            admin.setPassword(BCrypt.hashpw(admin.getPassword()));
+            coladmin.setPassword(BCrypt.hashpw(coladmin.getPassword()));
             // 设置属性初始值
-            admin.setStatus(SchoolConstant.DISABLED);
-            adminMapper.insert(admin);
+            coladmin.setStatus(SchoolConstant.DISABLED);
+            coladminMapper.insert(coladmin);
         } finally {
             try {
                 lock.unlock();
@@ -179,4 +188,6 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
             }
         }
     }
+
+
 }

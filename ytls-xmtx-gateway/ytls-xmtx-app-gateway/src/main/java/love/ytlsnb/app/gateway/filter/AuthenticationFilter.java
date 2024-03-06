@@ -45,7 +45,9 @@ public class AuthenticationFilter implements GlobalFilter {
         ServerHttpResponse response = exchange.getResponse();
         // 如果是登录/注册请求则放行
         String requestPath = request.getURI().getPath();
-        if (requestPath.contains(UserConstant.LOGIN_URL) || requestPath.contains(UserConstant.REGISTER_URL)) {
+        if (requestPath.contains(UserConstant.LOGIN_URL)
+                || requestPath.contains(UserConstant.REGISTER_URL)
+                || requestPath.contains(UserConstant.GETCODE_URL)) {
             return chain.filter(exchange);
         }
         // 获取请求头

@@ -8,12 +8,10 @@
         <version>0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>ytls-xmtx-service</artifactId>
     <packaging>pom</packaging>
     <modules>
         <module>ytls-xmtx-user</module>
-        <module>ytls-xmtx-coladmin</module>
         <module>ytls-xmtx-quest</module>
         <module>ytls-xmtx-school</module>
         <module>ytls-xmtx-reward</module>

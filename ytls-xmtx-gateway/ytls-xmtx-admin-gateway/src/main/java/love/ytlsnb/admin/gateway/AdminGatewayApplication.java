@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 /**
  * @author ula
- * @date 2024/2/7 13:54
+ * @date 2024/3/5 19:50
  */
 @SpringBootApplication
 @EnableDiscoveryClient

@@ -1,24 +1,24 @@
 package love.ytlsnb.common.utils;
 
-import love.ytlsnb.model.school.po.Admin;
+import love.ytlsnb.model.coladmin.po.Coladmin;
 
 /**
  * @author ula
  * @date 2024/2/7 10:48
  */
-public class AdminHolder {
+public class ColadminHolder {
     /**
      * 独立线程保存管理员状态
      */
-    private static final ThreadLocal<Admin> TL = new ThreadLocal<>();
+    private static final ThreadLocal<Coladmin> TL = new ThreadLocal<>();
 
     /**
      * 保存管理员信息
      *
-     * @param admin 管理员信息
+     * @param coladmin 管理员信息
      */
-    public static void saveAdmin(Admin admin) {
-        TL.set(admin);
+    public static void saveColadmin(Coladmin coladmin) {
+        TL.set(coladmin);
     }
 
     /**
@@ -26,14 +26,14 @@ public class AdminHolder {
      *
      * @return 管理员信息
      */
-    public static Admin getAdmin() {
+    public static Coladmin getColadmin() {
         return TL.get();
     }
 
     /**
      * 移出管理员信息
      */
-    public static void removeAdmin() {
+    public static void removeColadmin() {
         TL.remove();
     }
 }

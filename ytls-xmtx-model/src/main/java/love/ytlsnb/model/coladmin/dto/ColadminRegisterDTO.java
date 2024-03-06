@@ -1,13 +1,15 @@
-package love.ytlsnb.model.school.dto;
+package love.ytlsnb.model.coladmin.dto;
 
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * @author ula
  * @date 2024/2/7 14:29
  */
 @Data
-public class AdminRegisterDTO {
+@ToString
+public class ColadminRegisterDTO {
     /**
      * 管理员账户用户名（唯一）
      */
