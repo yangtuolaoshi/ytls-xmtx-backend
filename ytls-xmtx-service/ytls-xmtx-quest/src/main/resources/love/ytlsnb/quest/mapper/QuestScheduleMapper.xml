@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="love.ytlsnb.quest.mapper.QuestScheduleMapper">
+    <select id="getAdminMap" resultType="love.ytlsnb.model.quest.vo.QuestScheduleVo">
+        SELECT
+        s.id,
+        q.type,
+        q.quest_title AS questTitle,
+        s.schedule_title AS scheduleTitle,
+        l.longitude,
+        l.latitude
+        FROM
+        tb_quest_schedule s
+        LEFT JOIN tb_quest q ON s.quest_id = q.id
+        LEFT JOIN tb_quest_location l ON s.location_id = l.id
+        WHERE
+        q.school_id = #{schoolId}
+        <if test="!mapFilterDTO.getMain">
+            and type != 0
+        </if>
+        <if test="!mapFilterDTO.getSide">
+            and type != 1
+        </if>
+        <if test="!mapFilterDTO.getDaily">
+            and type != 2
+        </if>
+        ;
+    </select>
+</mapper>

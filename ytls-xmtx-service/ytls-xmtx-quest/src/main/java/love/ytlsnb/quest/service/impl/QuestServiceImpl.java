@@ -1,206 +1,282 @@
 package love.ytlsnb.quest.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
-import love.ytls.api.school.SchoolClient;
-import love.ytlsnb.common.constants.PojoConstant;
-import love.ytlsnb.common.constants.QuestConstant;
-import love.ytlsnb.common.constants.RedisConstant;
-import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.common.exception.BusinessException;
-import love.ytlsnb.model.common.Result;
-import love.ytlsnb.model.quest.dto.QuestInsertDTO;
-import love.ytlsnb.model.quest.po.Quest;
-import love.ytlsnb.model.quest.po.QuestLocation;
-import love.ytlsnb.model.quest.po.QuestLocationPhoto;
-import love.ytlsnb.model.quest.vo.QuestVO;
-import love.ytlsnb.model.school.vo.LocationVO;
-import love.ytlsnb.quest.mapper.QuestLocationMapper;
-import love.ytlsnb.quest.mapper.QuestLocationPhotoMapper;
-import love.ytlsnb.quest.mapper.QuestMapper;
+import love.ytlsnb.model.common.PageResult;
+import love.ytlsnb.model.quest.dto.QuestDTO;
+import love.ytlsnb.model.quest.dto.QuestQueryDTO;
+import love.ytlsnb.model.quest.po.*;
+import love.ytlsnb.model.quest.vo.QuestInfoVo;
+import love.ytlsnb.model.quest.vo.QuestVo;
+import love.ytlsnb.quest.mapper.*;
+import love.ytlsnb.quest.service.QuestLocationPhotoService;
+import love.ytlsnb.quest.service.QuestScheduleService;
 import love.ytlsnb.quest.service.QuestService;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
+import love.ytlsnb.quest.utils.QuestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static love.ytlsnb.common.constants.ResultCodes.*;
+
+import static love.ytlsnb.common.constants.ResultCodes.*;
 
 /**
- * 用户基本信息业务层实现类
+ * 任务业务层实现类
  *
- * @author ula
- * @date 2024/01/30
+ * @author 金泓宇
+ * @author 2024/2/29
  */
 @Service
 @Slf4j
-public class QuestServiceImpl extends ServiceImpl<QuestMapper, Quest> implements QuestService {
+public class QuestServiceImpl implements QuestService {
     @Autowired
     private QuestMapper questMapper;
+
+    @Autowired
+    private QuestInfoMapper questInfoMapper;
+
+    @Autowired
+    private QuestScheduleMapper questScheduleMapper;
+
     @Autowired
     private QuestLocationMapper questLocationMapper;
-    @Autowired
-    private QuestLocationPhotoMapper questLocationPhotoMapper;
-    @Autowired
-    private SchoolClient schoolClient;
-    @Autowired
-    private RedissonClient redissonClient;
 
-    /**
-     * 只能接收从学校服务传来的请求，否则逻辑出错(需保证到达此处的参数仅需填充左右值和自动填充的字段) TODO 后续添加对应的逻辑校验
-     *
-     * @param questInsertDTO 需要新增的任务对象
-     */
+    @Autowired
+    private QuestScheduleService questScheduleService;
+
+    @Autowired
+    private QuestLocationPhotoService questLocationPhotoService;
+
     @Override
-    @Transactional
-    public void insert(QuestInsertDTO questInsertDTO) {
-        Quest quest = new Quest();
-        BeanUtil.copyProperties(questInsertDTO, quest);
-        quest.setStatus(QuestConstant.DISABLED);
+    public PageResult<List<QuestVo>> getPageByCondition(QuestQueryDTO questQueryDTO, int page, int size) {
+        // TODO 按照学校ID查询
+        // 查询总数
+        LambdaQueryWrapper<Quest> queryWrapper = new LambdaQueryWrapper<>();
+        Integer type = questQueryDTO.getType();
+        if (type != null) {
+            queryWrapper.eq(Quest::getType, type);
+        }
+        String title = questQueryDTO.getTitle();
+        if (title != null && !"".equals(title)) {
+            queryWrapper.likeRight(Quest::getQuestTitle, title);// 百分号只在右侧，防止索引失效
+        }
+        Long total = questMapper.selectCount(queryWrapper);
+        // 分页查询
+        if (title != null) {
+            questQueryDTO.setTitle(title + "%");
+        }
+        List<QuestVo> questVos = questMapper.getPageByCondition(questQueryDTO, (page - 1) * size, size);
+        PageResult<List<QuestVo>> pageResult = new PageResult<>(page, questVos.size(), total);
+        pageResult.setData(questVos);
+        return pageResult;
+    }
 
+    @Override
+    public QuestInfoVo getInfoById(Long id) {
+        Quest quest = questMapper.selectById(id);
+        if (quest == null) {
+            throw new BusinessException(NOT_FOUND, "任务不存在！");
+        }
+        QuestInfo questInfo = questInfoMapper.selectById(quest.getInfoId());
+        if (questInfo == null) {
+            throw new BusinessException(NOT_FOUND, "任务不存在！");
+        }
+        // TODO 查询总进度数
+        QuestInfoVo questInfoVo = new QuestInfoVo();
+        // 查询父任务标题
         Long parentId = quest.getParentId();
-        if (parentId == null) {
-            // 需要添加的任务没有父结点
-            // 检查当前学校是否已经含有无父节点的任务
-            Quest selectOne = questMapper.selectOne(new QueryWrapper<Quest>()
-                    .eq(QuestConstant.SCHOOL_ID, quest.getSchoolId())
-                    .eq(QuestConstant.PARENT_ID, QuestConstant.NULL_PARENT_ID));
-            // 已经含有，报错
-            if (selectOne != null) {
-                throw new BusinessException(ResultCodes.FORBIDDEN, "当前学校已存在根任务");
+        if (parentId != null) {
+            Quest preQuest = questMapper.selectById(parentId);
+            if (preQuest == null) {
+                throw new BusinessException(SERVER_ERROR, "数据非法，请联系管理员");
             }
-            // 没有，添加任务
-            quest.setParentId(QuestConstant.NULL_PARENT_ID);
-            quest.setLeftValue(QuestConstant.ROOT_QUEST_LEFT);
-            quest.setRightValue(QuestConstant.ROOT_QUEST_RIGHT);
-
-            questMapper.insert(quest);
-            log.info("新增任务:{}", quest);
-        } else {
-            // 需要添加的任务有父节点
-            // 查询父结点
-            Quest parent = questMapper.selectById(parentId);
-            if (parent == null) {
-                throw new BusinessException(ResultCodes.BAD_REQUEST, "传入父结点参数错误");
-            }
-            Long parentLeft = parent.getLeftValue();
-            Long parentRight = parent.getRightValue();
-            // 生成当前任务结点的左右值
-            Long newLeft = parentLeft + 1;
-            Long newRight = parentLeft + 2;
-            quest.setLeftValue(newLeft);
-            quest.setRightValue(newRight);
-
-            // 修改关联任务的左值(左值大于父结点)
-            questMapper.update(null, new UpdateWrapper<Quest>()
-                    .eq(QuestConstant.SCHOOL_ID, quest.getSchoolId())
-                    .gt(QuestConstant.LEFT_VALUE, parentLeft)
-                    .setSql("left_value = left_value + 2"));
-            // 修改关联任务的右值(右值大于等于父结点)
-            questMapper.update(null, new UpdateWrapper<Quest>()
-                    .eq(QuestConstant.SCHOOL_ID, quest.getSchoolId())
-                    .ge(QuestConstant.LEFT_VALUE, parentLeft)
-                    .setSql("right_value = right_value + 2"));
-            // 新增任务
-            questMapper.insert(quest);
+            questInfoVo.setPreQuestTitle(preQuest.getQuestTitle());
         }
+        BeanUtil.copyProperties(questInfo, questInfoVo);
+        BeanUtil.copyProperties(quest, questInfoVo);
+        return questInfoVo;
     }
 
     /**
-     * 获取当前学校的根任务
-     *
-     * @param schoolId 学校ID
-     * @return 根据学校ID获得的Quest对象，包含了相关的所有信息
+     * 任务参数检测
+     * @param questDTO 任务添加表单
      */
-    @Override
-    public QuestVO getRootQuest(Long schoolId) {
-        // 获取学校的根任务
-        Quest rootQuest = questMapper.selectOne(new QueryWrapper<Quest>()
-                .eq(QuestConstant.SCHOOL_ID, schoolId)
-                .eq(QuestConstant.PARENT_ID, QuestConstant.NULL_PARENT_ID));
-        if (rootQuest == null) {
-            throw new BusinessException(ResultCodes.BAD_REQUEST, "当前学校没有根任务");
+    private void checkQuestParams(QuestDTO questDTO) {
+        // 标题
+        String questTitle = questDTO.getQuestTitle();
+        if (questTitle == null || "".equals(questTitle)) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "请输入任务标题");
         }
-        QuestVO questVO = BeanUtil.copyProperties(rootQuest, QuestVO.class);
-
-        // 封装根任务的地点信息
-        Long locationId = rootQuest.getLocationId();
-        QuestLocation questLocation = questLocationMapper.selectOne(new QueryWrapper<QuestLocation>()
-                .eq(QuestConstant.LOCATION_ID, locationId));
-        if (questLocation == null) {
-            // 查询到的任务地点信息为空，当前地址信息未更新至任务数据库
-            // 进行信息更新
-            String updateQuestLocationKey = RedisConstant.QUEST_LOCATION_PREFIX + locationId;
-            RLock lock = redissonClient.getLock(updateQuestLocationKey);
-            try {
-                boolean success = lock.tryLock();
-                if (!success) {
-                    throw new BusinessException(ResultCodes.BAD_REQUEST, "根任务数据重复更新");
-                }
-                // 更新地址信息
-                LocationVO locationVO = updateQuestLocation(locationId);
-                BeanUtil.copyProperties(locationVO, questVO, PojoConstant.ID, QuestConstant.SCHOOL_ID_JAVA);
-                return questVO;
-            } finally {
-                try {
-                    lock.unlock();
-                } catch (Exception e) {
-                    log.error("释放锁失败:{},锁已经释放", updateQuestLocationKey);
-                }
+        if (questTitle.length() > 16) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务标题不能超过16个字符");
+        }
+//        LambdaQueryWrapper<Quest> titleQueryWrapper = new LambdaQueryWrapper<>();
+//        titleQueryWrapper.eq(Quest::getTitle, questTitle);
+//        if (questMapper.selectOne(titleQueryWrapper) != null) {
+//            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务标题重复，换个标题吧");
+//        }
+        // 前置任务
+        Long preQuestId = questDTO.getPreQuestId();
+        if (preQuestId != null) {
+            LambdaQueryWrapper<Quest> preQuestQueryWrapper = new LambdaQueryWrapper<>();
+            preQuestQueryWrapper.eq(Quest::getId, preQuestId);
+            if (questMapper.selectOne(preQuestQueryWrapper) == null) {
+                throw new BusinessException(UNPROCESSABLE_ENTITY, "前置任务不存在");
             }
-        } else {
-            // 查询到的任务地点信息不为空
-            BeanUtil.copyProperties(questLocation, questVO, PojoConstant.ID);
-            List<QuestLocationPhoto> questLocationPhotos = questLocationPhotoMapper.selectList(new QueryWrapper<QuestLocationPhoto>()
-                    .eq(QuestConstant.LOCATION_ID, locationId));
-            if (questLocationPhotos != null) {
-                List<String> photos = questLocationPhotos.stream().map(QuestLocationPhoto::getPhoto).collect(Collectors.toList());
-                questVO.setPhotos(photos);
-            }
-            return questVO;
+        }
+        // 任务类型
+        Integer type = questDTO.getType();
+        if (type == null) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "请选择任务类型");
+        }
+        if (type < 0 || type > 3) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务类型非法");
+        }
+        // 任务目标
+        String objective = questDTO.getObjective();
+        if (objective == null || "".equals(objective)) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "请输入任务目标");
+        }
+        if (objective.length() > 64) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务目标不能超过64个字符");
+        }
+        // 任务详情
+        String questDescription = questDTO.getQuestDescription();
+        if (questDescription != null && questDescription.length() > 256) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务详情不能超过256个字符");
+        }
+        // 准备物品
+        String requiredItem = questDTO.getRequiredItem();
+        if (requiredItem != null && requiredItem.length() > 64) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "准备物品不能超过64个字符");
+        }
+        // 任务提示
+        String tip = questDTO.getTip();
+        if (tip != null && tip.length() > 64) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务提示不能超过64个字符");
+        }
+        // 任务奖励
+        Integer reward = questDTO.getReward();
+        if (reward == null) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "请设置任务完成奖励");
+        }
+        if (reward < 0) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "奖励数据非法");
+        }
+        // 启用状态
+        Integer questStatus = questDTO.getQuestStatus();
+        if (questStatus == null || questStatus > 1 || questStatus < 0) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "请选择启用状态");
         }
     }
 
-    private LocationVO updateQuestLocation(Long locationId) {
-        // 删除已经存在的任务地点信息
-        questLocationMapper.delete(new QueryWrapper<QuestLocation>()
-                .eq(QuestConstant.LOCATION_ID, locationId));
-        // 调用其他服务获取数据
-        Result<LocationVO> locationById = schoolClient.getWholeLocationById(locationId);
-        if (locationById.getCode() != ResultCodes.OK) {
-            // 远程调用异常
-            throw new BusinessException(ResultCodes.BAD_REQUEST, locationById.getMsg());
+    @Transactional
+    @Override
+    public Long add(QuestDTO questDTO) {
+        questDTO.setRequiredScheduleNum(1);// 目前添加任务时默认设置完成任务所需进度为1
+        // 检查任务的参数
+        this.checkQuestParams(questDTO);
+        // 添加任务和任务信息
+        QuestInfo questInfo = QuestUtil.createQuestInfo(questDTO);
+        questInfoMapper.insert(questInfo);
+        Quest quest = QuestUtil.createQuest(questDTO);
+        quest.setInfoId(questInfo.getId());
+        Long preQuestId = questDTO.getPreQuestId();
+        if (preQuestId == null) {
+            // 如果没有前置任务，它就是根结点
+            quest.setLeftValue(1);
+            quest.setRightValue(2);
+        } else {
+            // 如果有前置任务，更新左右值
+            Quest preQuest = questMapper.selectById(preQuestId);
+            Integer preLeftValue = preQuest.getLeftValue();
+            Integer preRightValue = preQuest.getRightValue();
+            questMapper.addUpdateLeftValue(preLeftValue, preRightValue);
+            questMapper.addUpdateRightValue(preRightValue);
+            quest.setLeftValue(preRightValue);
+            quest.setRightValue(preRightValue + 1);
         }
-        LocationVO locationVO = locationById.getData();
-        if (locationVO == null) {
-            // 查询结果为空
-            throw new BusinessException(ResultCodes.BAD_REQUEST, "地址 " + locationId + " 信息异常");
+        questMapper.insert(quest);
+        if (quest.getId() == null) {
+            throw new BusinessException(SERVER_ERROR, "任务添加失败，请稍后重试");
         }
-        // 根据查询到的信息新增数据
-        QuestLocation newQuestLocation = BeanUtil.copyProperties(locationVO, QuestLocation.class);
-        newQuestLocation.setLocationId(locationId);
-        newQuestLocation.setId(null);
-        questLocationMapper.insert(newQuestLocation);
-        // 新增任务相关照片信息
-        List<String> photos = locationVO.getPhotos();
-        if (photos != null && !photos.isEmpty()) {
-            for (int i = 0; i < photos.size(); i++) {
-                QuestLocationPhoto questLocationPhoto = new QuestLocationPhoto();
-                if (i == 0) {
-                    questLocationPhoto.setCover(QuestConstant.COVER);
-                } else {
-                    questLocationPhoto.setCover(QuestConstant.COMMON);
-                }
-                questLocationPhoto.setLocationId(newQuestLocation.getLocationId());
-                questLocationPhoto.setPhoto(photos.get(i));
-                questLocationPhotoMapper.insert(questLocationPhoto);
+        // 检查进度的参数
+        QuestUtil.checkScheduleParams(questDTO);
+        // 添加进度
+        QuestSchedule questSchedule = QuestUtil.createQuestSchedule(questDTO);
+        // 地点有关信息，根据表单提供的是否需要地点的字段来设置
+        if (questDTO.getNeedLocation() == 1) {
+            // 检查地点参数
+            QuestUtil.checkLocationParams(questDTO);
+            // 添加地点
+            QuestLocation questLocation = QuestUtil.createQuestLocation(questDTO);
+            questLocationMapper.insert(questLocation);
+            Long locationId = questLocation.getId();
+            if (locationId == null) {
+                throw new BusinessException(SERVER_ERROR, "任务添加失败，请稍后重试");
             }
+            questSchedule.setLocationId(locationId);// 进度地点ID
+            List<String> urls = questDTO.getLocationPhotoUrls();
+            questLocationPhotoService.addBatchByUrls(urls, locationId);
         }
-        return locationVO;
+        questSchedule.setQuestId(quest.getId());// 所属任务ID
+        questScheduleMapper.insert(questSchedule);
+        if (questSchedule.getId() == null) {
+            throw new BusinessException(SERVER_ERROR, "任务添加失败，请稍后重试");
+        }
+        return quest.getId();
+    }
+
+    @Transactional
+    @Override
+    public Boolean update(QuestDTO questUpdateDTO) {
+        // TODO 为了整体的一致性，不允许修改前置任务
+        this.checkQuestParams(questUpdateDTO);
+        Quest quest = new Quest();
+        BeanUtil.copyProperties(questUpdateDTO, quest);
+        quest.setId(questUpdateDTO.getQuestId());
+        LocalDateTime updateTime = LocalDateTime.now();
+        quest.setUpdateTime(updateTime);
+        // TODO 最大通过需求数量不能超过进度总数
+        // TODO 支线下面不能有主线
+        if (questMapper.updateById(quest) == 0) {
+            return false;
+        }
+        Long infoId = questMapper.selectById(questUpdateDTO.getQuestId()).getInfoId();
+        QuestInfo questInfo = new QuestInfo();
+        BeanUtil.copyProperties(questUpdateDTO, questInfo);
+        questInfo.setId(infoId);
+        questInfo.setUpdateTime(updateTime);
+        return questInfoMapper.updateById(questInfo) > 0;
+    }
+
+    @Transactional
+    @Override
+    public Boolean deleteById(Long id) {
+        // 查询这个任务还有没有子任务
+        Quest quest = questMapper.selectById(id);
+        if (quest == null) {
+            return false;
+        }
+        Integer leftValue = quest.getLeftValue();
+        Integer rightValue = quest.getRightValue();
+        if (rightValue - leftValue > 1) {// 只需要判断左右值之差是否为1
+            throw new BusinessException(FORBIDDEN, "删除失败，该任务还存在后置任务");
+        }
+        questScheduleService.deleteByQuestId(id);
+        // 删除任务详情
+        questInfoMapper.deleteById(quest.getInfoId());
+        int rows = questMapper.deleteById(id);
+        // 修改左右值
+        questMapper.deleteUpdateLeftValue(leftValue);
+        questMapper.deleteUpdateRightValue(rightValue);
+        return rows > 0;
     }
 }

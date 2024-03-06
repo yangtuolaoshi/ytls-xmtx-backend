@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="love.ytlsnb.quest.mapper.QuestMapper">
+    <select id="getPageByCondition" resultType="love.ytlsnb.model.quest.vo.QuestVo">
+        select q1.id,
+               q1.title,
+               q1.type,
+               q1.parent_id as parentId,
+               q1.status,
+               q1.reward,
+               q1.end_time as endTime,
+               q2.title as preQuestTitle
+        from tb_quest q1
+                 left join tb_quest q2 on q1.parent_id = q2.id
+        where 1 = 1
+            <if test="questQueryDTO.title != null and questQueryDTO.title != ''">
+                and q1.title like #{questQueryDTO.title}
+            </if>
+            <if test="questQueryDTO.type != null">
+                and q1.type = #{questQueryDTO.type}
+            </if>
+        limit #{page}, #{size};
+    </select>
+</mapper>

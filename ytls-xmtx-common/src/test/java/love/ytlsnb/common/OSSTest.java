@@ -14,13 +14,13 @@ import java.nio.file.Paths;
 
 public class OSSTest {
     public static void main(String[] args) throws ClientException, FileNotFoundException {
-        EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
-        Credentials credentials = credentialsProvider.getCredentials();
-        String accessKeyId = credentials.getAccessKeyId();
-        String secretAccessKey = credentials.getSecretAccessKey();
-        System.out.println("AccessKeyId: " + accessKeyId);
-        System.out.println("SecretAccessKey: " + secretAccessKey);
-        System.out.println(OSSUtil.ossClient);
+//        EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
+//        Credentials credentials = credentialsProvider.getCredentials();
+//        String accessKeyId = credentials.getAccessKeyId();
+//        String secretAccessKey = credentials.getSecretAccessKey();
+//        System.out.println("AccessKeyId: " + accessKeyId);
+//        System.out.println("SecretAccessKey: " + secretAccessKey);
+//        System.out.println(OSSUtil.ossClient);
 
         // 上传文件
         // 输入流
@@ -31,7 +31,7 @@ public class OSSTest {
         // 桶名称
         String bucketName = "ytls-xmtx";
         // 上传
-//        OSSUtil.uploadFile(bucketName, objectName, inputStream);
+        OSSUtil.uploadFile(bucketName, objectName, inputStream);
 
         // 删除文件
 //        OSSUtil.removeFile(bucketName, objectName);

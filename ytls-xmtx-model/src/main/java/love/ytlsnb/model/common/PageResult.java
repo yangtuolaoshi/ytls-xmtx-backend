@@ -26,9 +26,13 @@ public class PageResult<T> extends Result<T> {
     /**
      * 总数
      */
-    private Integer total;
+    private Long total;
 
-    public PageResult(Integer page, Integer size, Integer total) {
+    public PageResult() {
+    }
+
+    public PageResult(Integer page, Integer size, Long total) {
+        super();
         this.page = page;
         this.size = size;
         this.total = total;
