@@ -28,6 +28,7 @@ public class Result<T> {
 
     public Result() {
         this.code = 200;
+        this.msg = "success";
     }
 
     public Result(Integer code, T data, String msg) {
@@ -36,7 +37,7 @@ public class Result<T> {
         this.msg = msg;
     }
 
-    public static Result ok() {
+    public static<T> Result<T> ok() {
         return new Result<>(200, null, "success");
     }
     public static<T> Result<T> ok(T data) {
