@@ -7,14 +7,14 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 任务地点图片
+ * 任务详细信息模型
  *
  * @author 金泓宇
- * @date 2024/3/5
+ * @date 2024/3/1
  */
+@TableName("tb_quest_info")
 @Data
-@TableName("tb_quest_location_photo")
-public class QuestLocationPhoto {
+public class QuestInfo {
     /**
      * 主键ID
      */
@@ -22,26 +22,35 @@ public class QuestLocationPhoto {
     private Long id;
 
     /**
-     * 地点ID
+     * 任务目标
      */
-    @TableField("location_id")
-    private Long locationId;
+    private String objective;
 
     /**
-     * 图片地址
+     * 任务描述
      */
-    private String url;
+    @TableField("quest_description")
+    private String questDescription;
 
     /**
-     * 创建时间
+     * 任务提示
      */
+    private String tip;
+
+    /**
+     * 所需物品
+     */
+    @TableField("required_item")
+    private String requiredItem;
+
     @TableField("create_time")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createTime;
 
-    /**
-     * 是否删除
-     */
+    @TableField("update_time")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDateTime updateTime;
+
     @TableField("is_deleted")
     @TableLogic(value = "0", delval = "1")
     private Integer isDeleted;

@@ -6,15 +6,9 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/**
- * 任务地点实体类
- *
- * @author 金泓宇
- * @date 2024/3/2
- */
-@TableName("tb_quest_location")
+@TableName("tb_quest_schedule")
 @Data
-public class QuestLocation {
+public class QuestSchedule {
     /**
      * 主键ID
      */
@@ -22,26 +16,39 @@ public class QuestLocation {
     private Long id;
 
     /**
-     * 地点名称
+     * 任务ID
      */
-    @TableField("location_name")
-    private String locationName;
+    @TableField("quest_id")
+    private Long questId;
 
     /**
-     * 地点描述
+     * 地点ID
      */
-    @TableField("location_description")
-    private String locationDescription;
+    @TableField("location_id")
+    private Long locationId;
 
     /**
-     * 经度
+     * 进度标题
      */
-    private Double longitude;
+    @TableField("schedule_title")
+    private String scheduleTitle;
 
     /**
-     * 纬度
+     * 打卡方式 三位二进制表示 XXX-上传图片/地点检测/人工审核 0为禁用 1为开启
      */
-    private Double latitude;
+    @TableField("clock_in_method")
+    private Integer clockInMethod;
+
+    /**
+     * 启用地点 0-禁用 1-启用
+     */
+    @TableField("need_location")
+    private Integer needLocation;
+
+    /**
+     * 进度开启状态
+     */
+    private Integer scheduleStatus;
 
     /**
      * 创建时间

@@ -1,98 +1,107 @@
 package love.ytlsnb.model.quest.po;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 /**
- * @author ula
- * @date 2024/1/30 21:01
+ * 任务实体类
+ *
+ * @author 金泓宇
+ * @date 2024/2/29
  */
-@Data
-@ToString
 @TableName("tb_quest")
+@Data
 public class Quest {
     /**
-     * 任务主键
+     * 主键ID
      */
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
+
+    /**
+     * 任务类型：0-主线 1-支线 2-每日 3-活动
+     */
+    private Integer type;
+
     /**
      * 任务标题
      */
-    private String title;
+    @TableField("quest_title")
+    private String questTitle;
+
     /**
-     * 任务目标
+     * 任务详情ID
      */
-    private String objective;
+    private Long infoId;
+
     /**
-     * 任务描述
-     */
-    private String description;
-    /**
-     * 任务类型
-     */
-    private Byte type;
-    /**
-     * 任务地点主键
-     */
-    private Long locationId;
-    /**
-     * 任务地点名
-     */
-    private String locationName;
-    /**
-     * 任务所需物品
-     */
-    private String requiredItems;
-    /**
-     * 任务奖励
+     * 积分奖励
      */
     private Integer reward;
+
     /**
-     * 任务状态
+     * 任务完成所需进度数
      */
-    private Byte status;
+    @TableField("required_schedule_num")
+    private Integer requiredScheduleNum;
+
     /**
-     * 任务时限（秒）：与任务结束时间最多存在一个属性
+     * 启用状态
      */
-    private Integer timeLimit;
+    @TableField("quest_status")
+    private Integer questStatus;
+
     /**
-     * 任务结束时间：与任务时限最多存在一个属性
+     * 截止时间
      */
+    @TableField("end_time")
     private LocalDateTime endTime;
+
     /**
-     * 任务所属学校主键
+     * 学校ID
      */
+    @TableField("school_id")
     private Long schoolId;
+
     /**
-     * 任务的父结点
+     * 父结点ID
      */
+    @TableField("parent_id")
     private Long parentId;
+
     /**
-     * 任务左值
+     * 左值
      */
-    private Long leftValue;
+    @TableField("left_value")
+    private Integer leftValue;
+
     /**
-     * 任务右值
+     * 右值
      */
-    private Long rightValue;
+    @TableField("right_value")
+    private Integer rightValue;
+
     /**
      * 创建时间
      */
-    @TableField(fill = FieldFill.INSERT)
+    @TableField("create_time")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createTime;
+
     /**
-     * 修改时间
+     * 更新时间
      */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField("update_time")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime updateTime;
+
     /**
      * 是否删除
      */
-    @TableLogic
-    @TableField(value = "is_deleted", fill = FieldFill.INSERT)
-    private Byte deleted;
+    @TableField("is_deleted")
+    @TableLogic(value = "0", delval = "1")
+    private Integer isDeleted;
 }
