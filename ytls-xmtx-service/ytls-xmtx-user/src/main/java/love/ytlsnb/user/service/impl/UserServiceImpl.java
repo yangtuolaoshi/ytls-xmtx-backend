@@ -5,6 +5,7 @@ import cn.hutool.core.util.*;
 import cn.hutool.crypto.digest.BCrypt;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -93,16 +94,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 校验身份证号
         String idNumber = userInsertDTO.getIdNumber();
         if (idNumber != null) {
-            UserInfo selectOne = userInfoMapper.selectOne(new QueryWrapper<UserInfo>()
-                    .eq(UserConstant.ID_NUMBER, idNumber));
+            UserInfo selectOne = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>()
+                    .eq(UserInfo::getIdNumber, idNumber));
             if (selectOne != null) {
                 throw new BusinessException(ResultCodes.FORBIDDEN, "当前身份证号已注册过账号");
             }
         }
         // 校验手机号是否已经被注册
         String phone = userInsertDTO.getPhone();
-        User selectOne = userMapper.selectOne(new QueryWrapper<User>()
-                .eq(UserConstant.PHONE, phone));
+        User selectOne = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getPhone, phone));
         if (selectOne != null) {
             throw new BusinessException(ResultCodes.FORBIDDEN, "当前手机号已被注册");
         }
@@ -126,16 +127,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         } else {
             if (IdcardUtil.isValidCard(account)) {
                 // 当前账户使用的身份证作为账号
-                UserInfo userInfo = userInfoMapper.selectOne(new QueryWrapper<UserInfo>()
-                        .eq(UserConstant.ID_NUMBER, account));
+                UserInfo userInfo = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>()
+                        .eq(UserInfo::getIdNumber, account));
                 if (userInfo == null) {
                     return null;
                 }
-                return userMapper.selectOne(new QueryWrapper<User>()
-                        .eq(UserConstant.USER_INFO_ID, userInfo.getId()));
+                return userMapper.selectOne(new LambdaQueryWrapper<User>()
+                        .eq(User::getUserInfoId, userInfo.getId()));
             } else {
-                return userMapper.selectOne(new QueryWrapper<User>()
-                        .eq(UserConstant.PHONE, account));
+                return userMapper.selectOne(new LambdaQueryWrapper<User>()
+                        .eq(User::getPhone, account));
             }
         }
     }
@@ -227,8 +228,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 // 验证码不同
                 throw new BusinessException(ResultCodes.UNAUTHORIZED, "验证码错误");
             }
-            user = userMapper.selectOne(new QueryWrapper<User>()
-                    .eq(UserConstant.PHONE, userLoginDTO.getPhone()));
+            user = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                    .eq(User::getPhone, userLoginDTO.getPhone()));
             if (user == null) {
                 // 查询用户数据为空
                 throw new BusinessException(ResultCodes.UNAUTHORIZED, "当前手机号尚未注册账号");
@@ -305,8 +306,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 在数据库中查询当前用户数据
-        User selectOne = userMapper.selectOne(new QueryWrapper<User>()
-                .eq(UserConstant.PHONE, userRegisterDTO.getPhone()));
+        User selectOne = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getPhone, userRegisterDTO.getPhone()));
         // 用户已存在，报错
         if (selectOne != null) {
             throw new BusinessException(ResultCodes.FORBIDDEN, "用户已存在");
@@ -323,8 +324,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 throw new BusinessException(ResultCodes.FORBIDDEN, "用户已存在");
             }
             // 拿到锁后进行double check，避免并发时的冲突
-            selectOne = userMapper.selectOne(new QueryWrapper<User>()
-                    .eq(UserConstant.PHONE, userRegisterDTO.getPhone()));
+            selectOne = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                    .eq(User::getPhone, userRegisterDTO.getPhone()));
             // 用户已存在，报错
             if (selectOne != null) {
                 throw new BusinessException(ResultCodes.FORBIDDEN, "用户已存在");
@@ -533,18 +534,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 */
     @Override
     @Transactional
-    public void addUserBatch(MultipartFile multipartFile) throws IOException {
-        InputStream inputStream = multipartFile.getInputStream();
-        ExcelReader reader = ExcelUtil.getReader(inputStream);
-
-        Map<String, String> headerAliasMap = Map.of("学院", "deptName",
-                "班级", "clazzName",
-                "学号", "studentId",
-                "姓名", "name",
-                "身份证号", "idNumber",
-                "手机号", "photo");
-        reader.setHeaderAlias(headerAliasMap);
-        List<UserInsertBatchDTO> userInsertBatchDTOList = reader.readAll(UserInsertBatchDTO.class);
+    public void addUserBatch(List<UserInsertBatchDTO> userInsertBatchDTOList) throws IOException {
         // 重复性校验集合
         Set<String> validateUserStudentIdSet = new HashSet<>();
         Set<String> validateUserIdNumberSet = new HashSet<>();
@@ -579,7 +569,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<UserInfo> userInfoList = new ArrayList<>();
 
         // 批量设置待新增的数据(检查数据合法性)
-        for (UserInsertBatchDTO userInsertBatchDTO : userInsertBatchDTOList) {
+        for (int i = 0; i < userInsertBatchDTOList.size(); i++) {
+            UserInsertBatchDTO userInsertBatchDTO = userInsertBatchDTOList.get(i);
             String phone = userInsertBatchDTO.getPhone();
             String studentId = userInsertBatchDTO.getStudentId();
             String idNumber = userInsertBatchDTO.getIdNumber();
@@ -589,7 +580,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     || !IdcardUtil.isValidCard(idNumber)
                     || StrUtil.isBlankIfStr(studentId)
                     || StrUtil.isBlankIfStr(name)) {
-                throw new BusinessException(ResultCodes.BAD_REQUEST, "请核对必填数据");
+                throw new BusinessException(ResultCodes.BAD_REQUEST,
+                        "[第" + i + 1 + "行] 新增用户(身份证号: " + idNumber +
+                                " , 学号: " + studentId +
+                                " , 姓名: " + name +
+                                " , 手机号: " + phone + ")的用户数据有误");
             }
             if (validateUserPhoneSet.contains(phone)) {
                 throw new BusinessException(ResultCodes.BAD_REQUEST, "存在重复手机号");
@@ -610,15 +605,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String deptName = userInsertBatchDTO.getDeptName();
             if (deptName != null && !deptMap.containsKey(deptName)) {
                 throw new BusinessException(ResultCodes.BAD_REQUEST,
-                        "新增用户(身份证号: " + idNumber + " , 学号: " + studentId + " , 手机号: " + phone + ")的学院不存在");
+                        "[第" + i + 1 + "行] 新增用户(身份证号: " + idNumber +
+                                " , 学号: " + studentId +
+                                " , 姓名: " + name +
+                                " , 手机号: " + phone + ")的学院不存在");
             }
             String clazzName = userInsertBatchDTO.getClazzName();
             if (clazzName != null && !clazzMap.containsKey(clazzName)) {
                 throw new BusinessException(ResultCodes.BAD_REQUEST,
-                        "新增用户(身份证号: " + idNumber + " , 学号: " + studentId + " , 手机号: " + phone + ")的班级不存在");
+                        "[第" + i + 1 + "行] 新增用户(身份证号: " + idNumber +
+                                " , 学号: " + studentId +
+                                " , 姓名: " + name +
+                                " , 手机号: " + phone + ")的班级不存在");
             }
 
             user.setPhone(phone);
+            user.setStudentId(studentId);
             user.setSchoolId(schoolId);
             if (!StrUtil.isBlankIfStr(deptName)) {
                 user.setDeptId(deptMap.get(deptName));

@@ -9,11 +9,8 @@ import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.PhotoProperties;
 import love.ytlsnb.common.utils.AliUtil;
 import love.ytlsnb.model.common.Result;
-import love.ytlsnb.model.user.dto.UserInsertDTO;
-import love.ytlsnb.model.user.dto.UserQueryDTO;
+import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
-import love.ytlsnb.model.user.dto.UserLoginDTO;
-import love.ytlsnb.model.user.dto.UserRegisterDTO;
 import love.ytlsnb.model.user.po.UserInfo;
 import love.ytlsnb.user.service.UserInfoService;
 import love.ytlsnb.user.service.UserService;
@@ -43,11 +40,22 @@ public class UserController {
     private AliUtil aliUtil;
     @Autowired
     private PhotoProperties photoProperties;
+    @Autowired
+    private SchoolClient schoolClient;
+
+    /**
+     * 鼠鼠用来调试的接口
+     */
+    @GetMapping("test")
+    public void test() {
+        log.info("user-test");
+        schoolClient.getColadminById(1L);
+    }
 
     @PostMapping("/batch")
-    public Result addUserBatch(MultipartFile file) throws IOException {
-        log.info("通过Excel批量新增用户数据:{}", file);
-        userService.addUserBatch(file);
+    public Result addUserBatch(@RequestBody List<UserInsertBatchDTO> userInsertBatchDTOList) throws IOException {
+        log.info("通过Excel批量新增用户数据:{}", userInsertBatchDTOList);
+        userService.addUserBatch(userInsertBatchDTOList);
         return Result.ok();
     }
 

@@ -9,6 +9,9 @@ import love.ytlsnb.model.common.Result;
 import love.ytlsnb.school.service.ColadminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 /**
  * @author ula
@@ -49,4 +52,11 @@ public class ColadminController {
         return Result.ok(coladmin);
     }
 
+    //-------------------------User-------------------------
+    @PostMapping("/user/batch")
+    public Result addUserBatch(MultipartFile file) throws IOException {
+        log.info("批量添加用户");
+        coladminService.addUserBatch(file);
+        return Result.ok();
+    }
 }

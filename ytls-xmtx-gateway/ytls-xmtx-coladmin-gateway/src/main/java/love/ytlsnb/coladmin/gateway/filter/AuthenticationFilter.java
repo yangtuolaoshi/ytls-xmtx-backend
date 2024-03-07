@@ -62,7 +62,7 @@ public class AuthenticationFilter implements GlobalFilter {
             // 校验当前令牌是否有效（账户是否被其他人登录，生成了新的jwt）
             // 请求头中获取用户id
             Long coladminId = claims.get(SchoolConstant.COLADMIN_ID, Long.class);
-            String coladminLoginKey = RedisConstant.ADMIN_LOGIN_PREFIX + coladminId;
+            String coladminLoginKey = RedisConstant.COLADMIN_LOGIN_PREFIX + coladminId;
             // redis中的签名
             String redisSignature = redisTemplate.opsForValue().get(coladminLoginKey);
             // 当前请求中的签名

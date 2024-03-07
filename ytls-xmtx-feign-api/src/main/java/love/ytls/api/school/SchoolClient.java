@@ -19,24 +19,24 @@ import java.util.List;
  */
 @FeignClient("school-service")
 public interface SchoolClient {
-    @GetMapping("/api/coladmin/{coladminId}")
+    @GetMapping("/coladmin/coladmin/{coladminId}")
     Result<Coladmin> getColadminById(@PathVariable Long coladminId);
 
-    @GetMapping("/api/school/list")
+    @GetMapping("/coladmin/school/list")
     Result<List<School>> list();
 
-    @GetMapping("/api/location/{locationId}")
+    @GetMapping("/coladmin/location/{locationId}")
     Result<LocationVO> getWholeLocationById(@PathVariable Long locationId);
 
-    @GetMapping("/api/studentPhoto/{userId}")
+    @GetMapping("/coladmin/studentPhoto/{userId}")
     Result<StudentPhoto> getStudentPhoto(@PathVariable Long userId);
 
-    @GetMapping("/{schoolId}")
+    @GetMapping("/coladmin/school/{schoolId}")
     Result<School> getSchoolById(@PathVariable Long schoolId);
 
-    @GetMapping("/list/{schoolId}")
+    @GetMapping("/coladmin/dept/list/{schoolId}")
     Result<List<Dept>> listDeptBySchoolId(@PathVariable Long schoolId);
 
-    @GetMapping("/list/{schoolId}")
+    @GetMapping("/coladmin/clazz/list/{schoolId}")
     Result<List<Clazz>> listClazzBySchoolId(@PathVariable Long schoolId);
 }

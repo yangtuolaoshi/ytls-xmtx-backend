@@ -50,6 +50,7 @@
         <mysql.version>5.1.47</mysql.version>
         <druid.version>1.2.16</druid.version>
         <jdbc.version>3.1.6</jdbc.version>
+        <jakarta.servlet-api>6.0.0</jakarta.servlet-api>
     </properties>
 
     <dependencies>
@@ -230,6 +231,14 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet-api}</version>
+                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

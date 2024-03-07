@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import love.ytls.api.user.UserClient;
 import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.common.constants.SchoolConstant;
+import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.JwtProperties;
 import love.ytlsnb.common.utils.ColadminHolder;
@@ -42,25 +43,24 @@ public class HolderIntercepter implements HandlerInterceptor {
         String userToken = request.getHeader(jwtProperties.getUserTokenName());
         String coladminToken = request.getHeader(jwtProperties.getColadminTokenName());
         if (StrUtil.isBlankIfStr(userToken) && StrUtil.isBlankIfStr(coladminToken)) {
-            // 远程调用，直接放行
-            return true;
+            // 未知调用（远程调用已修复）
+            response.setStatus(ResultCodes.UNAUTHORIZED);
+            return false;
         }
-        if (StrUtil.isBlankIfStr(userToken)) {
-            // 学校管理员调用，保存学校管理员信息
-            Claims claims = JwtUtil.parseJwt(jwtProperties.getColadminSecretKey(), coladminToken);
-            Long coladminId = (Long) claims.get(SchoolConstant.COLADMIN_ID);
-            Coladmin coladmin = coladminService.getById(coladminId);
-            ColadminHolder.saveColadmin(coladmin);
-        } else {
-            // 用户管理员调用，保存用户管理员信息
+        if (StrUtil.isBlankIfStr(coladminToken)) {
             Claims claims = JwtUtil.parseJwt(jwtProperties.getUserSecretKey(), userToken);
-            Long userId = (Long) claims.get(SchoolConstant.USER_ID);
+            Long userId = (Long) claims.get(UserConstant.USER_ID);
             Result<User> userResult = userClient.getById(userId);
             if (userResult.getCode() != ResultCodes.OK) {
                 throw new BusinessException(userResult.getCode(), userResult.getMsg());
             }
             User user = userResult.getData();
             UserHolder.saveUser(user);
+        } else {
+            Claims claims = JwtUtil.parseJwt(jwtProperties.getColadminSecretKey(), coladminToken);
+            Long coladminId = (Long) claims.get(SchoolConstant.COLADMIN_ID);
+            Coladmin coladmin = coladminService.getById(coladminId);
+            ColadminHolder.saveColadmin(coladmin);
         }
         return true;
     }

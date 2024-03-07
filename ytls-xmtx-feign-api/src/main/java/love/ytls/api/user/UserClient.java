@@ -1,6 +1,7 @@
 package love.ytls.api.user;
 
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.user.dto.UserInsertBatchDTO;
 import love.ytlsnb.model.user.dto.UserInsertDTO;
 import love.ytlsnb.model.user.dto.UserQueryDTO;
 import love.ytlsnb.model.user.po.User;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,9 +23,11 @@ public interface UserClient {
 //    @PostMapping("/api/user")
 //    Result<User> addUser(@RequestBody UserInsertDTO userInsertDTO);
 
-//    @PostMapping("/api/user/saveUserAndUserInfoBatch")
+    //    @PostMapping("/api/user/saveUserAndUserInfoBatch")
 //    Result saveUserAndUserInfoBatch(List<User> userList, List<UserInfo> userInfoList);
 //
 //    @GetMapping("/api/user/list")
 //    Result<List<User>> list(UserQueryDTO userQueryDTO);
+    @PostMapping("/api/user/batch")
+    public Result addUserBatch(@RequestBody List<UserInsertBatchDTO> userInsertBatchDTOList);
 }

@@ -1,7 +1,7 @@
 package love.ytlsnb.school.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import love.ytlsnb.common.constants.RedisConstant;
 import love.ytlsnb.common.constants.ResultCodes;
@@ -52,7 +52,7 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
 
     @Override
     public List<Dept> listDeptBySchoolId(Long schoolId) {
-        return deptMapper.selectList(new QueryWrapper<Dept>()
-                .eq(SchoolConstant.SCHOOL_ID, schoolId));
+        return deptMapper.selectList(new LambdaQueryWrapper<Dept>()
+                .eq(Dept::getSchoolId, schoolId));
     }
 }

@@ -1,10 +1,7 @@
 package love.ytlsnb.school.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import love.ytlsnb.model.quest.dto.QuestInsertDTO;
 import love.ytlsnb.model.school.po.School;
-import love.ytlsnb.model.user.dto.UserInsertDTO;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 

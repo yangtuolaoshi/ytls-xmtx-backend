@@ -2,11 +2,8 @@ package love.ytlsnb.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
-import love.ytlsnb.model.user.dto.UserInsertDTO;
-import love.ytlsnb.model.user.dto.UserQueryDTO;
+import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
-import love.ytlsnb.model.user.dto.UserLoginDTO;
-import love.ytlsnb.model.user.dto.UserRegisterDTO;
 import love.ytlsnb.model.user.po.UserInfo;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,5 +42,5 @@ public interface UserService  extends IService<User> {
 
     void uploadAdmissionLetter(String admissionLetter);
 
-    void addUserBatch(MultipartFile multipartFile) throws IOException;
+    void addUserBatch(List<UserInsertBatchDTO> userInsertBatchDTOList) throws IOException;
 }

@@ -28,21 +28,9 @@ public class UserConstant {
      */
     public static final String USER_ID = "user_id";
     /**
-     * 用户信息ID常量,用于数据库sql操作
-     */
-    public static final String USER_INFO_ID = "user_info_id";
-    /**
-     * 用户学号常量,用于数据库sql操作
-     */
-    public static final String STUDENT_ID = "student_id";
-    /**
      * 用户学号最大长度
      */
     public static final Integer STUDENT_ID_MAX_LENGTH = 16;
-    /**
-     * 用户昵称常量
-     */
-    public static final String NICKNAME = "nickname";
     /**
      * 用户昵称最大长度
      */
@@ -55,10 +43,6 @@ public class UserConstant {
      * 默认生成用户名的随机字符串长度
      */
     public static final Integer DEFAULT_NICKNAME_LENGTH = 6;
-    /**
-     * 用户密码常量
-     */
-    public static final String PASSWORD = "password";
     /**
      * 用户密码脱敏后常量
      */
@@ -84,10 +68,6 @@ public class UserConstant {
      */
     public static final String DEFAULT_AVATAR = "";
     /**
-     * 用户手机号常量
-     */
-    public static final String PHONE = "phone";
-    /**
      * 用户手机号最大长度
      */
     public static final Integer PHONE_MAX_LENGTH = 11;
@@ -112,18 +92,6 @@ public class UserConstant {
      */
     public static final Byte IDENTIFIED = 1;
     /**
-     * 学校主键字段常量
-     */
-    public static final String SCHOOL_ID = "school_id";
-    /**
-     * 学院主键字段常量
-     */
-    public static final String DEPT_ID = "dept_id";
-    /**
-     * 班级主键字段常量
-     */
-    public static final String CLAZZ_ID = "clazz_id";
-    /**
      * 用户未删除
      */
     public static final Byte UNDELETED = 0;
@@ -132,8 +100,4 @@ public class UserConstant {
      */
     public static final Byte DELETED = 1;
     //-------------------------UserInfo-------------------------
-    /**
-     * 用户身份证号
-     */
-    public static final String ID_NUMBER = "id_number";
 }

@@ -5,6 +5,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import love.ytlsnb.model.school.dto.ColadminLoginDTO;
 import love.ytlsnb.model.school.dto.ColadminRegisterDTO;
 import love.ytlsnb.model.school.po.Coladmin;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 /**
  * @author ula
@@ -17,4 +20,5 @@ public interface ColadminService extends IService<Coladmin> {
 
     void register(ColadminRegisterDTO coladminRegisterDTO);
 
+    void addUserBatch(MultipartFile file) throws IOException;
 }

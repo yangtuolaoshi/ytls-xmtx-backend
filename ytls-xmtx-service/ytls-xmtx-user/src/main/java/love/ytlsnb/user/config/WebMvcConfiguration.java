@@ -1,7 +1,6 @@
 package love.ytlsnb.user.config;
 
 import lombok.extern.slf4j.Slf4j;
-import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.common.json.JacksonObjectMapper;
 import love.ytlsnb.user.intercepter.HolderIntercepter;
 import org.springframework.beans.factory.annotation.Autowired;

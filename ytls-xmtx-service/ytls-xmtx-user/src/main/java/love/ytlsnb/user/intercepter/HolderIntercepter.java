@@ -42,11 +42,11 @@ public class HolderIntercepter implements HandlerInterceptor {
         String userToken = request.getHeader(jwtProperties.getUserTokenName());
         String coladminToken = request.getHeader(jwtProperties.getColadminTokenName());
         if (StrUtil.isBlankIfStr(userToken) && StrUtil.isBlankIfStr(coladminToken)) {
-            // 远程调用，直接放行
-            return true;
+            // 未知调用（远程调用已修复）
+            response.setStatus(ResultCodes.UNAUTHORIZED);
+            return false;
         }
         if (StrUtil.isBlankIfStr(userToken)) {
-            // 学校管理员调用，保存学校管理员信息
             Claims claims = JwtUtil.parseJwt(jwtProperties.getColadminSecretKey(), coladminToken);
             Long coladminId = (Long) claims.get(SchoolConstant.COLADMIN_ID);
             Result<Coladmin> coladminResult = schoolClient.getColadminById(coladminId);
@@ -56,7 +56,6 @@ public class HolderIntercepter implements HandlerInterceptor {
             Coladmin coladmin = coladminResult.getData();
             ColadminHolder.saveColadmin(coladmin);
         } else {
-            // 用户管理员调用，保存用户管理员信息
             Claims claims = JwtUtil.parseJwt(jwtProperties.getUserSecretKey(), userToken);
             Long userId = (Long) claims.get(SchoolConstant.USER_ID);
             User user = userService.getById(userId);
