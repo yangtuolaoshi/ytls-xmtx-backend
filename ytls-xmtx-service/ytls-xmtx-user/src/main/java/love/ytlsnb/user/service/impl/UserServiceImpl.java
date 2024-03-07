@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import love.ytls.api.school.SchoolClient;
 import love.ytlsnb.common.constants.RedisConstant;
 import love.ytlsnb.common.constants.ResultCodes;
-import love.ytlsnb.common.constants.SchoolConstant;
 import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.JwtProperties;
@@ -21,7 +20,7 @@ import love.ytlsnb.common.utils.AliUtil;
 import love.ytlsnb.common.utils.ColadminHolder;
 import love.ytlsnb.common.utils.JwtUtil;
 import love.ytlsnb.common.utils.UserHolder;
-import love.ytlsnb.model.coladmin.po.Coladmin;
+import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.school.po.Clazz;
 import love.ytlsnb.model.school.po.Dept;
@@ -32,6 +31,7 @@ import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.po.UserInfo;
 import love.ytlsnb.user.mapper.UserInfoMapper;
 import love.ytlsnb.user.mapper.UserMapper;
+import love.ytlsnb.user.service.UserInfoService;
 import love.ytlsnb.user.service.UserService;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -59,6 +59,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+    @Autowired
+    private UserInfoService userInfoService;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -431,17 +433,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         redisTemplate.opsForValue().set(phoneCodeKey, code, userProperties.getPhoneCodeTtl(), TimeUnit.MILLISECONDS);
     }
 
-    @Override
-    @Transactional
-    public void saveUserAndUserInfoBatch(List<User> userList, List<UserInfo> userInfoList) {
-        for (int i = 0; i < userList.size(); i++) {
-            UserInfo userInfo = userInfoList.get(i);
-            userInfoMapper.insert(userInfo);
-            User user = userList.get(i);
-            user.setUserInfoId(userInfo.getId());
-            userMapper.insert(user);
-        }
-    }
 
     /**
      * 根据传入的身份证图片识别身份证信息，同时为相关用户设置身份证相关信息
@@ -587,7 +578,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<User> userList = new ArrayList<>();
         List<UserInfo> userInfoList = new ArrayList<>();
 
-        // 批量设置待新增的数据
+        // 批量设置待新增的数据(检查数据合法性)
         for (UserInsertBatchDTO userInsertBatchDTO : userInsertBatchDTOList) {
             String phone = userInsertBatchDTO.getPhone();
             String studentId = userInsertBatchDTO.getStudentId();
@@ -649,6 +640,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userList.add(user);
             userInfoList.add(userInfo);
         }
-        // 批量新增数据 TODO
+        userInfoService.saveBatch(userInfoList);
+        for (int i = 0; i < userList.size(); i++) {
+            userList.get(i).setUserInfoId(userInfoList.get(i).getId());
+        }
+        saveBatch(userList);
     }
 }

@@ -3,6 +3,7 @@ package love.ytlsnb.user.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import love.ytls.api.school.SchoolClient;
 import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.PhotoProperties;
@@ -44,9 +45,9 @@ public class UserController {
     private PhotoProperties photoProperties;
 
     @PostMapping("/batch")
-    public Result addUserBatch(MultipartFile multipartFile) throws IOException {
-        log.info("通过Excel批量新增用户数据:{}", multipartFile);
-        userService.addUserBatch(multipartFile);
+    public Result addUserBatch(MultipartFile file) throws IOException {
+        log.info("通过Excel批量新增用户数据:{}", file);
+        userService.addUserBatch(file);
         return Result.ok();
     }
 

@@ -1,5 +1,6 @@
 package love.ytls.api.school;
 
+import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.school.po.Clazz;
 import love.ytlsnb.model.school.po.Dept;
@@ -18,6 +19,9 @@ import java.util.List;
  */
 @FeignClient("school-service")
 public interface SchoolClient {
+    @GetMapping("/api/coladmin/{coladminId}")
+    Result<Coladmin> getColadminById(@PathVariable Long coladminId);
+
     @GetMapping("/api/school/list")
     Result<List<School>> list();
 
@@ -28,11 +32,11 @@ public interface SchoolClient {
     Result<StudentPhoto> getStudentPhoto(@PathVariable Long userId);
 
     @GetMapping("/{schoolId}")
-    public Result<School> getSchoolById(@PathVariable Long schoolId);
+    Result<School> getSchoolById(@PathVariable Long schoolId);
 
     @GetMapping("/list/{schoolId}")
-    public Result<List<Dept>> listDeptBySchoolId(@PathVariable Long schoolId);
+    Result<List<Dept>> listDeptBySchoolId(@PathVariable Long schoolId);
 
     @GetMapping("/list/{schoolId}")
-    public Result<List<Clazz>> listClazzBySchoolId(@PathVariable Long schoolId);
+    Result<List<Clazz>> listClazzBySchoolId(@PathVariable Long schoolId);
 }

@@ -10,7 +10,7 @@ import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.utils.ColadminHolder;
 import love.ytlsnb.common.utils.CacheClient;
 import love.ytlsnb.model.school.dto.DeptInsertDTO;
-import love.ytlsnb.model.coladmin.po.Coladmin;
+import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.school.po.Dept;
 import love.ytlsnb.model.school.po.School;
 import love.ytlsnb.school.mapper.DeptMapper;

@@ -2,7 +2,9 @@ package love.ytlsnb.model.school.po;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -11,7 +13,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("tb_clazz")
-public class Clazz {
+public class Clazz implements Serializable {
     /**
      * 班级主键
      */

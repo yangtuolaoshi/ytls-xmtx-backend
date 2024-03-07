@@ -5,11 +5,15 @@ spring:
         - id: school-service                # 当前路由id，唯一标识
           uri: lb://school-service        # 当前路由所对应的服务访问地址：
           predicates:
-            - Path=/api/**            # 请求的拦截规则：路径为/api开头的请求均由此路由处理(只能添加一个- Path参数)
+            - Path=/api/coladmin/**,/api/school/**,/api/dept/**,/api/clazz/**        # 请求的拦截规则：路径为/api开头的请求均由此路由处理(只能添加一个- Path参数)
         - id: quest-service                # 当前路由id，唯一标识
           uri: lb://quest-service        # 当前路由所对应的服务访问地址：
           predicates:
             - Path=/api/quest/**            # 请求的拦截规则：路径为/admin开头的请求均由此路由处理
+        - id: user-service                # 当前路由id，唯一标识
+          uri: lb://user-service        # 当前路由所对应的服务访问地址：
+          predicates:
+            - Path=/api/user/**            # 请求的拦截规则：路径为/admin开头的请求均由此路由处理
   data:
     redis:
       host: 139.196.230.249

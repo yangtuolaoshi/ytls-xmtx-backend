@@ -2,9 +2,9 @@ package love.ytlsnb.school.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import love.ytlsnb.model.coladmin.dto.ColadminLoginDTO;
-import love.ytlsnb.model.coladmin.dto.ColadminRegisterDTO;
-import love.ytlsnb.model.coladmin.po.Coladmin;
+import love.ytlsnb.model.school.dto.ColadminLoginDTO;
+import love.ytlsnb.model.school.dto.ColadminRegisterDTO;
+import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.school.service.ColadminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +20,13 @@ import org.springframework.web.bind.annotation.*;
 public class ColadminController {
     @Autowired
     private ColadminService coladminService;
+
+    @GetMapping("/{coladminId}")
+    public Result<Coladmin> getColadminById(@PathVariable Long coladminId) {
+        log.info("根据ID获取Coladmin的信息");
+        Coladmin coladmin = coladminService.getById(coladminId);
+        return Result.ok(coladmin);
+    }
 
     @PostMapping("/login")
     public Result<String> login(@RequestBody ColadminLoginDTO coladminLoginDTO, HttpServletRequest request) {

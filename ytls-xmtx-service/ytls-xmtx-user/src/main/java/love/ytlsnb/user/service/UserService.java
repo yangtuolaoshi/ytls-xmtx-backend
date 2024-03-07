@@ -38,7 +38,6 @@ public interface UserService  extends IService<User> {
 
     void addUser(UserInsertDTO userInsertDTO);
 
-    void saveUserAndUserInfoBatch(List<User> userList, List<UserInfo> userInfoList);
 
     void uploadIdCard(String idCard) throws Exception;
 

@@ -1,8 +1,10 @@
-package love.ytlsnb.model.coladmin.po;
+package love.ytlsnb.model.school.po;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -41,6 +43,7 @@ public class Coladmin {
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(locale="zh", timezone="GMT+8", pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
     /**
      * 修改时间
