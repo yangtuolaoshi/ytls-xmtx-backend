@@ -7,17 +7,19 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author ula
+ * @date 2024/3/10 9:47
  */
 @Data
 @Component
 @RefreshScope// 必须加，从配置中心中获取配置
-@ConfigurationProperties("xmtx.user")
-public class UserProperties {
+@ConfigurationProperties("xmtx.common")
+public class CommonProperties {
     /**
-     * 用户学号脱敏相关参数：
-     * param1：学号保留前几位
-     * param2：学号保留后几位
+     * 手机验证码的有效时间（毫秒）
      */
-    private Integer studentIdParam1;
-    private Integer studentIdParam2;
+    private Long phoneCodeTtl;
+    /**
+     * 重新发送验证码的间隔时间（毫秒）
+     */
+    private Long resendCodeTimeInterval;
 }

@@ -19,6 +19,10 @@ public class UserConstant {
      */
     public static final String LOGIN_URL = "user/login";
     /**
+     * 网关和拦截器用来鉴别重置密码操作的常量
+     */
+    public static final String REPASSWORD_URL = "user/repassword";
+    /**
      * 网关和拦截器用来鉴别发送验证码操作的常量
      */
     public static final String GETCODE_URL = "user/code";

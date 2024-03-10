@@ -5,24 +5,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import love.ytls.api.school.SchoolClient;
 import love.ytlsnb.common.constants.ResultCodes;
-import love.ytlsnb.common.exception.BusinessException;
-import love.ytlsnb.common.properties.PhotoProperties;
-import love.ytlsnb.common.utils.AliUtil;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
-import love.ytlsnb.model.user.po.UserInfo;
-import love.ytlsnb.user.service.UserInfoService;
 import love.ytlsnb.user.service.UserService;
-import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
 /**
  * 用户基本信息控制器层
@@ -36,10 +28,6 @@ import java.util.UUID;
 public class UserController {
     @Autowired
     private UserService userService;
-    @Autowired
-    private AliUtil aliUtil;
-    @Autowired
-    private PhotoProperties photoProperties;
     @Autowired
     private SchoolClient schoolClient;
 
@@ -60,49 +48,10 @@ public class UserController {
     }
 
     @PostMapping("/upload")
-    public Result<String> upload(MultipartFile multipartFile) {
-        log.info("正在上传文件 {} 至阿里云云端", multipartFile);
+    public Result<String> upload(MultipartFile file) {
+        log.info("正在上传文件 {} 至阿里云云端", file);
+        return Result.ok(userService.upload(file));
 
-        //获取上传文件的名字
-        String originalFilename = multipartFile.getOriginalFilename();
-        // 获取创传文件的后缀名
-        String suffix = Objects.requireNonNull(originalFilename).substring(originalFilename.lastIndexOf("."));
-        if (!photoProperties.getSupportedTypes().contains(suffix)) {
-            throw new BusinessException(ResultCodes.BAD_REQUEST, "当前图片类型不支持");
-        }
-        try {
-            // 获取出入流
-            InputStream inputStream = multipartFile.getInputStream();
-            // 创建一个临时输出流
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            // 判断文件大小
-            if (multipartFile.getSize() > photoProperties.getMaxSize() * 1024 * 1024) {
-                // 文件大小过大，进行压缩
-                // 计算压缩比：注意，经过赋值这里计算的压缩比之后还是并不保证文件大小为maxSize，
-                // 因为这里计算采用的线性函数计算，而实际的压缩质量与outputQuality并非线性关系，但测试下发现能够保证最终大小小于maxSize（能用）
-                float ratio = photoProperties.getMaxSize() * 1024 * 1024 / multipartFile.getSize();
-                Thumbnails.of(inputStream)
-                        .size(4096, 4096)
-                        .outputQuality(ratio)
-                        .toOutputStream(outputStream);
-                // 更新输入流
-                inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-            } else {
-                // 控制文件分辨率
-                Thumbnails.of(inputStream)
-                        .size(4096, 4096)
-                        .toOutputStream(outputStream);
-                // 更新输入流
-                inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-            }
-            //获取随机UUID同时拼接上上传文件的后缀名
-            String name = UUID.randomUUID() + suffix;
-            String fileurl = aliUtil.upload(inputStream, name);
-            return Result.ok(fileurl);
-        } catch (IOException e) {
-            log.error("文件上传失败 ->", e);
-            return Result.fail(ResultCodes.SERVER_ERROR, "文件上传异常");
-        }
     }
 
     @GetMapping("/list")
@@ -122,6 +71,20 @@ public class UserController {
     public Result register(@RequestBody UserRegisterDTO userRegisterDTO) {
         log.info("用户注册:{}", userRegisterDTO);
         userService.register(userRegisterDTO);
+        return Result.ok();
+    }
+
+    @PutMapping("/password")
+    public Result updatePassword(@RequestBody UserUpdatePasswordDTO userUpdatePasswordDTO) {
+        log.info("用户重置密码:{}", userUpdatePasswordDTO);
+        userService.updatePassword(userUpdatePasswordDTO);
+        return Result.ok();
+    }
+
+    @PostMapping
+    public Result updateUserById(@RequestBody UserUpdateDTO userUpdateDTO) {
+        log.info("修改用户:{}", userUpdateDTO);
+        userService.update(userUpdateDTO);
         return Result.ok();
     }
 
@@ -153,6 +116,13 @@ public class UserController {
     @GetMapping("/sign")
     public Result<Boolean> getSignStatus() {
         return Result.ok(userService.isSigned());
+    }
+
+    @GetMapping("/sign/list")
+    public Result<Boolean[]> listSign() {
+        log.info("获取本月所有签到数据");
+        Boolean[] signList = userService.listSign();
+        return Result.ok(signList);
     }
 
     /**

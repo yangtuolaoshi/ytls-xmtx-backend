@@ -47,6 +47,7 @@ public class AuthenticationFilter implements GlobalFilter {
         String requestPath = request.getURI().getPath();
         if (requestPath.contains(UserConstant.LOGIN_URL)
                 || requestPath.contains(UserConstant.REGISTER_URL)
+                || requestPath.contains(UserConstant.REPASSWORD_URL)
                 || requestPath.contains(UserConstant.GETCODE_URL)) {
             return chain.filter(exchange);
         }

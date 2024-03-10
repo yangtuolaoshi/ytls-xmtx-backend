@@ -16,15 +16,17 @@ import java.util.List;
  * @author 金泓宇
  * @date 2024/01/21
  */
-public interface UserService  extends IService<User> {
-    User selectByAccount(String account);
+public interface UserService extends IService<User> {
+    User getByAccount(String account);
+    User getByPhone(String phone);
 
-    User selectInsensitiveUserById(Long id);
+    User getInsensitiveUserById(Long id);
 
     List<User> list(UserQueryDTO userQueryDTO);
 
 
-    String  login(UserLoginDTO userLoginDTO, HttpServletRequest request);
+    String login(UserLoginDTO userLoginDTO, HttpServletRequest request);
+
     void register(UserRegisterDTO userRegisterDTO);
 
     boolean sign();
@@ -36,6 +38,7 @@ public interface UserService  extends IService<User> {
     void addUser(UserInsertDTO userInsertDTO);
 
 
+    void update(UserUpdateDTO userUpdateDTO);
     void uploadIdCard(String idCard) throws Exception;
 
     void uploadRealPhoto(String realPhoto) throws Exception;
@@ -43,4 +46,10 @@ public interface UserService  extends IService<User> {
     void uploadAdmissionLetter(String admissionLetter);
 
     void addUserBatch(List<UserInsertBatchDTO> userInsertBatchDTOList) throws IOException;
+
+    void updatePassword(UserUpdatePasswordDTO userUpdatePasswordDTO);
+
+    String upload(MultipartFile file);
+
+    Boolean[] listSign();
 }

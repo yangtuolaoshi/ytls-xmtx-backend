@@ -1,6 +1,7 @@
 package love.ytlsnb.model.user.dto;
 
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * 使用Excel批量插入用户的数据传输对象
@@ -9,6 +10,7 @@ import lombok.Data;
  * @date 2024/2/1 11:50
  */
 @Data
+@ToString
 public class UserInsertBatchDTO {
     /**
      * 用户手机号（非空）

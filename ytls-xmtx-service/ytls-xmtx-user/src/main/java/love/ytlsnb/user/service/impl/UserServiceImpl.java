@@ -3,10 +3,7 @@ package love.ytlsnb.user.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.digest.BCrypt;
-import cn.hutool.poi.excel.ExcelReader;
-import cn.hutool.poi.excel.ExcelUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -15,12 +12,11 @@ import love.ytlsnb.common.constants.RedisConstant;
 import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.common.exception.BusinessException;
+import love.ytlsnb.common.properties.CommonProperties;
 import love.ytlsnb.common.properties.JwtProperties;
+import love.ytlsnb.common.properties.PhotoProperties;
 import love.ytlsnb.common.properties.UserProperties;
-import love.ytlsnb.common.utils.AliUtil;
-import love.ytlsnb.common.utils.ColadminHolder;
-import love.ytlsnb.common.utils.JwtUtil;
-import love.ytlsnb.common.utils.UserHolder;
+import love.ytlsnb.common.utils.*;
 import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.school.po.Clazz;
@@ -67,9 +63,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private UserInfoMapper userInfoMapper;
     @Autowired
+    private CommonProperties commonProperties;
+    @Autowired
     private UserProperties userProperties;
     @Autowired
     private JwtProperties jwtProperties;
+    @Autowired
+    private PhotoProperties photoProperties;
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
@@ -79,6 +79,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private SchoolClient schoolClient;
     @Autowired
     private AliUtil aliUtil;
+    @Autowired
+    private CommonUtil commonUtil;
 
 
     /**
@@ -114,6 +116,33 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userMapper.insert(user);
     }
 
+    @Override
+    public void update(UserUpdateDTO userUpdateDTO) {
+        User user = UserHolder.getUser();
+        // 参数合法性校验
+        if (!StrUtil.isBlankIfStr(userUpdateDTO.getNickname())) {
+            user.setNickname(userUpdateDTO.getNickname());
+        }
+        if (!StrUtil.isBlankIfStr(userUpdateDTO.getSign())) {
+            user.setSign(userUpdateDTO.getSign());
+        }
+        // 校验验证码
+        String phone = userUpdateDTO.getPhone();
+        String code = userUpdateDTO.getCode();
+        if (!StrUtil.isBlankIfStr(phone)) {
+            if (!PhoneUtil.isPhone(phone) || StrUtil.isBlankIfStr(code)) {
+                // 修改手机号相关参数不合法
+                throw new BusinessException(ResultCodes.BAD_REQUEST, "修改手机号相关参数不合法");
+            }
+            if (!commonUtil.checkShortMessage(phone, code)) {
+                throw new BusinessException(ResultCodes.UNAUTHORIZED, "验证码错误");
+            }
+            user.setPhone(phone);
+        }
+        // 修改用户数据
+        userMapper.updateById(user);
+    }
+
     /**
      * 根据传入账户名查找用户：账户可为手机号和身份证号（方法内部不再做参数合法性校验）
      *
@@ -121,7 +150,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
-    public User selectByAccount(String account) {
+    public User getByAccount(String account) {
         if (account == null) {
             return null;
         } else {
@@ -141,6 +170,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
     }
 
+    /**
+     * 根据传入手机号查找用户（方法内部不再做参数合法性校验）
+     *
+     * @param phone 用户手机号
+     * @return 查找到的用户数据行
+     */
+    @Override
+    public User getByPhone(String phone) {
+        return userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getPhone, phone));
+    }
+
     /*
      * 根据用户id返回脱敏后的用户信息
      *
@@ -148,7 +189,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
-    public User selectInsensitiveUserById(Long id) {
+    public User getInsensitiveUserById(Long id) {
         if (id == null) {
             return null;
         } else {
@@ -222,9 +263,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (!PhoneUtil.isPhone(userLoginDTO.getPhone())) {
                 throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写正确的手机号");
             }
-            String phoneCodeKey = RedisConstant.USER_PHONE_CODE_PREFIX + userLoginDTO.getPhone();
-            String code = redisTemplate.opsForValue().get(phoneCodeKey);
-            if (!userLoginDTO.getCode().equals(code)) {
+            if (!commonUtil.checkShortMessage(userLoginDTO.getPhone(), userLoginDTO.getCode())) {
                 // 验证码不同
                 throw new BusinessException(ResultCodes.UNAUTHORIZED, "验证码错误");
             }
@@ -236,7 +275,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
         } else {
             // 账户密码登录
-            user = selectByAccount(userLoginDTO.getAccount());
+            user = getByAccount(userLoginDTO.getAccount());
             if (user == null) {
                 // 用户不存在
                 throw new BusinessException(ResultCodes.UNAUTHORIZED, "用户不存在");
@@ -299,9 +338,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 校验验证码
-        String phoneCodeKey = RedisConstant.USER_PHONE_CODE_PREFIX + userRegisterDTO.getPhone();
-        String code = redisTemplate.opsForValue().get(phoneCodeKey);
-        if (!userRegisterDTO.getCode().equals(code)) {
+        if (!commonUtil.checkShortMessage(userRegisterDTO.getPhone(), userRegisterDTO.getCode())) {
             throw new BusinessException(ResultCodes.UNAUTHORIZED, "验证码错误");
         }
 
@@ -409,31 +446,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return Boolean.TRUE.equals(sign);
     }
 
-    /**
-     * 向指定的电话号码发送验证码
-     *
-     * @param phone 指定的电话号
-     * @throws Exception 发送验证码失败的异常
-     */
+    @Override
+    public Boolean[] listSign() {
+        User user = UserHolder.getUser();
+        String signHistoryKey = RedisConstant.USER_SIGN_PREFIX +
+                LocalDate.now().format(DateTimeFormatter.ofPattern(RedisConstant.USER_SIGN_PERMOUTH_PATTERN)) +
+                user.getId();
+        String signStr = redisTemplate.opsForValue().get(signHistoryKey);
+        byte[] bytes = signStr.getBytes();
+        Boolean[] signList = new Boolean[32];
+        if (ArrayUtil.isEmpty(bytes)) {
+            return signList;
+        }
+        // 设置本月所有的签到信息
+        for (byte i = 0; i < bytes.length; i++) {
+            byte num = bytes[i];
+            for (byte j = 0; j < 8; j++) {
+                signList[i * 8 + j] = (num >> (7 - j) & 1) == 1;
+            }
+        }
+        return signList;
+    }
+
     @Override
     public void sendShortMessage(String phone) throws Exception {
         // 校验手机号
         if (!PhoneUtil.isPhone(phone)) {
             throw new BusinessException(ResultCodes.BAD_REQUEST, "请输入正确的手机号");
         }
-        // 生成存储验证码Key
-        String phoneCodeKey = RedisConstant.USER_PHONE_CODE_PREFIX + phone;
-        // 校验是否可以发送
-        Long expire = redisTemplate.opsForValue().getOperations().getExpire(phoneCodeKey);
-        if (expire != null && expire > userProperties.getPhoneCodeTtl() - userProperties.getResendCodeTimeInterval()) {
-            throw new BusinessException(ResultCodes.FORBIDDEN, "请在一分钟后重试");
-        }
-        // 发送验证码
-        String code = aliUtil.sendShortMessage(phone);
-        // 存储验证码
-        redisTemplate.opsForValue().set(phoneCodeKey, code, userProperties.getPhoneCodeTtl(), TimeUnit.MILLISECONDS);
+        commonUtil.sendShortMessage(phone);
     }
-
 
     /**
      * 根据传入的身份证图片识别身份证信息，同时为相关用户设置身份证相关信息
@@ -647,5 +689,53 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userList.get(i).setUserInfoId(userInfoList.get(i).getId());
         }
         saveBatch(userList);
+    }
+
+    @Override
+    @Transactional
+    public void updatePassword(UserUpdatePasswordDTO userUpdatePasswordDTO) {
+        // 校验属性中是否含有null值
+        if (BeanUtil.hasNullField(userUpdatePasswordDTO)) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写所有参数信息");
+        }
+        if (!userUpdatePasswordDTO.getPassword().equals(userUpdatePasswordDTO.getRepassword())) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "两次输入密码不一致");
+        }
+        if (!commonUtil.checkShortMessage(userUpdatePasswordDTO.getPhone(), userUpdatePasswordDTO.getCode())) {
+            throw new BusinessException(ResultCodes.UNAUTHORIZED, "验证码错误");
+        }
+        // 查询相关用户
+        User byPhone = getByPhone(userUpdatePasswordDTO.getPhone());
+        if (byPhone == null) {
+            throw new BusinessException(ResultCodes.UNAUTHORIZED, "当前手机号还未注册");
+        }
+        // 修改用户数据
+        byPhone.setPassword(BCrypt.hashpw(userUpdatePasswordDTO.getPassword()));
+        userMapper.updateById(byPhone);
+    }
+
+    @Override
+    public String upload(MultipartFile file) {
+        long size = file.getSize();
+        if (size > Integer.MAX_VALUE) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "上传文件过大");
+        }
+        //获取上传文件的名字
+        String originalFilename = file.getOriginalFilename();
+        // 获取创传文件的后缀名
+        String suffix = Objects.requireNonNull(originalFilename).substring(originalFilename.lastIndexOf("."));
+        if (!photoProperties.getSupportedTypes().contains(suffix)) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "当前图片类型不支持");
+        }
+        try {
+            // 获取出入流
+            InputStream inputStream = file.getInputStream();
+            //获取随机UUID同时拼接上上传文件的后缀名
+            String name = UUID.randomUUID() + suffix;
+            return aliUtil.upload(inputStream, (int) size, name);
+        } catch (IOException e) {
+            log.error("文件上传失败 ->", e);
+            throw new BusinessException(ResultCodes.SERVER_ERROR, "文件上传异常");
+        }
     }
 }

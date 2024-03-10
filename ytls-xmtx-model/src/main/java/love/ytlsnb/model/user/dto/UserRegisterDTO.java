@@ -1,6 +1,7 @@
 package love.ytlsnb.model.user.dto;
 
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * @author ula
@@ -8,6 +9,7 @@ import lombok.Data;
  * 用户注册数据传输对象
  */
 @Data
+@ToString
 public class UserRegisterDTO {
     /**
      * 手机号，长度限制11位

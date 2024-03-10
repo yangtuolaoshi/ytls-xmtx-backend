@@ -1,6 +1,7 @@
 package love.ytlsnb.model.user.dto;
 
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
@@ -9,6 +10,7 @@ import java.time.LocalDate;
  * @date 2024/2/16 14:41
  */
 @Data
+@ToString
 public class UserInsertDTO {
     /**
      * 学生学号
