@@ -3,6 +3,7 @@ package love.ytlsnb.school.controller;
 import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.school.dto.ClazzInsertDTO;
+import love.ytlsnb.model.school.dto.ClazzQueryDTO;
 import love.ytlsnb.model.school.po.Clazz;
 import love.ytlsnb.school.service.ClazzService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,15 @@ public class ClazzController {
     public Result<List<Clazz>> listClazzBySchoolId(@PathVariable Long schoolId){
         log.info("根据学校ID获取所有班级数据:{}",schoolId);
         List<Clazz> clazzList=clazzService.listClazzBySchoolId(schoolId);
+        return Result.ok(clazzList);
+    }
+    @GetMapping("/list/{schoolId}/{deptId}")
+    public Result<List<Clazz>> listClazzBySchoolIdAndDeptId(@PathVariable Long schoolId,@PathVariable Long deptId){
+        log.info("根据学校ID和学院ID获取所有相关班级数据:{},{}",schoolId,deptId);
+        ClazzQueryDTO clazzQueryDTO =new ClazzQueryDTO();
+        clazzQueryDTO.setSchoolId(schoolId);
+        clazzQueryDTO.setDeptId(deptId);
+        List<Clazz> clazzList=clazzService.listClazzByCondition(clazzQueryDTO);
         return Result.ok(clazzList);
     }
 }

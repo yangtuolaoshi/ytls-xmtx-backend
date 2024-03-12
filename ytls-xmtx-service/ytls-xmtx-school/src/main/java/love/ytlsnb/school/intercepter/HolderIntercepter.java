@@ -50,7 +50,7 @@ public class HolderIntercepter implements HandlerInterceptor {
         if (StrUtil.isBlankIfStr(coladminToken)) {
             Claims claims = JwtUtil.parseJwt(jwtProperties.getUserSecretKey(), userToken);
             Long userId = (Long) claims.get(UserConstant.USER_ID);
-            Result<User> userResult = userClient.getById(userId);
+            Result<User> userResult = userClient.getUserById(userId);
             if (userResult.getCode() != ResultCodes.OK) {
                 throw new BusinessException(userResult.getCode(), userResult.getMsg());
             }

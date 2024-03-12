@@ -5,9 +5,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import love.ytls.api.school.SchoolClient;
 import love.ytlsnb.common.constants.ResultCodes;
+import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
+import love.ytlsnb.model.user.vo.UserVO;
 import love.ytlsnb.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +42,13 @@ public class UserController {
         schoolClient.getColadminById(1L);
     }
 
+    @PostMapping
+    public Result addUser(@RequestBody UserInsertDTO userInsertDTO) throws Exception {
+        log.info("新增用户:{}", userInsertDTO);
+        userService.addUser(userInsertDTO);
+        return Result.ok();
+    }
+
     @PostMapping("/batch")
     public Result addUserBatch(@RequestBody List<UserInsertBatchDTO> userInsertBatchDTOList) throws IOException {
         log.info("通过Excel批量新增用户数据:{}", userInsertBatchDTOList);
@@ -47,17 +56,73 @@ public class UserController {
         return Result.ok();
     }
 
+    @DeleteMapping("/{id}")
+    public Result deleteUserById(@PathVariable Long id) {
+        log.info("根据用户ID删除用户:{}", id);
+        userService.deleteUserById(id);
+        return Result.ok();
+    }
+
+    /**
+     * 用户的修改接口
+     *
+     * @param userUpdateDTO 用户修改数据传输对象
+     * @return
+     */
+    @PutMapping
+    public Result updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
+        log.info("修改用户:{}", userUpdateDTO);
+        userService.update(userUpdateDTO);
+        return Result.ok();
+    }
+
+    /**
+     * 学校管理员修改用户数据的接口
+     *
+     * @param userInsertDTO 用户修改数据传输对象（二者参数一致，这里采用同一个模型）
+     * @param id            待修改的用户ID
+     * @return
+     * @throws Exception 修改失败的异常
+     */
+    @PutMapping("/{id}")
+    public Result updateUserById(@RequestBody UserInsertDTO userInsertDTO, @PathVariable Long id) throws Exception {
+        log.info("修改用户:{}", userInsertDTO);
+        userService.updateUserById(userInsertDTO, id);
+        return Result.ok();
+    }
+
+    @PutMapping("/password")
+    public Result updatePassword(@RequestBody UserUpdatePasswordDTO userUpdatePasswordDTO) {
+        log.info("用户重置密码:{}", userUpdatePasswordDTO);
+        userService.updatePassword(userUpdatePasswordDTO);
+        return Result.ok();
+    }
+
+    @GetMapping("/{id}")
+    public Result<User> getUserById(@PathVariable Long id) {
+        log.info("根据用户ID查询用户:{}", id);
+        User user = userService.getById(id);
+        user.setPassword(UserConstant.INSENSITIVE_PASSWORD);
+        return Result.ok(user);
+    }
+
+    @GetMapping("/detail/{id}")
+    public Result<UserVO> getUserVOById(@PathVariable Long id) {
+        log.info("根据用户ID查询用户:{}", id);
+        UserVO userVO = userService.getUserVOById(id);
+        return Result.ok(userVO);
+    }
+
+    @GetMapping("/listByConditions")
+    public Result<List<UserVO>> listByConditions(UserQueryDTO userQueryDTO) {
+        log.info("查询用户，userQueryDTO:{}", userQueryDTO);
+        return Result.ok(userService.listByConditions(userQueryDTO));
+    }
+
     @PostMapping("/upload")
     public Result<String> upload(MultipartFile file) {
         log.info("正在上传文件 {} 至阿里云云端", file);
         return Result.ok(userService.upload(file));
-
-    }
-
-    @GetMapping("/list")
-    public Result<List<User>> list(UserQueryDTO userQueryDTO) {
-        log.info("查询用户，userQueryDTO:{}", userQueryDTO);
-        return Result.ok(userService.list(userQueryDTO));
     }
 
     @PostMapping("/login")
@@ -74,25 +139,6 @@ public class UserController {
         return Result.ok();
     }
 
-    @PutMapping("/password")
-    public Result updatePassword(@RequestBody UserUpdatePasswordDTO userUpdatePasswordDTO) {
-        log.info("用户重置密码:{}", userUpdatePasswordDTO);
-        userService.updatePassword(userUpdatePasswordDTO);
-        return Result.ok();
-    }
-
-    @PostMapping
-    public Result updateUserById(@RequestBody UserUpdateDTO userUpdateDTO) {
-        log.info("修改用户:{}", userUpdateDTO);
-        userService.update(userUpdateDTO);
-        return Result.ok();
-    }
-
-    @GetMapping("/{id}")
-    public Result<User> getUserById(@PathVariable Long id) {
-        log.info("查询用户，id:{}", id);
-        return Result.ok(userService.getById(id));
-    }
 
     /**
      * 用户签到接口，当用户不能签到时理应不能访问该接口

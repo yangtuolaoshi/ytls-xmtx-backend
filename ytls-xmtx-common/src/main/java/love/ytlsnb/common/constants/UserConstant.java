@@ -9,23 +9,23 @@ public class UserConstant {
     /**
      * 拦截器用来鉴别用户操作的常量
      */
-    public static final String USER_ALL_URL = "user/**";
+    public static final String USER_ALL_URL = "/user/**";
     /**
      * 网关和拦截器用来鉴别注册操作的常量
      */
-    public static final String REGISTER_URL = "user/register";
+    public static final String USER_REGISTER_URL = "/user/register";
     /**
      * 网关和拦截器用来鉴别登录操作的常量
      */
-    public static final String LOGIN_URL = "user/login";
+    public static final String USER_LOGIN_URL = "/user/login";
     /**
      * 网关和拦截器用来鉴别重置密码操作的常量
      */
-    public static final String REPASSWORD_URL = "user/repassword";
+    public static final String USER_REPASSWORD_URL = "/user/repassword";
     /**
      * 网关和拦截器用来鉴别发送验证码操作的常量
      */
-    public static final String GETCODE_URL = "user/code";
+    public static final String USER_GETCODE_URL = "/user/code";
     //-------------------------User-------------------------
     /**
      * 用户ID常量,用于数据库sql操作
@@ -35,6 +35,7 @@ public class UserConstant {
      * 用户学号最大长度
      */
     public static final Integer STUDENT_ID_MAX_LENGTH = 16;
+    public static final String NICKNAME="nickname";
     /**
      * 用户昵称最大长度
      */
@@ -104,4 +105,5 @@ public class UserConstant {
      */
     public static final Byte DELETED = 1;
     //-------------------------UserInfo-------------------------
+    public static final String NAME="name";
 }

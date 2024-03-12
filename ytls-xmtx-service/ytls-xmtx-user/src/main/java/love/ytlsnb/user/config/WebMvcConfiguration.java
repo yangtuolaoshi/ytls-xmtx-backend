@@ -1,6 +1,7 @@
 package love.ytlsnb.user.config;
 
 import lombok.extern.slf4j.Slf4j;
+import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.common.json.JacksonObjectMapper;
 import love.ytlsnb.user.intercepter.HolderIntercepter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,11 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(holderIntercepter);
+        registry.addInterceptor(holderIntercepter)
+                .excludePathPatterns(UserConstant.USER_REGISTER_URL)
+                .excludePathPatterns(UserConstant.USER_LOGIN_URL)
+                .excludePathPatterns(UserConstant.USER_REPASSWORD_URL)
+                .excludePathPatterns(UserConstant.USER_GETCODE_URL);
     }
 
     /**

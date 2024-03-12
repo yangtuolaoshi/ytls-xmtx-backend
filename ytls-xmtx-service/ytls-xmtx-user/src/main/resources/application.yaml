@@ -58,3 +58,6 @@ xmtx:
     supported-types: # 格式为：“.xxx”
       - .jpg
       - .png
+#mybatis-plus:
+#  configuration:
+#    map-underscore-to-camel-case: true

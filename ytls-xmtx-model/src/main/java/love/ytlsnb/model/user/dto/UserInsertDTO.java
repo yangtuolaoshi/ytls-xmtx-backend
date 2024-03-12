@@ -1,5 +1,6 @@
 package love.ytlsnb.model.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.ToString;
 
@@ -13,13 +14,9 @@ import java.time.LocalDate;
 @ToString
 public class UserInsertDTO {
     /**
-     * 学生学号
+     * 学生学号(必填)
      */
     private String studentId;
-    /**
-     * 学生手机号（必填字段）
-     */
-    private String phone;
     /**
      * 学生真实姓名
      */
@@ -35,6 +32,7 @@ public class UserInsertDTO {
     /**
      * 学生出生日期
      */
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDate birthDate;
     /**
      * 学生身份证上面的地址
@@ -48,6 +46,10 @@ public class UserInsertDTO {
      * 学生真实照片
      */
     private String realPhoto;
+    /**
+     * 学生录取通知书
+     */
+    private String admissionLetterPhoto;
     /**
      * 学生学校ID
      */

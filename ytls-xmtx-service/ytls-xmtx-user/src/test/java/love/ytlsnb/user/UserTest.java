@@ -6,6 +6,7 @@ import love.ytlsnb.common.utils.AliUtil;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.user.dto.UserQueryDTO;
 import love.ytlsnb.model.user.po.User;
+import love.ytlsnb.model.user.vo.UserVO;
 import love.ytlsnb.user.controller.UserController;
 import love.ytlsnb.user.service.UserService;
 import net.coobird.thumbnailator.Thumbnails;
@@ -27,16 +28,22 @@ import java.util.Map;
 /**
  * @author ula
  */
-@SpringBootTest
+//@SpringBootTest
 public class UserTest {
-    @Autowired
-    UserController userController;
-
-    @Autowired
-    AliUtil aliUtil;
+//    @Autowired
+//    UserController userController;
+//
+//    @Autowired
+//    AliUtil aliUtil;
 
     @Test
     public void test() throws Exception {
-
+        User user = new User();
+        user.setPhone("123");
+        UserVO userVO = new UserVO();
+        userVO.setPhone("456");
+        System.out.println(user);
+        BeanUtil.copyProperties(userVO, user);
+        System.out.println(user);
     }
 }
