@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 @Slf4j
 @RestController
-@RequestMapping("/coladmin")
+@RequestMapping("/user")
 public class ColadminController {
     @Autowired
     private ColadminService coladminService;

@@ -16,15 +16,18 @@
         LEFT JOIN tb_quest_location l ON s.location_id = l.id
         WHERE
         q.school_id = #{schoolId}
-        <if test="!mapFilterDTO.getMain">
+        and q.is_deleted = 0
+        <if test="mapFilterDTO.getMain != null and !mapFilterDTO.getMain">
             and type != 0
         </if>
-        <if test="!mapFilterDTO.getSide">
+        <if test="mapFilterDTO.getSide != null and !mapFilterDTO.getSide">
             and type != 1
         </if>
-        <if test="!mapFilterDTO.getDaily">
+        <if test="mapFilterDTO.getDaily != null and !mapFilterDTO.getDaily">
             and type != 2
         </if>
+        and l.longitude IS NOT NULL
+        and l.latitude IS NOT NULL
         ;
     </select>
 </mapper>

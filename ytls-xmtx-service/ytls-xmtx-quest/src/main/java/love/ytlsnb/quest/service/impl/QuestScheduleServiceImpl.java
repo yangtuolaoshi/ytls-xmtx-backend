@@ -17,6 +17,7 @@ import love.ytlsnb.quest.mapper.QuestLocationMapper;
 import love.ytlsnb.quest.mapper.QuestLocationPhotoMapper;
 import love.ytlsnb.quest.mapper.QuestMapper;
 import love.ytlsnb.quest.mapper.QuestScheduleMapper;
+import love.ytlsnb.quest.service.QuestLocationPhotoService;
 import love.ytlsnb.quest.service.QuestScheduleService;
 import love.ytlsnb.quest.utils.QuestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,9 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
     @Autowired
     private QuestLocationPhotoMapper questLocationPhotoMapper;
 
+    @Autowired
+    private QuestLocationPhotoService questLocationPhotoService;
+
     /**
      * 检查任务表单数据
      *
@@ -66,9 +70,8 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
     }
 
     @Override
-    public List<QuestScheduleVo> getAdminMap(MapFilterDTO mapFilterDTO) {
-        // TODO 根据学校ID查询
-        return questScheduleMapper.getAdminMap(mapFilterDTO, 1L);
+    public List<QuestScheduleVo> getAdminMap(MapFilterDTO mapFilterDTO, Long schoolId) {
+        return questScheduleMapper.getAdminMap(mapFilterDTO, schoolId);
     }
 
     @Transactional
@@ -82,10 +85,13 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
         if (questDTO.getNeedLocation() == 1) {
             QuestLocation questLocation = QuestUtil.createQuestLocation(questDTO);
             questLocationMapper.insert(questLocation);
-            if (questLocation.getId() == null) {
+            Long locationId = questLocation.getId();
+            if (locationId == null) {
                 throw new BusinessException(SERVER_ERROR, "进度添加失败，请稍后重试");
             }
-            questSchedule.setLocationId(questLocation.getId());
+            questSchedule.setLocationId(locationId);
+            List<String> photoUrls = questDTO.getLocationPhotoUrls();
+            questLocationPhotoService.addBatchByUrls(photoUrls, locationId);
         }
         // 添加进度
         LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
@@ -167,7 +173,6 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
     @Transactional
     @Override
     public Boolean deleteById(Long id) {
-        // TODO 删除其下所有照片
         QuestSchedule questSchedule = questScheduleMapper.selectById(id);
         if (questSchedule == null) {
             return false;
@@ -184,7 +189,6 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
 
     @Override
     public Boolean deleteByQuestId(Long questId) {
-        // TODO 删除其下所有照片
         LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(QuestSchedule::getQuestId, questId);
         List<QuestSchedule> questSchedules = questScheduleMapper.selectList(queryWrapper);
@@ -192,9 +196,20 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
         List<Long> questScheduleIds = new LinkedList<>();
         questSchedules.forEach((questSchedule) -> {
             questScheduleIds.add(questSchedule.getId());
-            questLocationIds.add(questSchedule.getLocationId());
+            if (questSchedule.getNeedLocation() == 1) {
+                questLocationIds.add(questSchedule.getLocationId());
+            }
         });
-        questLocationMapper.deleteBatchIds(questLocationIds);
+        if (questLocationIds.size() > 0) {
+            questLocationMapper.deleteBatchIds(questLocationIds);
+        }
         return questScheduleMapper.deleteBatchIds(questScheduleIds) > 0;
+    }
+
+    @Override
+    public Long getCountByQuestId(Long questId) {
+        LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(QuestSchedule::getQuestId, questId);
+        return questScheduleMapper.selectCount(queryWrapper);
     }
 }

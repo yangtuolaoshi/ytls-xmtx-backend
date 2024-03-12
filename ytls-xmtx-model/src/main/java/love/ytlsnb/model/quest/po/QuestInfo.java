@@ -44,11 +44,11 @@ public class QuestInfo {
     private String requiredItem;
 
     @TableField("create_time")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd 2024-03-05")
     private LocalDateTime createTime;
 
     @TableField("update_time")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd 2024-03-05")
     private LocalDateTime updateTime;
 
     @TableField("is_deleted")

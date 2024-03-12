@@ -25,7 +25,7 @@ public class SchoolConstant {
     /**
      * 网关用来鉴别登录操作的字符串常量
      */
-    public static final String LOGIN_URL = "coladmin/login";
+    public static final String LOGIN_URL = "user/login";
     /**
      * 网关用来鉴别注册操作的字符串常量
      */

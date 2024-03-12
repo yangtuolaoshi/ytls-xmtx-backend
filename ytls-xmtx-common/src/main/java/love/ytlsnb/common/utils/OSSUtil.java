@@ -62,6 +62,7 @@ public class OSSUtil {
      * @param ossOperation 操作（函数式接口）
      */
     private static void doOperation(OSSOperation ossOperation) {
+        // TODO 原来的finally导致只能上传一个文件
         try {
             ossOperation.operate();
         } catch (OSSException oe) {
@@ -76,11 +77,14 @@ public class OSSUtil {
                     + "a serious internal problem while trying to communicate with OSS, "
                     + "such as not being able to access the network.");
             log.error("Error Message:" + ce.getMessage());
-        } finally {
             if (ossClient != null) {
                 ossClient.shutdown();
             }
-        }
+        } /*finally {
+            if (ossClient != null) {
+                ossClient.shutdown();
+            }
+        }*/
     }
 
     /**
