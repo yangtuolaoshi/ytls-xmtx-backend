@@ -14,6 +14,11 @@ import java.util.List;
 @Data
 public class QuestDTO {
     /**
+     * 学校ID
+     */
+    private Long schoolId;
+
+    /**
      * 任务标题
      */
     private String questTitle;
@@ -86,9 +91,24 @@ public class QuestDTO {
     private String scheduleTitle;
 
     /**
-     * 打卡方式
+     * 管理员审核
      */
-    private Integer clockInMethod;
+    private Integer adminCheck;
+
+    /**
+     * 照片识别
+     */
+    private Integer photoCheck;
+
+    /**
+     * 地点识别
+     */
+    private Integer locationCheck;
+
+    /**
+     * 面部识别（硬件）
+     */
+    private Integer faceCheck;
 
     /**
      * 进度启用状态

@@ -29,6 +29,8 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +47,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Service
+@RefreshScope
 public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> implements ColadminService {
     @Autowired
     private ColadminMapper coladminMapper;
@@ -60,6 +63,11 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
     @Autowired
     private AliUtil aliUtil;
 
+    @Value("${xmtx.jwt.coladmin-secret-key}")
+    private String coladminSecretKey;
+    @Value("${xmtx.jwt.user-secret-key}")
+    private String userSecretKey;
+
     /**
      * 学校管理人员登录
      *
@@ -69,6 +77,8 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
      */
     @Override
     public String login(ColadminLoginDTO coladminLoginDTO, HttpServletRequest request) {
+        log.info(coladminSecretKey);
+        log.info(userSecretKey);
         // 校验传入参数
         if (StrUtil.isBlankIfStr(coladminLoginDTO.getUsername()) || StrUtil.isBlankIfStr(coladminLoginDTO.getPassword())) {
             throw new BusinessException(ResultCodes.BAD_REQUEST, "登录账户登录信息不全");
@@ -89,6 +99,8 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
         // 提前创建jwt令牌
         Map<String, Object> claims = new HashMap<>();
         claims.put(SchoolConstant.COLADMIN_ID, coladmin.getId());
+        System.out.println(jwtProperties);
+        System.out.println(jwtProperties.getColadminSecretKey());
         String jwt = JwtUtil.createJwt(jwtProperties.getColadminSecretKey(), jwtProperties.getColadminTtl(), claims);
         log.info("生成的JWT令牌：{}", jwt);
         // jwt令牌中的签名,用来做唯一登录校验

@@ -3,7 +3,6 @@ package love.ytlsnb.school.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import love.ytlsnb.model.school.po.School;
 
-import java.io.IOException;
 
 /**
  * @author ula
