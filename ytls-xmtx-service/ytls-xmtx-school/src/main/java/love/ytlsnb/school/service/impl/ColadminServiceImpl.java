@@ -45,8 +45,8 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
     private JwtProperties jwtProperties;
     @Autowired
     private RedissonClient redissonClient;
-//    @Autowired
-//    private StringRedisTemplate redisTemplate;
+    @Autowired
+    private StringRedisTemplate redisTemplate;
     @Autowired
     private AliUtil aliUtil;
 
