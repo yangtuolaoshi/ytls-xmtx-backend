@@ -4,7 +4,7 @@ logging:
 server:
   port: 6664
   servlet:
-    context-path: /api
+    context-path: /coladmin
 spring:
   application:
     name: school-service # 服务名称

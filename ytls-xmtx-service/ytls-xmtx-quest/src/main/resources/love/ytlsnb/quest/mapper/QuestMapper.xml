@@ -4,22 +4,57 @@
 <mapper namespace="love.ytlsnb.quest.mapper.QuestMapper">
     <select id="getPageByCondition" resultType="love.ytlsnb.model.quest.vo.QuestVo">
         select q1.id,
-               q1.title,
-               q1.type,
-               q1.parent_id as parentId,
-               q1.status,
-               q1.reward,
-               q1.end_time as endTime,
-               q2.title as preQuestTitle
+        q1.quest_title as questTitle,
+        q1.type,
+        q1.parent_id as parentId,
+        q1.quest_status as questStatus,
+        q1.required_schedule_num as requiredScheduleNum,
+        q1.reward,
+        q1.end_time as endTime,
+        q2.quest_title as preQuestTitle
         from tb_quest q1
-                 left join tb_quest q2 on q1.parent_id = q2.id
-        where 1 = 1
-            <if test="questQueryDTO.title != null and questQueryDTO.title != ''">
-                and q1.title like #{questQueryDTO.title}
-            </if>
-            <if test="questQueryDTO.type != null">
-                and q1.type = #{questQueryDTO.type}
-            </if>
+        left join tb_quest q2 on q1.parent_id = q2.id
+        where q1.school_id = #{questQueryDTO.schoolId}
+        and q1.is_deleted = 0
+        <if test="questQueryDTO.title != null and questQueryDTO.title != ''">
+            and q1.quest_title like #{questQueryDTO.title}
+        </if>
+        <if test="questQueryDTO.type != null">
+            and q1.type = #{questQueryDTO.type}
+        </if>
         limit #{page}, #{size};
     </select>
+
+    <update id="addUpdateLeftValue">
+        update tb_quest
+        set left_value = (left_value + 2)
+        where right_value > #{rightValue}
+          and left_value > #{leftValue}
+          and school_id = #{schoolId}
+          and is_deleted = 0;
+    </update>
+
+    <update id="addUpdateRightValue">
+        update tb_quest
+        set right_value = (right_value + 2)
+        where right_value >= #{rightValue}
+          and school_id = #{schoolId}
+          and is_deleted = 0;
+    </update>
+
+    <update id="deleteUpdateLeftValue">
+        update tb_quest
+        set left_value = (left_value - 2)
+        where left_value > #{leftValue}
+          and school_id = #{schoolId}
+          and is_deleted = 0;
+    </update>
+
+    <update id="deleteUpdateRightValue">
+        update tb_quest
+        set right_value = (right_value - 2)
+        where right_value > #{rightValue}
+          and school_id = #{schoolId}
+          and is_deleted = 0;
+    </update>
 </mapper>

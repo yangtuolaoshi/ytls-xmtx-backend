@@ -19,4 +19,9 @@ public class QuestQueryDTO {
      * 任务类型
      */
     private Integer type;
+
+    /**
+     * 学校ID
+     */
+    private Long schoolId;
 }

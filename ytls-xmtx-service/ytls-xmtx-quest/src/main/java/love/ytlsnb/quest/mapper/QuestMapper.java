@@ -32,27 +32,23 @@ public interface QuestMapper extends BaseMapper<Quest> {
      * @param leftValue 左值，这里的左右值是
      * @param rightValue 右值
      */
-    @Update("update tb_quest set left_value = (left_value + 2) where right_value > #{rightValue} and left_value > #{leftValue};")
-    void addUpdateLeftValue(int leftValue, int rightValue);
+    void addUpdateLeftValue(int leftValue, int rightValue, Long schoolId);
 
     /**
      * 添加操作更新右值
      * @param rightValue 右值
      */
-    @Update("update tb_quest set right_value = (right_value + 2) where right_value >= #{rightValue};")
-    void addUpdateRightValue(int rightValue);
+    void addUpdateRightValue(int rightValue, Long schoolId);
 
     /**
      * 删除操作更新左值
      * @param leftValue 左值
      */
-    @Update("update tb_quest set left_value = (left_value - 2) where left_value > #{leftValue}")
-    void deleteUpdateLeftValue(int leftValue);
+    void deleteUpdateLeftValue(int leftValue, Long schoolId);
 
     /**
      * 删除操作更新右值
      * @param rightValue 右值
      */
-    @Update("update tb_quest set right_value = (right_value - 2) where right_value > #{rightValue}")
-    void deleteUpdateRightValue(int rightValue);
+    void deleteUpdateRightValue(int rightValue, Long schoolId);
 }

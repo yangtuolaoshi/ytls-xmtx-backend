@@ -36,7 +36,7 @@ public class QuestLocationPhoto {
      * 创建时间
      */
     @TableField("create_time")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     /**

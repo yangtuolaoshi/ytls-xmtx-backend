@@ -20,7 +20,7 @@ public class QuestInfoVo extends QuestVo {
     /**
      * 任务描述
      */
-    private String description;
+    private String questDescription;
 
     /**
      * 任务提示

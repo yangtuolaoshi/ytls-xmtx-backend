@@ -19,9 +19,10 @@ public interface QuestScheduleService {
     /**
      * 管理平台查询地图坐标点
      * @param mapFilterDTO 过滤条件
+     * @param schoolId 学校ID
      * @return 坐标点集合
      */
-    List<QuestScheduleVo> getAdminMap(MapFilterDTO mapFilterDTO);
+    List<QuestScheduleVo> getAdminMap(MapFilterDTO mapFilterDTO, Long schoolId);
 
     /**
      * 为一个任务添加进度
@@ -64,4 +65,11 @@ public interface QuestScheduleService {
      * @return 是否删除成功
      */
     Boolean deleteByQuestId(Long questId);
+
+    /**
+     * 根据任务ID查询它的总进度数
+     * @param questId 任务ID
+     * @return 总进度数
+     */
+    Long getCountByQuestId(Long questId);
 }
