@@ -23,12 +23,15 @@ import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.*;
 import love.ytlsnb.model.user.dto.IdCard;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.swing.text.DateFormatter;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.time.LocalDate;
@@ -42,6 +45,8 @@ import java.util.List;
 @Slf4j
 @Component
 public class AliUtil {
+    @Autowired
+    private PhotoProperties photoProperties;
     @Autowired
     private AliProperties aliProperties;
     @Autowired
@@ -57,30 +62,56 @@ public class AliUtil {
      * 文件上传
      *
      * @param bytes      待上传文件的字节数据
+     * @param size        输入流中的数据大小
      * @param objectName 待上传文件的文件名称
      * @return 阿里云OSS的存储地址
      */
-    public String upload(byte[] bytes, String objectName) {
-        return upload(new ByteArrayInputStream(bytes), objectName);
+    public String upload(byte[] bytes, Integer size, String objectName) {
+        return upload(new ByteArrayInputStream(bytes), bytes.length, objectName);
     }
 
     /**
      * 文件上传
      *
      * @param inputStream 待上传文件的数据输入流
+     * @param size        输入流中的数据大小
      * @param objectName  待上传文件的文件名称
      * @return 阿里云OSS的存储地址
      */
-    public String upload(InputStream inputStream, String objectName) {
+    public String upload(InputStream inputStream, Integer size, String objectName) {
         // 创建OSSClient实例。
         OSS ossClient = new OSSClientBuilder()
                 .build(aliOssProperties.getEndpoint(),
                         aliProperties.getAccessKeyId(),
                         aliProperties.getAccessKeySecret());
-
         try {
-            // 创建PutObject请求。
+            // 创建一个临时输出流
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            // 判断文件大小
+            if (size > photoProperties.getMaxSize() * 1024 * 1024) {
+                // 文件大小过大，进行压缩
+                // 计算压缩比：注意，经过赋值这里计算的压缩比之后还是并不保证文件大小为maxSize，
+                // 因为这里计算采用的线性函数计算，而实际的压缩质量与outputQuality并非线性关系，但测试下发现能够保证最终大小小于maxSize（能用）
+                float ratio = photoProperties.getMaxSize() * 1024 * 1024 / size;
+                Thumbnails.of(inputStream)
+                        .size(4096, 4096)
+                        .outputQuality(ratio)
+                        .toOutputStream(outputStream);
+                // 更新输入流
+                inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+            } else {
+                // 控制文件分辨率
+                Thumbnails.of(inputStream)
+                        .size(4096, 4096)
+                        .toOutputStream(outputStream);
+                // 更新输入流
+                inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+            }
+            // 创建PutObject请求
             ossClient.putObject(aliOssProperties.getBucketName(), objectName, inputStream);
+        } catch (IOException ioe) {
+            log.error(ioe.getMessage());
+            throw new BusinessException(ResultCodes.SERVER_ERROR, ioe.getMessage());
         } catch (OSSException oe) {
             log.error("Caught an OSSException, which means your request made it to OSS, "
                     + "but was rejected with an error response for some reason.");

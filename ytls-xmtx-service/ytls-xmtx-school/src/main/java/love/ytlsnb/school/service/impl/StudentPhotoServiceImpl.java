@@ -1,6 +1,6 @@
 package love.ytlsnb.school.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.common.constants.SchoolConstant;
@@ -22,7 +22,7 @@ public class StudentPhotoServiceImpl extends ServiceImpl<StudentPhotoMapper, Stu
 
     @Override
     public StudentPhoto getStudentPhoto(Long userId) {
-        return studentPhotoMapper.selectOne(new QueryWrapper<StudentPhoto>()
-                .eq(SchoolConstant.USER_ID, userId));
+        return studentPhotoMapper.selectOne(new LambdaQueryWrapper<StudentPhoto>()
+                .eq(StudentPhoto::getStudentId, userId));
     }
 }

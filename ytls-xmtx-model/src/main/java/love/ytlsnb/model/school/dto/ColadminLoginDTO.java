@@ -1,4 +1,4 @@
-package love.ytlsnb.model.coladmin.dto;
+package love.ytlsnb.model.school.dto;
 
 import lombok.Data;
 import lombok.ToString;

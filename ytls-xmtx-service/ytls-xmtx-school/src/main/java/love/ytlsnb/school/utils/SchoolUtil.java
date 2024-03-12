@@ -1,4 +1,4 @@
-package love.ytlsnb.common.utils;
+package love.ytlsnb.school.utils;
 
 import cn.hutool.core.collection.ListUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;

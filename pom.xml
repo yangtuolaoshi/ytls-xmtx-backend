@@ -39,6 +39,7 @@
         <aliyun.facebody.version>3.0.8</aliyun.facebody.version>
         <aliyun.ocr.version>2.0.0</aliyun.ocr.version>
         <thumbnailator>0.4.20</thumbnailator>
+        <poi-ooxml>5.2.3</poi-ooxml>
         <spring.boot.version>3.1.6</spring.boot.version>
         <redis.version>3.1.6</redis.version>
         <redisson.version>3.24.3</redisson.version>
@@ -49,6 +50,7 @@
         <mysql.version>5.1.47</mysql.version>
         <druid.version>1.2.16</druid.version>
         <jdbc.version>3.1.6</jdbc.version>
+        <jakarta.servlet-api>6.0.0</jakarta.servlet-api>
     </properties>
 
     <dependencies>
@@ -202,6 +204,13 @@
                 <artifactId>thumbnailator</artifactId>
                 <version>${thumbnailator}</version>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi-ooxml}</version>
+            </dependency>
+
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
@@ -222,6 +231,14 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <!-- https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api -->
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet-api}</version>
+                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
