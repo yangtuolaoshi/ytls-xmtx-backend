@@ -2,11 +2,8 @@ package love.ytlsnb.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
-import love.ytlsnb.model.user.dto.UserInsertDTO;
-import love.ytlsnb.model.user.dto.UserQueryDTO;
+import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
-import love.ytlsnb.model.user.dto.UserLoginDTO;
-import love.ytlsnb.model.user.dto.UserRegisterDTO;
 import love.ytlsnb.model.user.po.UserInfo;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,15 +16,17 @@ import java.util.List;
  * @author 金泓宇
  * @date 2024/01/21
  */
-public interface UserService  extends IService<User> {
-    User selectByAccount(String account);
+public interface UserService extends IService<User> {
+    User getByAccount(String account);
+    User getByPhone(String phone);
 
-    User selectInsensitiveUserById(Long id);
+    User getInsensitiveUserById(Long id);
 
     List<User> list(UserQueryDTO userQueryDTO);
 
 
-    String  login(UserLoginDTO userLoginDTO, HttpServletRequest request);
+    String login(UserLoginDTO userLoginDTO, HttpServletRequest request);
+
     void register(UserRegisterDTO userRegisterDTO);
 
     boolean sign();
@@ -38,13 +37,19 @@ public interface UserService  extends IService<User> {
 
     void addUser(UserInsertDTO userInsertDTO);
 
-    void saveUserAndUserInfoBatch(List<User> userList, List<UserInfo> userInfoList);
 
+    void update(UserUpdateDTO userUpdateDTO);
     void uploadIdCard(String idCard) throws Exception;
 
     void uploadRealPhoto(String realPhoto) throws Exception;
 
     void uploadAdmissionLetter(String admissionLetter);
 
-    void addUserBatch(MultipartFile multipartFile) throws IOException;
+    void addUserBatch(List<UserInsertBatchDTO> userInsertBatchDTOList) throws IOException;
+
+    void updatePassword(UserUpdatePasswordDTO userUpdatePasswordDTO);
+
+    String upload(MultipartFile file);
+
+    Boolean[] listSign();
 }

@@ -3,10 +3,14 @@ package love.ytlsnb.school.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.BCrypt;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import love.ytls.api.school.SchoolClient;
+import love.ytls.api.user.UserClient;
 import love.ytlsnb.common.constants.RedisConstant;
 import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.common.constants.SchoolConstant;
@@ -14,20 +18,26 @@ import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.JwtProperties;
 import love.ytlsnb.common.utils.AliUtil;
 import love.ytlsnb.common.utils.JwtUtil;
-import love.ytlsnb.model.coladmin.dto.ColadminLoginDTO;
-import love.ytlsnb.model.coladmin.dto.ColadminRegisterDTO;
-import love.ytlsnb.model.coladmin.po.Coladmin;
+import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.school.dto.ColadminLoginDTO;
+import love.ytlsnb.model.school.dto.ColadminRegisterDTO;
+import love.ytlsnb.model.school.po.Coladmin;
+import love.ytlsnb.model.user.dto.UserInsertBatchDTO;
 import love.ytlsnb.school.mapper.ColadminMapper;
 import love.ytlsnb.school.service.ColadminService;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -44,9 +54,12 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
     @Autowired
     private JwtProperties jwtProperties;
     @Autowired
-    private RedissonClient redissonClient;
-    @Autowired
     private StringRedisTemplate redisTemplate;
+    @Autowired
+    private RedissonClient redissonClient;
+    @Lazy
+    @Autowired
+    private UserClient userClient;
     @Autowired
     private AliUtil aliUtil;
 
@@ -70,8 +83,8 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
         if (StrUtil.isBlankIfStr(coladminLoginDTO.getUsername()) || StrUtil.isBlankIfStr(coladminLoginDTO.getPassword())) {
             throw new BusinessException(ResultCodes.BAD_REQUEST, "登录账户登录信息不全");
         }
-        Coladmin coladmin = this.getOne(new QueryWrapper<Coladmin>()
-                .eq(SchoolConstant.USERNAME, coladminLoginDTO.getUsername()));
+        Coladmin coladmin = this.getOne(new LambdaQueryWrapper<Coladmin>()
+                .eq(Coladmin::getUsername, coladminLoginDTO.getUsername()));
 
         // 账号不存在
         if (coladmin == null) {
@@ -94,7 +107,7 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
         String newSignature = jwt.substring(jwt.lastIndexOf('.') + 1);
 
         // 登录
-        String adminLoginLockKey = RedisConstant.ADMIN_LOGIN_LOCK_PREFIX + coladmin.getId();
+        String adminLoginLockKey = RedisConstant.COLADMIN_LOGIN_LOCK_PREFIX + coladmin.getId();
         RLock lock = redissonClient.getLock(adminLoginLockKey);
 
         try {
@@ -106,7 +119,7 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
             }
             // 登录，记录当前登录对应的签名
             redisTemplate.opsForValue()
-                    .set(RedisConstant.ADMIN_LOGIN_PREFIX + coladmin.getId(),
+                    .set(RedisConstant.COLADMIN_LOGIN_PREFIX + coladmin.getId(),
                             newSignature,
                             jwtProperties.getColadminTtl(),
                             TimeUnit.MILLISECONDS);
@@ -133,7 +146,9 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
         if (adminId == null) {
             throw new NullPointerException("传入管理员账号ID为空");
         }
-        Coladmin coladmin = coladminMapper.selectOne(new QueryWrapper<Coladmin>().eq(SchoolConstant.ID, adminId).eq(SchoolConstant.STATUS, SchoolConstant.ENABLED));
+        Coladmin coladmin = coladminMapper.selectOne(new LambdaQueryWrapper<Coladmin>()
+                .eq(Coladmin::getId, adminId)
+                .eq(Coladmin::getStatus, SchoolConstant.ENABLED));
 
         if (coladmin == null) {
             throw new BusinessException(ResultCodes.UNAUTHORIZED, "管理员账号不存在/状态异常");
@@ -161,14 +176,14 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
 
         // 用户名校验
         String username = coladminRegisterDTO.getUsername();
-        Coladmin selectOne = coladminMapper.selectOne(new QueryWrapper<Coladmin>()
-                .eq(SchoolConstant.USERNAME, username));
+        Coladmin selectOne = coladminMapper.selectOne(new LambdaQueryWrapper<Coladmin>()
+                .eq(Coladmin::getUsername, username));
         if (selectOne != null) {
             throw new BusinessException(ResultCodes.FORBIDDEN, "账号名称已存在");
         }
 
         // 对写入操作进行上锁
-        String adminRegisterLockKey = RedisConstant.ADMIN_REGISTER_LOCK_PREFIX + coladminRegisterDTO.getUsername();
+        String adminRegisterLockKey = RedisConstant.COLADMIN_REGISTER_LOCK_PREFIX + coladminRegisterDTO.getUsername();
         RLock lock = redissonClient.getLock(adminRegisterLockKey);
         try {
             boolean success = lock.tryLock();
@@ -178,8 +193,8 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
             }
 
             // 获取锁成功，进行double check
-            selectOne = coladminMapper.selectOne(new QueryWrapper<Coladmin>()
-                    .eq(SchoolConstant.USERNAME, username));
+            selectOne = coladminMapper.selectOne(new LambdaQueryWrapper<Coladmin>()
+                    .eq(Coladmin::getUsername, username));
             if (selectOne != null) {
                 throw new BusinessException(ResultCodes.FORBIDDEN, "账号名称已存在");
             }
@@ -201,5 +216,22 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
         }
     }
 
+    @Override
+    public void addUserBatch(MultipartFile file) throws IOException {
+        InputStream inputStream = file.getInputStream();
+        ExcelReader reader = ExcelUtil.getReader(inputStream);
 
+        Map<String, String> headerAliasMap = Map.of("学院", "deptName",
+                "班级", "clazzName",
+                "学号", "studentId",
+                "姓名", "name",
+                "身份证号", "idNumber",
+                "手机号", "phone");
+        reader.setHeaderAlias(headerAliasMap);
+        List<UserInsertBatchDTO> userInsertBatchDTOList = reader.readAll(UserInsertBatchDTO.class);
+        Result result = userClient.addUserBatch(userInsertBatchDTOList);
+        if (result.getCode() != ResultCodes.OK) {
+            throw new BusinessException(result.getCode(), result.getMsg());
+        }
+    }
 }

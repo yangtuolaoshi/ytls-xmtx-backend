@@ -8,6 +8,7 @@ package love.ytlsnb.common.constants;
 public class RedisConstant {
     public static final String SEPARATOR = ":";
     public static final String LOCK_PREFIX = "lock:";
+    public static final String PHONE_CODE_PREFIX = "common:code:";
     public static final String USER_REGISTER_LOCK_PREFIX = "lock:user:register:";
     public static final String USER_LOGIN_LOCK_PREFIX = "lock:user:login:";
     public static final String USER_SIGN_LOCK_PREFIX = "lock:user:sign:";
@@ -19,8 +20,8 @@ public class RedisConstant {
     public static final String SCHOOL_PREFIX = "school:school:";
     public static final String DEPT_PREFIX = "school:dept:";
     public static final String CLAZZ_PREFIX = "school:clazz:";
-    public static final String ADMIN_LOGIN_LOCK_PREFIX = "lock:admin:login:";
-    public static final String ADMIN_LOGIN_PREFIX = "admin:login:";
-    public static final String ADMIN_REGISTER_LOCK_PREFIX = "lock:admin:register:";
+    public static final String COLADMIN_LOGIN_LOCK_PREFIX = "lock:coladmin:login:";
+    public static final String COLADMIN_LOGIN_PREFIX = "coladmin:login:";
+    public static final String COLADMIN_REGISTER_LOCK_PREFIX = "lock:coladmin:register:";
     public static final String QUEST_LOCATION_PREFIX = "lock:quest:location:";
 }
