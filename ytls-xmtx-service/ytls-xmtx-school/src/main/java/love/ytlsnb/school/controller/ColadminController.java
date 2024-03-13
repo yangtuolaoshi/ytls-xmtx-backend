@@ -86,7 +86,7 @@ public class ColadminController {
         return Result.ok();
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/user/detail/{id}")
     public Result<UserVO> getUserVOById(@PathVariable Long id) {
         log.info("根据用户ID查询用户:{}", id);
         UserVO userVO = coladminService.getUserVOById(id);

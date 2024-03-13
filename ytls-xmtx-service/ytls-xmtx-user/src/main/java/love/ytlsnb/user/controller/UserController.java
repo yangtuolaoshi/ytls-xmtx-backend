@@ -99,6 +99,12 @@ public class UserController {
         return Result.ok();
     }
 
+    @GetMapping
+    public Result<User> getUser() {
+        log.info("用户端查询用户");
+        User user = userService.getUser();
+        return Result.ok(user);
+    }
     @GetMapping("/{id}")
     public Result<User> getUserById(@PathVariable Long id) {
         log.info("根据用户ID查询用户:{}", id);
