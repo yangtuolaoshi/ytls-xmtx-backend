@@ -52,4 +52,12 @@ public class UserQueryDTO {
      * 用户真实姓名
      */
     private String name;
+    /**
+     * 当前页码
+     */
+    private Integer currentPage;
+    /**
+     * 每页大小
+     */
+    private Integer pageSize;
 }

@@ -1,5 +1,6 @@
 package love.ytls.api.user;
 
+import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
@@ -33,5 +34,5 @@ public interface UserClient {
     Result<UserVO> getUserVOById(@PathVariable Long id);
 
     @GetMapping("/api/user/listByConditions")
-    Result<List<UserVO>> listByConditions(@SpringQueryMap UserQueryDTO userQueryDTO);
+    PageResult<List<UserVO>> listByConditions(@SpringQueryMap UserQueryDTO userQueryDTO);
 }

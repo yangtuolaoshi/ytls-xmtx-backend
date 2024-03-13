@@ -2,6 +2,7 @@ package love.ytlsnb.school.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.school.dto.ColadminLoginDTO;
 import love.ytlsnb.model.school.dto.ColadminRegisterDTO;
 import love.ytlsnb.model.school.po.Coladmin;
@@ -93,9 +94,12 @@ public class ColadminController {
     }
 
     @GetMapping("/user/listByConditions")
-    public Result listUserByConditions(UserQueryDTO userQueryDTO) {
+    public PageResult<List<UserVO>> listUserByConditions(UserQueryDTO userQueryDTO) {
         log.info("条件查询用户:{}", userQueryDTO);
         List<UserVO> userVOList = coladminService.listUserByConditions(userQueryDTO);
-        return Result.ok(userVOList);
+        return new PageResult<>(userQueryDTO.getCurrentPage(),
+                userQueryDTO.getPageSize(),
+                userVOList,
+                (long) userVOList.size());
     }
 }

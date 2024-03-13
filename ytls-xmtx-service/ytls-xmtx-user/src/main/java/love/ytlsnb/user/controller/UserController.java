@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import love.ytls.api.school.SchoolClient;
 import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.common.constants.UserConstant;
+import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
@@ -114,9 +115,13 @@ public class UserController {
     }
 
     @GetMapping("/listByConditions")
-    public Result<List<UserVO>> listByConditions(UserQueryDTO userQueryDTO) {
+    public PageResult<List<UserVO>> listByConditions(UserQueryDTO userQueryDTO) {
         log.info("查询用户，userQueryDTO:{}", userQueryDTO);
-        return Result.ok(userService.listByConditions(userQueryDTO));
+        List<UserVO> userVOList = userService.listByConditions(userQueryDTO);
+        return new PageResult<>(userQueryDTO.getCurrentPage(),
+                userQueryDTO.getPageSize(),
+                userVOList,
+                (long) userVOList.size());
     }
 
     @PostMapping("/upload")

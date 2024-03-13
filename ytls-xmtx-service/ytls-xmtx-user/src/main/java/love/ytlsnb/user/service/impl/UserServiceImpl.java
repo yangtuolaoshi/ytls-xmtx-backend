@@ -239,6 +239,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!StrUtil.isBlank(name)) {
             userQueryDTO.setName(name + "%");
         }
+        userQueryDTO.setCurrentPage((userQueryDTO.getCurrentPage() - 1) * userQueryDTO.getPageSize());
         List<UserVO> userVOList = userMapper.listByConditions(userQueryDTO);
         userVOList.forEach(userVO -> userVO.setPassword(UserConstant.INSENSITIVE_PASSWORD));
         return userVOList;

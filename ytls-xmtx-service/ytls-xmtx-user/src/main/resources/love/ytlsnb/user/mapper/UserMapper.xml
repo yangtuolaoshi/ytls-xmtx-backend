@@ -26,6 +26,7 @@
                 </if>
             </if>
         </if>
-        <if test="name != null">and ui.name like #{name}</if>;
+        <if test="name != null">and ui.name like #{name}</if>
+        limit #{currentPage}, #{pageSize};
     </select>
 </mapper>

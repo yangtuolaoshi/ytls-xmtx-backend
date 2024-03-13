@@ -19,6 +19,7 @@ import love.ytlsnb.common.properties.JwtProperties;
 import love.ytlsnb.common.utils.AliUtil;
 import love.ytlsnb.common.utils.ColadminHolder;
 import love.ytlsnb.common.utils.JwtUtil;
+import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.school.dto.ColadminLoginDTO;
 import love.ytlsnb.model.school.dto.ColadminRegisterDTO;
@@ -243,11 +244,11 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
     public List<UserVO> listUserByConditions(UserQueryDTO userQueryDTO) {
         Coladmin coladmin = ColadminHolder.getColadmin();
         userQueryDTO.setSchoolId(coladmin.getSchoolId());
-        Result<List<UserVO>> listResult = userClient.listByConditions(userQueryDTO);
-        if (listResult.getCode() != ResultCodes.OK) {
-            throw new BusinessException(listResult.getCode(), listResult.getMsg());
+        PageResult<List<UserVO>> listPageResult = userClient.listByConditions(userQueryDTO);
+        if (listPageResult.getCode() != ResultCodes.OK) {
+            throw new BusinessException(listPageResult.getCode(), listPageResult.getMsg());
         }
-        return listResult.getData();
+        return listPageResult.getData();
     }
 
     @Override
