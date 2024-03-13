@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.po.UserInfo;
+import love.ytlsnb.model.user.vo.UserVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -18,12 +19,10 @@ import java.util.List;
  */
 public interface UserService extends IService<User> {
     User getByAccount(String account);
+
     User getByPhone(String phone);
 
-    User getInsensitiveUserById(Long id);
-
-    List<User> list(UserQueryDTO userQueryDTO);
-
+    List<UserVO> listByConditions(UserQueryDTO userQueryDTO);
 
     String login(UserLoginDTO userLoginDTO, HttpServletRequest request);
 
@@ -35,10 +34,10 @@ public interface UserService extends IService<User> {
 
     void sendShortMessage(String phone) throws Exception;
 
-    void addUser(UserInsertDTO userInsertDTO);
-
+    void addUser(UserInsertDTO userInsertDTO) throws Exception;
 
     void update(UserUpdateDTO userUpdateDTO);
+
     void uploadIdCard(String idCard) throws Exception;
 
     void uploadRealPhoto(String realPhoto) throws Exception;
@@ -52,4 +51,10 @@ public interface UserService extends IService<User> {
     String upload(MultipartFile file);
 
     Boolean[] listSign();
+
+    void updateUserById(UserInsertDTO userInsertDTO, Long id) throws Exception;
+
+    UserVO getUserVOById(Long id);
+
+    void deleteUserById(Long id);
 }

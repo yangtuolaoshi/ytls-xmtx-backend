@@ -39,4 +39,7 @@ public interface SchoolClient {
 
     @GetMapping("/coladmin/clazz/list/{schoolId}")
     Result<List<Clazz>> listClazzBySchoolId(@PathVariable Long schoolId);
+
+    @GetMapping("/coladmin/clazz/list/{schoolId}/{deptId}")
+    public Result<List<Clazz>> listClazzBySchoolIdAndDeptId(@PathVariable Long schoolId, @PathVariable Long deptId);
 }

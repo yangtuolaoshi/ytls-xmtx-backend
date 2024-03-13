@@ -1,9 +1,11 @@
 package love.ytlsnb.user.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ import love.ytlsnb.model.school.po.StudentPhoto;
 import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.po.UserInfo;
+import love.ytlsnb.model.user.vo.UserVO;
 import love.ytlsnb.user.mapper.UserInfoMapper;
 import love.ytlsnb.user.mapper.UserMapper;
 import love.ytlsnb.user.service.UserInfoService;
@@ -91,29 +94,71 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     @Transactional
-    public void addUser(UserInsertDTO userInsertDTO) {
+    public void addUser(UserInsertDTO userInsertDTO) throws Exception {
         // 校验是否可以新增用户数据
+        Coladmin coladmin = ColadminHolder.getColadmin();
+        Long schoolId = coladmin.getSchoolId();
         // 校验身份证号
         String idNumber = userInsertDTO.getIdNumber();
         if (idNumber != null) {
+            if (!IdcardUtil.isValidCard(idNumber)) {
+                throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写正确的身份证号");
+            }
             UserInfo selectOne = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>()
                     .eq(UserInfo::getIdNumber, idNumber));
             if (selectOne != null) {
                 throw new BusinessException(ResultCodes.FORBIDDEN, "当前身份证号已注册过账号");
             }
         }
-        // 校验手机号是否已经被注册
-        String phone = userInsertDTO.getPhone();
-        User selectOne = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                .eq(User::getPhone, phone));
-        if (selectOne != null) {
-            throw new BusinessException(ResultCodes.FORBIDDEN, "当前手机号已被注册");
+        // 校验学号
+        if (StrUtil.isBlank(userInsertDTO.getStudentId())) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "请补充用户学号信息");
         }
-        User user = BeanUtil.copyProperties(userInsertDTO, User.class);
-        UserInfo userInfo = BeanUtil.copyProperties(userInsertDTO, UserInfo.class);
-        userInfoMapper.insert(userInfo);
-        user.setUserInfoId(userInfo.getId());
-        userMapper.insert(user);
+        User selectOne = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getSchoolId, schoolId)
+                .eq(User::getStudentId, userInsertDTO.getStudentId()));
+        if (selectOne != null) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "相关账号已存在");
+        }
+        String realPhoto = userInsertDTO.getRealPhoto();
+        if (!StrUtil.isBlank(realPhoto)) {
+            aliUtil.faceDetect(realPhoto);
+        }
+        String userRegisterKey = RedisConstant.USER_REGISTER_LOCK_PREFIX + schoolId + userInsertDTO.getStudentId();
+        RLock userRegisterLock = redissonClient.getLock(userRegisterKey);
+        try {
+            boolean success = userRegisterLock.tryLock();
+            if (!success) {
+                throw new BusinessException(ResultCodes.BAD_REQUEST, "重复创建用户");
+            }
+            selectOne = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                    .eq(User::getSchoolId, schoolId)
+                    .eq(User::getStudentId, userInsertDTO.getStudentId()));
+            if (selectOne != null) {
+                throw new BusinessException(ResultCodes.BAD_REQUEST, "相关账号已存在");
+            }
+            User user = BeanUtil.copyProperties(userInsertDTO, User.class);
+            user.setPoint(UserConstant.INITIAL_POINT);
+            user.setIdentified(UserConstant.UNIDENTIFIED);
+            user.setSchoolId(schoolId);
+            UserInfo userInfo = BeanUtil.copyProperties(userInsertDTO, UserInfo.class);
+            Result<School> schoolResult = schoolClient.getSchoolById(schoolId);
+            if (schoolResult.getCode() != ResultCodes.OK) {
+                throw new BusinessException(schoolResult.getCode(), schoolResult.getMsg());
+            }
+            School school = schoolResult.getData();
+            userInfo.setSchoolName(school.getSchoolName());
+            userInfoMapper.insert(userInfo);
+            user.setUserInfoId(userInfo.getId());
+            userMapper.insert(user);
+        } finally {
+            try {
+                userRegisterLock.unlock();
+            } catch (Exception e) {
+                log.error("释放锁失败:{},锁已经释放", userRegisterKey);
+            }
+        }
+
     }
 
     @Override
@@ -182,64 +227,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(User::getPhone, phone));
     }
 
-    /*
-     * 根据用户id返回脱敏后的用户信息
-     *
-     * @param id
-     * @return
-     */
-    @Override
-    public User getInsensitiveUserById(Long id) {
-        if (id == null) {
-            return null;
-        } else {
-            User user = userMapper.selectById(id);
-            if (user == null) {
-                throw new BusinessException(ResultCodes.FORBIDDEN, "未能检测到您的用户信息");
-            }
-            // 敏感信息脱敏
-            // 学号脱敏
-            String afterStudentId = DesensitizedUtil.idCardNum(user.getStudentId(),
-                    userProperties.getStudentIdParam1(),
-                    userProperties.getStudentIdParam2());
-            user.setStudentId(afterStudentId);
-            // 密码脱敏
-            user.setPassword(UserConstant.INSENSITIVE_PASSWORD);
-            // 手机号脱敏
-            user.setPhone(DesensitizedUtil.mobilePhone(user.getPhone()));
-            // 积分脱敏
-            user.setPoint(null);
-            // 学校相关信息脱敏
-            user.setIdentified(null);
-            user.setSchoolId(null);
-            user.setDeptId(null);
-            user.setClazzId(null);
-            // 用户数据库信息脱敏
-            user.setCreateTime(null);
-            user.setUpdateTime(null);
-            user.setDeleted(null);
-
-            return user;
-        }
-    }
-
     /**
-     * 根据传入的数据传输对象中的非空属性进行用户查询
+     * 根据传入的数据传输对象中的非空属性进行用户查询，其中的用户名和真实姓名会进行右模糊查询
      *
      * @param userQueryDTO 用来查询的数据
      * @return 查询到的数据
      */
     @Override
-    public List<User> list(UserQueryDTO userQueryDTO) {
-        Map<String, Object> map = BeanUtil.beanToMap(userQueryDTO, true, true);
-
-        // 特殊字段处理
-        Object isIdentified = map.get(UserConstant.IS_IDENTIFIED_JAVA);
-        if (isIdentified != null) {
-            map.remove(UserConstant.IS_IDENTIFIED_JAVA);
-            map.put(UserConstant.IS_IDENTIFIED, isIdentified);
+    public List<UserVO> listByConditions(UserQueryDTO userQueryDTO) {
+        String name = userQueryDTO.getName();
+        if (!StrUtil.isBlank(name)) {
+            userQueryDTO.setName(name + "%");
         }
-        return listByMap(map);
+        userQueryDTO.setCurrentPage((userQueryDTO.getCurrentPage() - 1) * userQueryDTO.getPageSize());
+        List<UserVO> userVOList = userMapper.listByConditions(userQueryDTO);
+        userVOList.forEach(userVO -> userVO.setPassword(UserConstant.INSENSITIVE_PASSWORD));
+        return userVOList;
     }
 
     /**
@@ -453,11 +456,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 LocalDate.now().format(DateTimeFormatter.ofPattern(RedisConstant.USER_SIGN_PERMOUTH_PATTERN)) +
                 user.getId();
         String signStr = redisTemplate.opsForValue().get(signHistoryKey);
-        byte[] bytes = signStr.getBytes();
         Boolean[] signList = new Boolean[32];
-        if (ArrayUtil.isEmpty(bytes)) {
+        if (signStr == null) {
             return signList;
         }
+        byte[] bytes = signStr.getBytes();
         // 设置本月所有的签到信息
         for (byte i = 0; i < bytes.length; i++) {
             byte num = bytes[i];
@@ -467,6 +470,73 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         return signList;
     }
+
+    /**
+     * 根据传入参数修改用户信息，默认不修改用户的学校信息
+     *
+     * @param userInsertDTO 用户修改信息数据传输对象
+     * @param id            用户id
+     */
+    @Override
+    @Transactional
+    public void updateUserById(UserInsertDTO userInsertDTO, Long id) throws Exception {
+        // 参数校验
+        // 校验身份证
+        String idNumber = userInsertDTO.getIdNumber();
+        if (!StrUtil.isBlank(idNumber)) {
+            if (!IdcardUtil.isValidCard(idNumber)) {
+                throw new BusinessException(ResultCodes.BAD_REQUEST, "请输入正确的身份证号码");
+            }
+            UserInfo selectByIdNumber = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>()
+                    .eq(UserInfo::getIdNumber, idNumber));
+            if (selectByIdNumber != null) {
+                User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                        .eq(User::getUserInfoId, selectByIdNumber.getId()));
+                if (!id.equals(user.getId())) {
+                    throw new BusinessException(ResultCodes.BAD_REQUEST, "该身份证号已被注册");
+                }
+            }
+        }
+        // 校验学号
+        String studentId = userInsertDTO.getStudentId();
+        if (StrUtil.isBlank(studentId)) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "用户学号不能为空");
+        }
+        Coladmin coladmin = ColadminHolder.getColadmin();
+        User selectByStudentID = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getSchoolId, coladmin.getSchoolId())
+                .eq(User::getStudentId, studentId));
+        if (selectByStudentID != null && !selectByStudentID.getId().equals(id)) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "该学号已被注册");
+        }
+        String realPhoto = userInsertDTO.getRealPhoto();
+        if (!StrUtil.isBlank(realPhoto)) {
+            aliUtil.faceDetect(realPhoto);
+        }
+
+        User user = userMapper.selectById(id);
+        UserInfo userInfo = userInfoMapper.selectById(user.getUserInfoId());
+        BeanUtil.copyProperties(userInsertDTO, user);
+        BeanUtil.copyProperties(userInsertDTO, userInfo);
+        userMapper.updateById(user);
+        userInfoMapper.updateById(userInfo);
+    }
+
+    @Override
+    public UserVO getUserVOById(Long id) {
+        User user = userMapper.selectById(id);
+        UserInfo userInfo = userInfoMapper.selectById(user.getUserInfoId());
+        return new UserVO(user, userInfo);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUserById(Long id) {
+        User user = userMapper.selectById(id);
+        userInfoMapper.deleteById(user.getUserInfoId());
+        userMapper.deleteById(id);
+    }
+
 
     @Override
     public void sendShortMessage(String phone) throws Exception {
@@ -480,7 +550,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     /**
      * 根据传入的身份证图片识别身份证信息，同时为相关用户设置身份证相关信息
      *
-     * @param idCardOss
+     * @param idCardOss 身份证图片的阿里云OSS存放访问路径
      * @throws Exception
      */
     @Override

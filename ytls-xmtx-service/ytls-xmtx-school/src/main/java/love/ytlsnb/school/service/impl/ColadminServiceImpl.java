@@ -17,12 +17,17 @@ import love.ytlsnb.common.constants.SchoolConstant;
 import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.properties.JwtProperties;
 import love.ytlsnb.common.utils.AliUtil;
+import love.ytlsnb.common.utils.ColadminHolder;
 import love.ytlsnb.common.utils.JwtUtil;
+import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.school.dto.ColadminLoginDTO;
 import love.ytlsnb.model.school.dto.ColadminRegisterDTO;
 import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.user.dto.UserInsertBatchDTO;
+import love.ytlsnb.model.user.dto.UserInsertDTO;
+import love.ytlsnb.model.user.dto.UserQueryDTO;
+import love.ytlsnb.model.user.vo.UserVO;
 import love.ytlsnb.school.mapper.ColadminMapper;
 import love.ytlsnb.school.service.ColadminService;
 import org.redisson.api.RLock;
@@ -233,5 +238,49 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
         if (result.getCode() != ResultCodes.OK) {
             throw new BusinessException(result.getCode(), result.getMsg());
         }
+    }
+
+    @Override
+    public List<UserVO> listUserByConditions(UserQueryDTO userQueryDTO) {
+        Coladmin coladmin = ColadminHolder.getColadmin();
+        userQueryDTO.setSchoolId(coladmin.getSchoolId());
+        PageResult<List<UserVO>> listPageResult = userClient.listByConditions(userQueryDTO);
+        if (listPageResult.getCode() != ResultCodes.OK) {
+            throw new BusinessException(listPageResult.getCode(), listPageResult.getMsg());
+        }
+        return listPageResult.getData();
+    }
+
+    @Override
+    public void addUser(UserInsertDTO userInsertDTO) {
+        Result result = userClient.addUser(userInsertDTO);
+        if (result.getCode() != ResultCodes.OK) {
+            throw new BusinessException(result.getCode(), result.getMsg());
+        }
+    }
+
+    @Override
+    public void deleteUserById(Long id) {
+        Result result = userClient.deleteUserById(id);
+        if (result.getCode() != ResultCodes.OK) {
+            throw new BusinessException(result.getCode(), result.getMsg());
+        }
+    }
+
+    @Override
+    public void updateUserById(UserInsertDTO userInsertDTO, Long id) {
+        Result result = userClient.updateUserById(userInsertDTO, id);
+        if (result.getCode() != ResultCodes.OK) {
+            throw new BusinessException(result.getCode(), result.getMsg());
+        }
+    }
+
+    @Override
+    public UserVO getUserVOById(Long id) {
+        Result<UserVO> userVOResult = userClient.getUserVOById(id);
+        if (userVOResult.getCode() != ResultCodes.OK) {
+            throw new BusinessException(userVOResult.getCode(), userVOResult.getMsg());
+        }
+        return userVOResult.getData();
     }
 }

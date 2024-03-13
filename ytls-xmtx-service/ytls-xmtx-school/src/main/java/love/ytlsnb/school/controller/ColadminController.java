@@ -2,16 +2,21 @@ package love.ytlsnb.school.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.school.dto.ColadminLoginDTO;
 import love.ytlsnb.model.school.dto.ColadminRegisterDTO;
 import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.user.dto.UserInsertDTO;
+import love.ytlsnb.model.user.dto.UserQueryDTO;
+import love.ytlsnb.model.user.vo.UserVO;
 import love.ytlsnb.school.service.ColadminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author ula
@@ -19,7 +24,7 @@ import java.io.IOException;
  */
 @Slf4j
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/coladmin")
 public class ColadminController {
     @Autowired
     private ColadminService coladminService;
@@ -53,10 +58,48 @@ public class ColadminController {
     }
 
     //-------------------------User-------------------------
+    @PostMapping("/user")
+    public Result addUser(@RequestBody UserInsertDTO userInsertDTO) {
+        log.info("添加用户:{}", userInsertDTO);
+        coladminService.addUser(userInsertDTO);
+        return Result.ok();
+    }
+
     @PostMapping("/user/batch")
     public Result addUserBatch(MultipartFile file) throws IOException {
         log.info("批量添加用户");
         coladminService.addUserBatch(file);
         return Result.ok();
+    }
+
+    @DeleteMapping("/user/{id}")
+    public Result deleteUserById(@PathVariable Long id) {
+        log.info("根据用户ID删除用户:{}", id);
+        coladminService.deleteUserById(id);
+        return Result.ok();
+    }
+
+    @PutMapping("/user/{id}")
+    public Result updateUserById(@RequestBody UserInsertDTO userInsertDTO, @PathVariable Long id) {
+        log.info("修改用户信息:{},{}", userInsertDTO, id);
+        coladminService.updateUserById(userInsertDTO, id);
+        return Result.ok();
+    }
+
+    @GetMapping("/user/{id}")
+    public Result<UserVO> getUserVOById(@PathVariable Long id) {
+        log.info("根据用户ID查询用户:{}", id);
+        UserVO userVO = coladminService.getUserVOById(id);
+        return Result.ok(userVO);
+    }
+
+    @GetMapping("/user/listByConditions")
+    public PageResult<List<UserVO>> listUserByConditions(UserQueryDTO userQueryDTO) {
+        log.info("条件查询用户:{}", userQueryDTO);
+        List<UserVO> userVOList = coladminService.listUserByConditions(userQueryDTO);
+        return new PageResult<>(userQueryDTO.getCurrentPage(),
+                userQueryDTO.getPageSize(),
+                userVOList,
+                (long) userVOList.size());
     }
 }
