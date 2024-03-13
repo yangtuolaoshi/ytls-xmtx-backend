@@ -537,6 +537,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userMapper.deleteById(id);
     }
 
+    @Override
+    public User getUser() {
+        User user = UserHolder.getUser();
+        user.setPassword(UserConstant.INSENSITIVE_PASSWORD);
+        return user;
+    }
+
 
     @Override
     public void sendShortMessage(String phone) throws Exception {
