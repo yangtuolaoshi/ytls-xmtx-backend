@@ -42,4 +42,6 @@ public class ColadminController {
         return Result.ok(coladmin);
     }
 
+
+
 }

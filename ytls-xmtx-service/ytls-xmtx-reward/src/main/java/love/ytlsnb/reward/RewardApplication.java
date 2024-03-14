@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableTransactionManagement
-@MapperScan("love.ytlsnb.quest.mapper")
+@MapperScan("love.ytlsnb.reward.mapper")
 @EnableFeignClients(basePackages = "love.ytls.api")
 @ComponentScan({"love.ytlsnb.common", "love.ytlsnb.reward"})
 public class RewardApplication {

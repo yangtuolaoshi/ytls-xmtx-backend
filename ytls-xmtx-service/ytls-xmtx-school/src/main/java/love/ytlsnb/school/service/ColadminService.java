@@ -5,10 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import love.ytlsnb.model.coladmin.dto.ColadminLoginDTO;
 import love.ytlsnb.model.coladmin.dto.ColadminRegisterDTO;
 import love.ytlsnb.model.coladmin.po.Coladmin;
-import love.ytlsnb.model.user.dto.UserInsertDTO;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 /**
  * @author ula
@@ -20,5 +16,6 @@ public interface ColadminService extends IService<Coladmin> {
     Coladmin selectInsensitiveAdminById(Long adminId);
 
     void register(ColadminRegisterDTO coladminRegisterDTO);
+
 
 }
