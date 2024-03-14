@@ -76,11 +76,13 @@ public class RewardServiceImpl extends ServiceImpl<RewardMapper, Reward> impleme
 
         Integer cost = rewardQueryDTO.getCost();
         if(cost != null && cost > 0){
+            //花费查询
             queryWrapper.le(Reward::getCost,cost);
         }
 
         Byte status = rewardQueryDTO.getStatus();
         if(status != null){
+            //状态查询
             queryWrapper.eq(Reward::getStatus,status);
         }
 
@@ -104,6 +106,11 @@ public class RewardServiceImpl extends ServiceImpl<RewardMapper, Reward> impleme
 
     }
 
+    /**
+     * 修改奖品
+     * @param rewardUpdateDTO
+     * @return
+     */
     @Override
     public Boolean update(RewardDTO rewardUpdateDTO) {
         Reward reward = new Reward();
@@ -112,11 +119,14 @@ public class RewardServiceImpl extends ServiceImpl<RewardMapper, Reward> impleme
         reward.setCreateTime(null);
         reward.setDeleted(null);
 
-
-
         return rewardMapper.updateById(reward)>0;
     }
 
+    /**
+     * 根据id删除奖品
+     * @param id
+     * @return
+     */
     @Override
     public Boolean deleteById(Long id) {
             Reward reward = rewardMapper.selectById(id);

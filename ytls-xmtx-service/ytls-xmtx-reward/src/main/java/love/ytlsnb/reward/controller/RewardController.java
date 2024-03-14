@@ -23,6 +23,11 @@ public class RewardController {
     @Autowired
     private RewardService rewardService;
 
+    /**
+     * 新增奖品
+     * @param rewardInsertDTO
+     * @return
+     */
     @PostMapping
     public Result addReward(@RequestBody RewardDTO rewardInsertDTO){
         log.info("新增奖品:{}",rewardInsertDTO);
@@ -30,6 +35,13 @@ public class RewardController {
         return Result.ok();
     }
 
+    /**
+     * 分页查询奖品
+     * @param rewardQueryDTO
+     * @param page
+     * @param size
+     * @return
+     */
     @GetMapping("/page")
     public PageResult<List<RewardVO>> getPageByCondition(RewardQueryDTO rewardQueryDTO, int page, int size){
         log.info("分页查询奖品:{}",rewardQueryDTO);
@@ -37,12 +49,22 @@ public class RewardController {
 
     }
 
+    /**
+     * 修改奖品呢信息
+     * @param rewardDTO
+     * @return
+     */
     @PutMapping("/update")
     public Result<Boolean> update(@RequestBody RewardDTO rewardDTO){
         log.info("修改奖品信息:{}",rewardDTO);
         return Result.ok(rewardService.update(rewardDTO));
     }
 
+    /**
+     * 根据id删除奖品
+     * @param id
+     * @return
+     */
     @DeleteMapping("/{id}")
     public Result<Boolean>deleteById(@PathVariable Long id){
         log.info("删除奖品信息:{}",id);
