@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.List;
-
-import static love.ytlsnb.common.constants.ResultCodes.*;
 
 import static love.ytlsnb.common.constants.ResultCodes.*;
 
@@ -56,7 +53,6 @@ public class QuestServiceImpl implements QuestService {
 
     @Override
     public PageResult<List<QuestVo>> getPageByCondition(QuestQueryDTO questQueryDTO, int page, int size) {
-        // TODO 按照学校ID查询
         // 查询总数
         LambdaQueryWrapper<Quest> queryWrapper = new LambdaQueryWrapper<>();
         Integer type = questQueryDTO.getType();
@@ -67,6 +63,11 @@ public class QuestServiceImpl implements QuestService {
         if (title != null && !"".equals(title)) {
             queryWrapper.likeRight(Quest::getQuestTitle, title);// 百分号只在右侧，防止索引失效
         }
+        Long schoolId = questQueryDTO.getSchoolId();
+        if (schoolId == null) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "参数非法");
+        }
+        queryWrapper.eq(Quest::getSchoolId, schoolId);
         Long total = questMapper.selectCount(queryWrapper);
         // 分页查询
         if (title != null) {
@@ -79,6 +80,14 @@ public class QuestServiceImpl implements QuestService {
     }
 
     @Override
+    public List<Quest> getAll(Long schoolId) {
+        LambdaQueryWrapper<Quest> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(Quest::getId, Quest::getQuestTitle)
+                .eq(Quest::getSchoolId, schoolId);
+        return questMapper.selectList(queryWrapper);
+    }
+
+    @Override
     public QuestInfoVo getInfoById(Long id) {
         Quest quest = questMapper.selectById(id);
         if (quest == null) {
@@ -88,8 +97,10 @@ public class QuestServiceImpl implements QuestService {
         if (questInfo == null) {
             throw new BusinessException(NOT_FOUND, "任务不存在！");
         }
-        // TODO 查询总进度数
         QuestInfoVo questInfoVo = new QuestInfoVo();
+        // 查询这个任务的总进度数
+        Long scheduleNum = questScheduleService.getCountByQuestId(id);
+        questInfoVo.setScheduleNum(scheduleNum);
         // 查询父任务标题
         Long parentId = quest.getParentId();
         if (parentId != null) {
@@ -106,6 +117,7 @@ public class QuestServiceImpl implements QuestService {
 
     /**
      * 任务参数检测
+     *
      * @param questDTO 任务添加表单
      */
     private void checkQuestParams(QuestDTO questDTO) {
@@ -117,11 +129,14 @@ public class QuestServiceImpl implements QuestService {
         if (questTitle.length() > 16) {
             throw new BusinessException(UNPROCESSABLE_ENTITY, "任务标题不能超过16个字符");
         }
-//        LambdaQueryWrapper<Quest> titleQueryWrapper = new LambdaQueryWrapper<>();
-//        titleQueryWrapper.eq(Quest::getTitle, questTitle);
-//        if (questMapper.selectOne(titleQueryWrapper) != null) {
-//            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务标题重复，换个标题吧");
-//        }
+        Long schoolId = questDTO.getSchoolId();
+        LambdaQueryWrapper<Quest> titleQueryWrapper = new LambdaQueryWrapper<>();
+        titleQueryWrapper
+                .eq(Quest::getQuestTitle, questTitle)
+                .eq(Quest::getSchoolId, schoolId);
+        if (questMapper.selectOne(titleQueryWrapper) != null) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务标题重复，换个标题吧");
+        }
         // 前置任务
         Long preQuestId = questDTO.getPreQuestId();
         if (preQuestId != null) {
@@ -180,6 +195,7 @@ public class QuestServiceImpl implements QuestService {
     @Transactional
     @Override
     public Long add(QuestDTO questDTO) {
+        Long schoolId = questDTO.getSchoolId();
         questDTO.setRequiredScheduleNum(1);// 目前添加任务时默认设置完成任务所需进度为1
         // 检查任务的参数
         this.checkQuestParams(questDTO);
@@ -189,6 +205,7 @@ public class QuestServiceImpl implements QuestService {
         Quest quest = QuestUtil.createQuest(questDTO);
         quest.setInfoId(questInfo.getId());
         Long preQuestId = questDTO.getPreQuestId();
+        // TODO 目前只支持一颗树，而如果在不同的任务树中，不能把其它树的左右值也改了
         if (preQuestId == null) {
             // 如果没有前置任务，它就是根结点
             quest.setLeftValue(1);
@@ -198,8 +215,8 @@ public class QuestServiceImpl implements QuestService {
             Quest preQuest = questMapper.selectById(preQuestId);
             Integer preLeftValue = preQuest.getLeftValue();
             Integer preRightValue = preQuest.getRightValue();
-            questMapper.addUpdateLeftValue(preLeftValue, preRightValue);
-            questMapper.addUpdateRightValue(preRightValue);
+            questMapper.addUpdateLeftValue(preLeftValue, preRightValue, schoolId);
+            questMapper.addUpdateRightValue(preRightValue, schoolId);
             quest.setLeftValue(preRightValue);
             quest.setRightValue(preRightValue + 1);
         }
@@ -212,6 +229,7 @@ public class QuestServiceImpl implements QuestService {
         // 添加进度
         QuestSchedule questSchedule = QuestUtil.createQuestSchedule(questDTO);
         // 地点有关信息，根据表单提供的是否需要地点的字段来设置
+        // TODO 如果设置不启用地点，那么就不能选择地点打卡方式
         if (questDTO.getNeedLocation() == 1) {
             // 检查地点参数
             QuestUtil.checkLocationParams(questDTO);
@@ -259,7 +277,7 @@ public class QuestServiceImpl implements QuestService {
 
     @Transactional
     @Override
-    public Boolean deleteById(Long id) {
+    public Boolean deleteById(Long id, Long schoolId) {
         // 查询这个任务还有没有子任务
         Quest quest = questMapper.selectById(id);
         if (quest == null) {
@@ -275,8 +293,8 @@ public class QuestServiceImpl implements QuestService {
         questInfoMapper.deleteById(quest.getInfoId());
         int rows = questMapper.deleteById(id);
         // 修改左右值
-        questMapper.deleteUpdateLeftValue(leftValue);
-        questMapper.deleteUpdateRightValue(rightValue);
+        questMapper.deleteUpdateLeftValue(leftValue, schoolId);
+        questMapper.deleteUpdateRightValue(rightValue, schoolId);
         return rows > 0;
     }
 }

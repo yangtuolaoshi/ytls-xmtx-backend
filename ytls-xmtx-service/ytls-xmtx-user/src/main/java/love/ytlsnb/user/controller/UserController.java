@@ -3,28 +3,21 @@ package love.ytlsnb.user.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import love.ytls.api.school.SchoolClient;
 import love.ytlsnb.common.constants.ResultCodes;
-import love.ytlsnb.common.exception.BusinessException;
-import love.ytlsnb.common.properties.PhotoProperties;
-import love.ytlsnb.common.utils.AliUtil;
+import love.ytlsnb.common.constants.UserConstant;
+import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
-import love.ytlsnb.model.user.dto.UserInsertDTO;
-import love.ytlsnb.model.user.dto.UserQueryDTO;
+import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
-import love.ytlsnb.model.user.dto.UserLoginDTO;
-import love.ytlsnb.model.user.dto.UserRegisterDTO;
-import love.ytlsnb.model.user.po.UserInfo;
-import love.ytlsnb.user.service.UserInfoService;
+import love.ytlsnb.model.user.vo.UserVO;
 import love.ytlsnb.user.service.UserService;
-import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 
 /**
  * 用户基本信息控制器层
@@ -39,67 +32,108 @@ public class UserController {
     @Autowired
     private UserService userService;
     @Autowired
-    private AliUtil aliUtil;
-    @Autowired
-    private PhotoProperties photoProperties;
+    private SchoolClient schoolClient;
 
-    @PostMapping("/batch")
-    public Result addUserBatch(MultipartFile multipartFile) throws IOException {
-        log.info("通过Excel批量新增用户数据:{}", multipartFile);
-        userService.addUserBatch(multipartFile);
+    /**
+     * 鼠鼠用来调试的接口
+     */
+    @GetMapping("test")
+    public void test() {
+        log.info("user-test");
+        schoolClient.getColadminById(1L);
+    }
+
+    @PostMapping
+    public Result addUser(@RequestBody UserInsertDTO userInsertDTO) throws Exception {
+        log.info("新增用户:{}", userInsertDTO);
+        userService.addUser(userInsertDTO);
         return Result.ok();
     }
 
-    @PostMapping("/upload")
-    public Result<String> upload(MultipartFile multipartFile) {
-        log.info("正在上传文件 {} 至阿里云云端", multipartFile);
-
-        //获取上传文件的名字
-        String originalFilename = multipartFile.getOriginalFilename();
-        // 获取创传文件的后缀名
-        String suffix = Objects.requireNonNull(originalFilename).substring(originalFilename.lastIndexOf("."));
-        if (!photoProperties.getSupportedTypes().contains(suffix)) {
-            throw new BusinessException(ResultCodes.BAD_REQUEST, "当前图片类型不支持");
-        }
-        try {
-            // 获取出入流
-            InputStream inputStream = multipartFile.getInputStream();
-            // 创建一个临时输出流
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            // 判断文件大小
-            if (multipartFile.getSize() > photoProperties.getMaxSize() * 1024 * 1024) {
-                // 文件大小过大，进行压缩
-                // 计算压缩比：注意，经过赋值这里计算的压缩比之后还是并不保证文件大小为maxSize，
-                // 因为这里计算采用的线性函数计算，而实际的压缩质量与outputQuality并非线性关系，但测试下发现能够保证最终大小小于maxSize（能用）
-                float ratio = photoProperties.getMaxSize() * 1024 * 1024 / multipartFile.getSize();
-                Thumbnails.of(inputStream)
-                        .size(4096, 4096)
-                        .outputQuality(ratio)
-                        .toOutputStream(outputStream);
-                // 更新输入流
-                inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-            } else {
-                // 控制文件分辨率
-                Thumbnails.of(inputStream)
-                        .size(4096, 4096)
-                        .toOutputStream(outputStream);
-                // 更新输入流
-                inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-            }
-            //获取随机UUID同时拼接上上传文件的后缀名
-            String name = UUID.randomUUID() + suffix;
-            String fileurl = aliUtil.upload(inputStream, name);
-            return Result.ok(fileurl);
-        } catch (IOException e) {
-            log.error("文件上传失败 ->", e);
-            return Result.fail(ResultCodes.SERVER_ERROR, "文件上传异常");
-        }
+    @PostMapping("/batch")
+    public Result addUserBatch(@RequestBody List<UserInsertBatchDTO> userInsertBatchDTOList) throws IOException {
+        log.info("通过Excel批量新增用户数据:{}", userInsertBatchDTOList);
+        userService.addUserBatch(userInsertBatchDTOList);
+        return Result.ok();
     }
 
-    @GetMapping("/list")
-    public Result<List<User>> list(UserQueryDTO userQueryDTO) {
+    @DeleteMapping("/{id}")
+    public Result deleteUserById(@PathVariable Long id) {
+        log.info("根据用户ID删除用户:{}", id);
+        userService.deleteUserById(id);
+        return Result.ok();
+    }
+
+    /**
+     * 用户的修改接口
+     *
+     * @param userUpdateDTO 用户修改数据传输对象
+     * @return
+     */
+    @PutMapping
+    public Result updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
+        log.info("修改用户:{}", userUpdateDTO);
+        userService.update(userUpdateDTO);
+        return Result.ok();
+    }
+
+    /**
+     * 学校管理员修改用户数据的接口
+     *
+     * @param userInsertDTO 用户修改数据传输对象（二者参数一致，这里采用同一个模型）
+     * @param id            待修改的用户ID
+     * @return
+     * @throws Exception 修改失败的异常
+     */
+    @PutMapping("/{id}")
+    public Result updateUserById(@RequestBody UserInsertDTO userInsertDTO, @PathVariable Long id) throws Exception {
+        log.info("修改用户:{}", userInsertDTO);
+        userService.updateUserById(userInsertDTO, id);
+        return Result.ok();
+    }
+
+    @PutMapping("/password")
+    public Result updatePassword(@RequestBody UserUpdatePasswordDTO userUpdatePasswordDTO) {
+        log.info("用户重置密码:{}", userUpdatePasswordDTO);
+        userService.updatePassword(userUpdatePasswordDTO);
+        return Result.ok();
+    }
+
+    @GetMapping
+    public Result<User> getUser() {
+        log.info("用户端查询用户");
+        User user = userService.getUser();
+        return Result.ok(user);
+    }
+    @GetMapping("/{id}")
+    public Result<User> getUserById(@PathVariable Long id) {
+        log.info("根据用户ID查询用户:{}", id);
+        User user = userService.getById(id);
+        user.setPassword(UserConstant.INSENSITIVE_PASSWORD);
+        return Result.ok(user);
+    }
+
+    @GetMapping("/detail/{id}")
+    public Result<UserVO> getUserVOById(@PathVariable Long id) {
+        log.info("根据用户ID查询用户:{}", id);
+        UserVO userVO = userService.getUserVOById(id);
+        return Result.ok(userVO);
+    }
+
+    @GetMapping("/listByConditions")
+    public PageResult<List<UserVO>> listByConditions(UserQueryDTO userQueryDTO) {
         log.info("查询用户，userQueryDTO:{}", userQueryDTO);
-        return Result.ok(userService.list(userQueryDTO));
+        List<UserVO> userVOList = userService.listByConditions(userQueryDTO);
+        return new PageResult<>(userQueryDTO.getCurrentPage(),
+                userQueryDTO.getPageSize(),
+                userVOList,
+                (long) userVOList.size());
+    }
+
+    @PostMapping("/upload")
+    public Result<String> upload(MultipartFile file) {
+        log.info("正在上传文件 {} 至阿里云云端", file);
+        return Result.ok(userService.upload(file));
     }
 
     @PostMapping("/login")
@@ -116,11 +150,6 @@ public class UserController {
         return Result.ok();
     }
 
-    @GetMapping("/{id}")
-    public Result<User> getUserById(@PathVariable Long id) {
-        log.info("查询用户，id:{}", id);
-        return Result.ok(userService.getById(id));
-    }
 
     /**
      * 用户签到接口，当用户不能签到时理应不能访问该接口
@@ -144,6 +173,13 @@ public class UserController {
     @GetMapping("/sign")
     public Result<Boolean> getSignStatus() {
         return Result.ok(userService.isSigned());
+    }
+
+    @GetMapping("/sign/list")
+    public Result<Boolean[]> listSign() {
+        log.info("获取本月所有签到数据");
+        Boolean[] signList = userService.listSign();
+        return Result.ok(signList);
     }
 
     /**

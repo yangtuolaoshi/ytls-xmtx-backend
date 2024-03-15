@@ -31,6 +31,8 @@ public class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
     @Override
     public void updateFill(MetaObject metaObject) {
         log.info("正在进行updateFill");
-        this.strictInsertFill(metaObject, PojoConstant.UPDATE_TIME, LocalDateTime.class, LocalDateTime.now());
+        this.setFieldValByName(PojoConstant.UPDATE_TIME, LocalDateTime.now(), metaObject);
+        // 注释代码为官方推荐，但是更新时由于已有更新时间不为空，默认不覆盖，则存在逻辑问题，这里直接使用老方法强行进行赋值
+        // this.strictUpdateFill(metaObject, PojoConstant.UPDATE_TIME, LocalDateTime.class, LocalDateTime.now());
     }
 }

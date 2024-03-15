@@ -1,29 +1,35 @@
 spring:
-  datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://sh-cdb-l0mn910i.sql.tencentcdb.com:63660/ytls_xmtx_school?useSSL=false&useUnicode=true&characterEncoding=utf-8
-    username: dev
-    password: yangtuo233
+  cloud:
+    gateway:
+      routes:
+        - id: school-service                # 当前路由id，唯一标识
+          uri: lb://school-service        # 当前路由所对应的服务访问地址：
+          predicates:
+            - Path=/coladmin/user/**,/coladmin/school/**,/coladmin/dept/**,/coladmin/clazz/**,/coladmin/quest/**,/coladmin/coladmin/**         # 请求的拦截规则：路径为/api开头的请求均由此路由处理(只能添加一个- Path参数)
+        - id: quest-service                # 当前路由id，唯一标识
+          uri: lb://quest-service        # 当前路由所对应的服务访问地址：
+          predicates:
+            - Path=/api/quest/**            # 请求的拦截规则：路径为/admin开头的请求均由此路由处理
+        - id: user-service                # 当前路由id，唯一标识
+          uri: lb://user-service        # 当前路由所对应的服务访问地址：
+          predicates:
+            - Path=/api/user/**            # 请求的拦截规则：路径为/admin开头的请求均由此路由处理
   data:
     redis:
       host: 139.196.230.249
       password: yangtuo233
       port: 6379
       database: 0
-logging:
-  level:
-    love.ytlsnb: debug
 xmtx:
   cache:
     null-ttl: 30000   # 三十秒
-    default-ttl: 1800000  # 三十分钟
   jwt:
     user-secret-key: abcdefghabcdefghabcdefghabcdefgh   # 32位
     user-ttl: 1800000000   # 三十分钟*1000
-    user-token-name: Authentication
+    user-token-name: Authentication-User
     coladmin-secret-key: abcdefghabcdefghabcdefghabcdefgh   # 32位
     coladmin-ttl: 1800000000   # 三十分钟*1000
-    coladmin-token-name: Authentication
+    coladmin-token-name: Authentication-Coladmin
   user:
     student-id-param1: 3    # 用户学号脱敏保留前几位
     student-id-param2: 4    # 用户学号脱敏保留后几位

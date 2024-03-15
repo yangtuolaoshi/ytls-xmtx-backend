@@ -4,7 +4,7 @@ logging:
 server:
   port: 6664
   servlet:
-    context-path: /api
+    context-path: /coladmin
 spring:
   application:
     name: school-service # 服务名称
@@ -16,3 +16,5 @@ spring:
       config:
         server-addr: 139.196.230.249:8848 # Nacos地址
         file-extension: yaml # 文件后缀名
+      discovery:
+        group: LY

@@ -1,6 +1,6 @@
 package love.ytlsnb.school.task;
 
-import love.ytlsnb.common.utils.SchoolUtil;
+import love.ytlsnb.school.utils.SchoolUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

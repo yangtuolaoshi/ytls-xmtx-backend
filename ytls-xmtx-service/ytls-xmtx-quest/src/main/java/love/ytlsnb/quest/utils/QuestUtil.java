@@ -32,14 +32,12 @@ public final class QuestUtil {
             throw new BusinessException(UNPROCESSABLE_ENTITY, "进度标题不能超过16个字符");
         }
         // 打卡方式
-        // 打卡方式 三位二进制表示 XXX-上传图片/地点检测/人工审核 0为禁用 1为开启
-        // TODO 打卡方式要添加一种——人脸识别（硬件摄像头）
-        Integer clockInMethod = questDTO.getClockInMethod();
-        if (clockInMethod == null || ((clockInMethod & 0b111) == 0)) {
+        Integer adminCheck = questDTO.getAdminCheck();
+        Integer photoCheck = questDTO.getPhotoCheck();
+        Integer locationCheck = questDTO.getLocationCheck();
+        Integer faceCheck = questDTO.getFaceCheck();
+        if (adminCheck == null && photoCheck == null && locationCheck == null && faceCheck == null) {
             throw new BusinessException(UNPROCESSABLE_ENTITY, "请至少选择一种打卡方式");
-        }
-        if (clockInMethod < 0 || clockInMethod > 7) {
-            throw new BusinessException(UNPROCESSABLE_ENTITY, "打卡方式非法");
         }
         Integer scheduleStatus = questDTO.getScheduleStatus();
         if (scheduleStatus == null || scheduleStatus > 1 || scheduleStatus < 0) {
@@ -86,8 +84,7 @@ public final class QuestUtil {
         quest.setQuestStatus(questDTO.getQuestStatus());
         quest.setParentId(questDTO.getPreQuestId());
         quest.setEndTime(questDTO.getEndTime());
-        // TODO 通过管理员用户查询所在学校
-        quest.setSchoolId(1L);
+        quest.setSchoolId(questDTO.getSchoolId());
         quest.setCreateTime(LocalDateTime.now());
         quest.setIsDeleted(0);
         return quest;
@@ -117,10 +114,13 @@ public final class QuestUtil {
     public static QuestSchedule createQuestSchedule(QuestDTO questDTO) {
         QuestSchedule questSchedule = new QuestSchedule();
         questSchedule.setScheduleTitle(questDTO.getScheduleTitle());
-        questSchedule.setClockInMethod(questDTO.getClockInMethod());
         questSchedule.setScheduleStatus(questDTO.getScheduleStatus());
         questSchedule.setCreateTime(LocalDateTime.now());
         questSchedule.setNeedLocation(questDTO.getNeedLocation());
+        questSchedule.setAdminCheck(questDTO.getAdminCheck());
+        questSchedule.setPhotoCheck(questDTO.getPhotoCheck());
+        questSchedule.setLocationCheck(questDTO.getLocationCheck());
+        questSchedule.setFaceCheck(questDTO.getFaceCheck());
         questSchedule.setIsDeleted(0);
         return questSchedule;
     }

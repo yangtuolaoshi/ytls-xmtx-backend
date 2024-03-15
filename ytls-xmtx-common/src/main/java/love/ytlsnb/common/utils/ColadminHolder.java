@@ -1,6 +1,6 @@
 package love.ytlsnb.common.utils;
 
-import love.ytlsnb.model.coladmin.po.Coladmin;
+import love.ytlsnb.model.school.po.Coladmin;
 
 /**
  * @author ula

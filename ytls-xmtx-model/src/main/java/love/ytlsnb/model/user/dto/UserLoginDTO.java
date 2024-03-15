@@ -1,6 +1,7 @@
 package love.ytlsnb.model.user.dto;
 
 import lombok.Data;
+import lombok.ToString;
 
 /**
  * 用户登录数据传输对象，四个字段中最多含有两个有效字段
@@ -8,6 +9,7 @@ import lombok.Data;
  * @author ula
  */
 @Data
+@ToString
 public class UserLoginDTO {
     /**
      * 登录的账号：手机号（11位）/身份证号 长度限制18位

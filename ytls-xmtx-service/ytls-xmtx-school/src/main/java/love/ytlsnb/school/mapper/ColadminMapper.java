@@ -1,7 +1,7 @@
 package love.ytlsnb.school.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import love.ytlsnb.model.coladmin.po.Coladmin;
+import love.ytlsnb.model.school.po.Coladmin;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
