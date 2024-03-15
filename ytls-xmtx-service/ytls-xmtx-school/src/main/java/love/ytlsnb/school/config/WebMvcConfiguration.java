@@ -33,6 +33,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 .addPathPatterns(SchoolConstant.COLADMIN_ALL_URL)
                 .addPathPatterns(SchoolConstant.SCHOOL_ALL_URL)
                 .addPathPatterns(SchoolConstant.QUEST_ALL_URL)
+                .addPathPatterns(SchoolConstant.USER_ALL_URL)
                 .addPathPatterns(SchoolConstant.SCHEDULE_ALL_URL);
     }
     /**

@@ -42,6 +42,11 @@ public class SchoolConstant {
      * 学校ID字段常量：jwt信息存储
      */
     public static final String INSENSITIVE_PASSWORD = "********";
+    //-------------------------User-------------------------
+    /**
+     * 拦截器用来鉴别学校操作的常量
+     */
+    public static final String USER_ALL_URL = "/user/**";
     //-------------------------Location-------------------------
     //-------------------------School-------------------------
     /**

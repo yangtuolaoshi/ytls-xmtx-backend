@@ -27,4 +27,8 @@ public class UserLoginDTO {
      * 验证码
      */
     private String code;
+    /**
+     * 用户登录类型：必填，例：ACCOUNT
+     */
+    private String loginType;
 }

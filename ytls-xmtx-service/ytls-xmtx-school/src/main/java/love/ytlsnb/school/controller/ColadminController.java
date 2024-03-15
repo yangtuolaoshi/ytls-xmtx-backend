@@ -2,6 +2,8 @@ package love.ytlsnb.school.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import love.ytlsnb.model.common.LogOperation;
+import love.ytlsnb.model.common.Operator;
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.school.dto.ColadminLoginDTO;
 import love.ytlsnb.model.school.dto.ColadminRegisterDTO;
@@ -36,6 +38,7 @@ public class ColadminController {
         return Result.ok(coladmin);
     }
 
+    @LogOperation(Operator.COLADMIN)
     @PostMapping("/login")
     public Result<String> login(@RequestBody ColadminLoginDTO coladminLoginDTO, HttpServletRequest request) {
         log.info("管理员登录:{}", coladminLoginDTO);
@@ -43,6 +46,7 @@ public class ColadminController {
         return Result.ok(jwt);
     }
 
+    @LogOperation(Operator.COLADMIN)
     @PostMapping("/register")
     public Result register(@RequestBody ColadminRegisterDTO coladminRegisterDTO) {
         log.info("管理员注册:{}", coladminRegisterDTO);
@@ -57,49 +61,4 @@ public class ColadminController {
         return Result.ok(coladmin);
     }
 
-    //-------------------------User-------------------------
-    @PostMapping("/user")
-    public Result addUser(@RequestBody UserInsertDTO userInsertDTO) {
-        log.info("添加用户:{}", userInsertDTO);
-        coladminService.addUser(userInsertDTO);
-        return Result.ok();
-    }
-
-    @PostMapping("/user/batch")
-    public Result addUserBatch(MultipartFile file) throws IOException {
-        log.info("批量添加用户");
-        coladminService.addUserBatch(file);
-        return Result.ok();
-    }
-
-    @DeleteMapping("/user/{id}")
-    public Result deleteUserById(@PathVariable Long id) {
-        log.info("根据用户ID删除用户:{}", id);
-        coladminService.deleteUserById(id);
-        return Result.ok();
-    }
-
-    @PutMapping("/user/{id}")
-    public Result updateUserById(@RequestBody UserInsertDTO userInsertDTO, @PathVariable Long id) {
-        log.info("修改用户信息:{},{}", userInsertDTO, id);
-        coladminService.updateUserById(userInsertDTO, id);
-        return Result.ok();
-    }
-
-    @GetMapping("/user/detail/{id}")
-    public Result<UserVO> getUserVOById(@PathVariable Long id) {
-        log.info("根据用户ID查询用户:{}", id);
-        UserVO userVO = coladminService.getUserVOById(id);
-        return Result.ok(userVO);
-    }
-
-    @GetMapping("/user/listByConditions")
-    public PageResult<List<UserVO>> listUserByConditions(UserQueryDTO userQueryDTO) {
-        log.info("条件查询用户:{}", userQueryDTO);
-        List<UserVO> userVOList = coladminService.listUserByConditions(userQueryDTO);
-        return new PageResult<>(userQueryDTO.getCurrentPage(),
-                userQueryDTO.getPageSize(),
-                userVOList,
-                (long) userVOList.size());
-    }
 }

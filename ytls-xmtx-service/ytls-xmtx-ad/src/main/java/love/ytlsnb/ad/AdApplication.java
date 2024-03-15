@@ -1,4 +1,4 @@
-package love.ytlsnb.reward;
+package love.ytlsnb.ad;
 
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
@@ -10,16 +10,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * @author ula
- * @date 2024/2/13 10:25
+ * @date 2024/3/14 11:32
  */
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableTransactionManagement
-@MapperScan("love.ytlsnb.reward.mapper")
+@MapperScan("love.ytlsnb.ad.mapper")
 @EnableFeignClients(basePackages = "love.ytls.api")
-@ComponentScan({"love.ytlsnb.common", "love.ytlsnb.reward"})
-public class RewardApplication {
+@ComponentScan({"love.ytlsnb.common", "love.ytlsnb.ad"})
+public class AdApplication {
     public static void main(String[] args) {
-        SpringApplication.run(RewardApplication.class, args);
+        SpringApplication.run(AdApplication.class,args);
     }
 }

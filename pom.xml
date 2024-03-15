@@ -40,6 +40,7 @@
         <aliyun.ocr.version>2.0.0</aliyun.ocr.version>
         <thumbnailator>0.4.20</thumbnailator>
         <poi-ooxml>5.2.3</poi-ooxml>
+        <xxl-job-core>2.4.0</xxl-job-core>
         <spring.boot.version>3.1.6</spring.boot.version>
         <redis.version>3.1.6</redis.version>
         <redisson.version>3.24.3</redisson.version>
@@ -210,7 +211,12 @@
                 <artifactId>poi-ooxml</artifactId>
                 <version>${poi-ooxml}</version>
             </dependency>
-
+            <!-- https://mvnrepository.com/artifact/com.xuxueli/xxl-job-core -->
+            <dependency>
+                <groupId>com.xuxueli</groupId>
+                <artifactId>xxl-job-core</artifactId>
+                <version>${xxl-job-core}</version>
+            </dependency>
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
