@@ -1,12 +1,12 @@
 package love.ytlsnb.school.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import love.ytlsnb.common.constants.RedisConstant;
-import love.ytlsnb.common.constants.SchoolConstant;
 import love.ytlsnb.common.utils.CacheClient;
 import love.ytlsnb.model.school.dto.ClazzInsertDTO;
+import love.ytlsnb.model.school.dto.ClazzQueryDTO;
 import love.ytlsnb.model.school.po.Clazz;
 import love.ytlsnb.model.school.po.Dept;
 import love.ytlsnb.school.mapper.ClazzMapper;
@@ -45,7 +45,13 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
 
     @Override
     public List<Clazz> listClazzBySchoolId(Long schoolId) {
-        return clazzMapper.selectList(new QueryWrapper<Clazz>()
-                .eq(SchoolConstant.SCHOOL_ID, schoolId));
+        return clazzMapper.selectList(new LambdaQueryWrapper<Clazz>()
+                .eq(Clazz::getSchoolId, schoolId));
+    }
+
+    @Override
+    public List<Clazz> listClazzByCondition(ClazzQueryDTO clazzQueryDTO) {
+        // todo
+        return clazzMapper.selectByMap(BeanUtil.beanToMap(clazzQueryDTO,false,true));
     }
 }

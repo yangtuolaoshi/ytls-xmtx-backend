@@ -8,4 +8,5 @@ import love.ytlsnb.model.user.po.UserInfo;
  * @date 2024/2/4 17:54
  */
 public interface UserInfoService extends IService<UserInfo>{
+    UserInfo getUserInfo();
 }

@@ -24,9 +24,24 @@ public class QuestScheduleInfoVO {
     private String scheduleTitle;
 
     /**
-     * 打卡方式
+     * 管理员审核
      */
-    private Integer clockInMethod;
+    private Integer adminCheck;
+
+    /**
+     * 照片识别
+     */
+    private Integer photoCheck;
+
+    /**
+     * 地点识别
+     */
+    private Integer locationCheck;
+
+    /**
+     * 面部识别（硬件）
+     */
+    private Integer faceCheck;
 
     /**
      * 启用地点
@@ -36,7 +51,7 @@ public class QuestScheduleInfoVO {
     /**
      * 启用状态
      */
-    private Integer status;
+    private Integer scheduleStatus;
 
     /**
      * 地点名称
@@ -46,7 +61,7 @@ public class QuestScheduleInfoVO {
     /**
      * 地点描述
      */
-    private String description;
+    private String locationDescription;
 
     /**
      * 地点经度

@@ -1,8 +1,9 @@
 package love.ytlsnb.user.config;
 
+import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.common.json.JacksonObjectMapper;
-import love.ytlsnb.user.intercepter.UserHolderIntercepter;
+import love.ytlsnb.user.intercepter.HolderIntercepter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -15,18 +16,22 @@ import java.util.List;
 /**
  * @author ula
  */
+@Slf4j
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
     @Autowired
-    UserHolderIntercepter userHolderIntercepter;
+    HolderIntercepter holderIntercepter;
 
     /**
      * 注册用户态保存拦截器
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(userHolderIntercepter)
-                .addPathPatterns(UserConstant.USER_ALL_URL);
+        registry.addInterceptor(holderIntercepter)
+                .excludePathPatterns(UserConstant.USER_REGISTER_URL)
+                .excludePathPatterns(UserConstant.USER_LOGIN_URL)
+                .excludePathPatterns(UserConstant.USER_REPASSWORD_URL)
+                .excludePathPatterns(UserConstant.USER_GETCODE_URL);
     }
 
     /**
@@ -36,6 +41,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
      */
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        log.info("正在添加自定义JSON转换器");
         //创建消息转换器
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         //创建并设置自定义对象转换器

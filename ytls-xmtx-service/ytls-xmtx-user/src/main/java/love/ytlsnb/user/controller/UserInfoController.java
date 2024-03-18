@@ -18,6 +18,11 @@ public class UserInfoController {
     @Autowired
     private UserInfoService userInfoService;
 
+    @GetMapping
+    public Result<UserInfo> getUserInfo() {
+        log.info("用户端查询用户信息");
+        return Result.ok(userInfoService.getUserInfo());
+    }
     @GetMapping("/{id}")
     public Result<UserInfo> getUserInfoById(@PathVariable Long id) {
         log.info("查询用户，id:{}", id);

@@ -21,6 +21,13 @@ public class ColadminController {
     @Autowired
     private ColadminService coladminService;
 
+    @GetMapping("/{coladminId}")
+    public Result<Coladmin> getColadminById(@PathVariable Long coladminId) {
+        log.info("根据ID获取Coladmin的信息");
+        Coladmin coladmin = coladminService.getById(coladminId);
+        return Result.ok(coladmin);
+    }
+
     @PostMapping("/login")
     public Result<String> login(@RequestBody ColadminLoginDTO coladminLoginDTO, HttpServletRequest request) {
         log.info("管理员登录:{}", coladminLoginDTO);
@@ -42,6 +49,49 @@ public class ColadminController {
         return Result.ok(coladmin);
     }
 
+    //-------------------------User-------------------------
+    @PostMapping("/user")
+    public Result addUser(@RequestBody UserInsertDTO userInsertDTO) {
+        log.info("添加用户:{}", userInsertDTO);
+        coladminService.addUser(userInsertDTO);
+        return Result.ok();
+    }
 
+    @PostMapping("/user/batch")
+    public Result addUserBatch(MultipartFile file) throws IOException {
+        log.info("批量添加用户");
+        coladminService.addUserBatch(file);
+        return Result.ok();
+    }
 
+    @DeleteMapping("/user/{id}")
+    public Result deleteUserById(@PathVariable Long id) {
+        log.info("根据用户ID删除用户:{}", id);
+        coladminService.deleteUserById(id);
+        return Result.ok();
+    }
+
+    @PutMapping("/user/{id}")
+    public Result updateUserById(@RequestBody UserInsertDTO userInsertDTO, @PathVariable Long id) {
+        log.info("修改用户信息:{},{}", userInsertDTO, id);
+        coladminService.updateUserById(userInsertDTO, id);
+        return Result.ok();
+    }
+
+    @GetMapping("/user/detail/{id}")
+    public Result<UserVO> getUserVOById(@PathVariable Long id) {
+        log.info("根据用户ID查询用户:{}", id);
+        UserVO userVO = coladminService.getUserVOById(id);
+        return Result.ok(userVO);
+    }
+
+    @GetMapping("/user/listByConditions")
+    public PageResult<List<UserVO>> listUserByConditions(UserQueryDTO userQueryDTO) {
+        log.info("条件查询用户:{}", userQueryDTO);
+        List<UserVO> userVOList = coladminService.listUserByConditions(userQueryDTO);
+        return new PageResult<>(userQueryDTO.getCurrentPage(),
+                userQueryDTO.getPageSize(),
+                userVOList,
+                (long) userVOList.size());
+    }
 }

@@ -39,7 +39,8 @@ public class AuthenticationFilter implements GlobalFilter {
         ServerHttpResponse response = exchange.getResponse();
         // 如果是登录/注册请求则放行
         String requestPath = request.getURI().getPath();
-        if (requestPath.contains(SchoolConstant.LOGIN_URL) || requestPath.contains(SchoolConstant.REGISTER_URL)) {
+        if (requestPath.contains(SchoolConstant.COLADMIN_LOGIN_URL)
+                || requestPath.contains(SchoolConstant.COLADMIN_REGISTER_URL)) {
             return chain.filter(exchange);
         }
         // 获取请求头
@@ -62,7 +63,7 @@ public class AuthenticationFilter implements GlobalFilter {
             // 校验当前令牌是否有效（账户是否被其他人登录，生成了新的jwt）
             // 请求头中获取用户id
             Long coladminId = claims.get(SchoolConstant.COLADMIN_ID, Long.class);
-            String coladminLoginKey = RedisConstant.ADMIN_LOGIN_PREFIX + coladminId;
+            String coladminLoginKey = RedisConstant.COLADMIN_LOGIN_PREFIX + coladminId;
             // redis中的签名
             String redisSignature = redisTemplate.opsForValue().get(coladminLoginKey);
             // 当前请求中的签名

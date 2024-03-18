@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 任务表现层接口
+ * 任务表现层
  *
  * @author 金泓宇
  * @author 2024/2/29
@@ -21,31 +21,4 @@ import java.util.List;
 @RestController
 @RequestMapping("/quest")
 public class QuestController {
-    @Autowired
-    private QuestService questService;
-
-    @GetMapping("/page")
-    public PageResult<List<QuestVo>> getPageByCondition(QuestQueryDTO questQueryDTO, int page, int size) {
-        return questService.getPageByCondition(questQueryDTO, page, size);
-    }
-
-    @PostMapping
-    public Result<Long> add(@RequestBody QuestDTO questAddDTO) {
-        return Result.ok(questService.add(questAddDTO));
-    }
-
-    @GetMapping("/{id}")
-    public Result<QuestInfoVo> getById(@PathVariable Long id) {
-        return Result.ok(questService.getInfoById(id));
-    }
-
-    @PutMapping
-    public Result<Boolean> update(@RequestBody QuestDTO questDTO) {
-        return Result.ok(questService.update(questDTO));
-    }
-
-    @DeleteMapping("/{id}")
-    public Result<Boolean> deleteById(@PathVariable Long id) {
-        return Result.ok(questService.deleteById(id));
-    }
 }

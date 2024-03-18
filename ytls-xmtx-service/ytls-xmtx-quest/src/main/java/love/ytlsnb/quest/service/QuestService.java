@@ -3,6 +3,7 @@ package love.ytlsnb.quest.service;
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.quest.dto.QuestDTO;
 import love.ytlsnb.model.quest.dto.QuestQueryDTO;
+import love.ytlsnb.model.quest.po.Quest;
 import love.ytlsnb.model.quest.vo.QuestInfoVo;
 import love.ytlsnb.model.quest.vo.QuestVo;
 
@@ -22,6 +23,13 @@ public interface QuestService {
      * @return 分页查询集合
      */
     PageResult<List<QuestVo>> getPageByCondition(QuestQueryDTO questQueryDTO, int page, int size);
+
+    /**
+     * 获取本校的所有任务
+     * @param schoolId 学校ID
+     * @return 本校的所有任务
+     */
+    List<Quest> getAll(Long schoolId);
 
     /**
      * 根据ID查询详情
@@ -47,7 +55,8 @@ public interface QuestService {
     /**
      * 根据ID删除
      * @param id 主键ID
+     * @param schoolId 学校ID
      * @return 是否删除成功
      */
-    Boolean deleteById(Long id);
+    Boolean deleteById(Long id, Long schoolId);
 }

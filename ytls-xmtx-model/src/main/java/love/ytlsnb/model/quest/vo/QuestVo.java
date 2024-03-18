@@ -20,7 +20,7 @@ public class QuestVo {
     /**
      * 任务标题
      */
-    private String title;
+    private String questTitle;
 
     /**
      * 任务类型
@@ -43,9 +43,14 @@ public class QuestVo {
     private Integer requiredScheduleNum;
 
     /**
+     * 总进度数
+     */
+    private Long scheduleNum;
+
+    /**
      * 启用状态
      */
-    private Integer status;
+    private Integer questStatus;
 
     /**
      * 奖励

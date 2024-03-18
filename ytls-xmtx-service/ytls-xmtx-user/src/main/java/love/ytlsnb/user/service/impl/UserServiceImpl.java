@@ -1,10 +1,10 @@
 package love.ytlsnb.user.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.digest.BCrypt;
-import cn.hutool.poi.excel.ExcelReader;
-import cn.hutool.poi.excel.ExcelUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,16 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 import love.ytls.api.school.SchoolClient;
 import love.ytlsnb.common.constants.RedisConstant;
 import love.ytlsnb.common.constants.ResultCodes;
-import love.ytlsnb.common.constants.SchoolConstant;
 import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.common.exception.BusinessException;
+import love.ytlsnb.common.properties.CommonProperties;
 import love.ytlsnb.common.properties.JwtProperties;
+import love.ytlsnb.common.properties.PhotoProperties;
 import love.ytlsnb.common.properties.UserProperties;
-import love.ytlsnb.common.utils.AliUtil;
-import love.ytlsnb.common.utils.ColadminHolder;
-import love.ytlsnb.common.utils.JwtUtil;
-import love.ytlsnb.common.utils.UserHolder;
-import love.ytlsnb.model.coladmin.po.Coladmin;
+import love.ytlsnb.common.utils.*;
+import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.school.po.Clazz;
 import love.ytlsnb.model.school.po.Dept;
@@ -30,8 +28,10 @@ import love.ytlsnb.model.school.po.StudentPhoto;
 import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.po.UserInfo;
+import love.ytlsnb.model.user.vo.UserVO;
 import love.ytlsnb.user.mapper.UserInfoMapper;
 import love.ytlsnb.user.mapper.UserMapper;
+import love.ytlsnb.user.service.UserInfoService;
 import love.ytlsnb.user.service.UserService;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -60,13 +60,19 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     @Autowired
+    private UserInfoService userInfoService;
+    @Autowired
     private UserMapper userMapper;
     @Autowired
     private UserInfoMapper userInfoMapper;
     @Autowired
+    private CommonProperties commonProperties;
+    @Autowired
     private UserProperties userProperties;
     @Autowired
     private JwtProperties jwtProperties;
+    @Autowired
+    private PhotoProperties photoProperties;
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
@@ -76,6 +82,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private SchoolClient schoolClient;
     @Autowired
     private AliUtil aliUtil;
+    @Autowired
+    private CommonUtil commonUtil;
 
 
     /**
@@ -86,29 +94,98 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     @Transactional
-    public void addUser(UserInsertDTO userInsertDTO) {
+    public void addUser(UserInsertDTO userInsertDTO) throws Exception {
         // 校验是否可以新增用户数据
+        Coladmin coladmin = ColadminHolder.getColadmin();
+        Long schoolId = coladmin.getSchoolId();
         // 校验身份证号
         String idNumber = userInsertDTO.getIdNumber();
         if (idNumber != null) {
-            UserInfo selectOne = userInfoMapper.selectOne(new QueryWrapper<UserInfo>()
-                    .eq(UserConstant.ID_NUMBER, idNumber));
+            if (!IdcardUtil.isValidCard(idNumber)) {
+                throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写正确的身份证号");
+            }
+            UserInfo selectOne = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>()
+                    .eq(UserInfo::getIdNumber, idNumber));
             if (selectOne != null) {
                 throw new BusinessException(ResultCodes.FORBIDDEN, "当前身份证号已注册过账号");
             }
         }
-        // 校验手机号是否已经被注册
-        String phone = userInsertDTO.getPhone();
-        User selectOne = userMapper.selectOne(new QueryWrapper<User>()
-                .eq(UserConstant.PHONE, phone));
-        if (selectOne != null) {
-            throw new BusinessException(ResultCodes.FORBIDDEN, "当前手机号已被注册");
+        // 校验学号
+        if (StrUtil.isBlank(userInsertDTO.getStudentId())) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "请补充用户学号信息");
         }
-        User user = BeanUtil.copyProperties(userInsertDTO, User.class);
-        UserInfo userInfo = BeanUtil.copyProperties(userInsertDTO, UserInfo.class);
-        userInfoMapper.insert(userInfo);
-        user.setUserInfoId(userInfo.getId());
-        userMapper.insert(user);
+        User selectOne = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getSchoolId, schoolId)
+                .eq(User::getStudentId, userInsertDTO.getStudentId()));
+        if (selectOne != null) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "相关账号已存在");
+        }
+        String realPhoto = userInsertDTO.getRealPhoto();
+        if (!StrUtil.isBlank(realPhoto)) {
+            aliUtil.faceDetect(realPhoto);
+        }
+        String userRegisterKey = RedisConstant.USER_REGISTER_LOCK_PREFIX + schoolId + userInsertDTO.getStudentId();
+        RLock userRegisterLock = redissonClient.getLock(userRegisterKey);
+        try {
+            boolean success = userRegisterLock.tryLock();
+            if (!success) {
+                throw new BusinessException(ResultCodes.BAD_REQUEST, "重复创建用户");
+            }
+            selectOne = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                    .eq(User::getSchoolId, schoolId)
+                    .eq(User::getStudentId, userInsertDTO.getStudentId()));
+            if (selectOne != null) {
+                throw new BusinessException(ResultCodes.BAD_REQUEST, "相关账号已存在");
+            }
+            User user = BeanUtil.copyProperties(userInsertDTO, User.class);
+            user.setPoint(UserConstant.INITIAL_POINT);
+            user.setIdentified(UserConstant.UNIDENTIFIED);
+            user.setSchoolId(schoolId);
+            UserInfo userInfo = BeanUtil.copyProperties(userInsertDTO, UserInfo.class);
+            Result<School> schoolResult = schoolClient.getSchoolById(schoolId);
+            if (schoolResult.getCode() != ResultCodes.OK) {
+                throw new BusinessException(schoolResult.getCode(), schoolResult.getMsg());
+            }
+            School school = schoolResult.getData();
+            userInfo.setSchoolName(school.getSchoolName());
+            userInfoMapper.insert(userInfo);
+            user.setUserInfoId(userInfo.getId());
+            userMapper.insert(user);
+        } finally {
+            try {
+                userRegisterLock.unlock();
+            } catch (Exception e) {
+                log.error("释放锁失败:{},锁已经释放", userRegisterKey);
+            }
+        }
+
+    }
+
+    @Override
+    public void update(UserUpdateDTO userUpdateDTO) {
+        User user = UserHolder.getUser();
+        // 参数合法性校验
+        if (!StrUtil.isBlankIfStr(userUpdateDTO.getNickname())) {
+            user.setNickname(userUpdateDTO.getNickname());
+        }
+        if (!StrUtil.isBlankIfStr(userUpdateDTO.getSign())) {
+            user.setSign(userUpdateDTO.getSign());
+        }
+        // 校验验证码
+        String phone = userUpdateDTO.getPhone();
+        String code = userUpdateDTO.getCode();
+        if (!StrUtil.isBlankIfStr(phone)) {
+            if (!PhoneUtil.isPhone(phone) || StrUtil.isBlankIfStr(code)) {
+                // 修改手机号相关参数不合法
+                throw new BusinessException(ResultCodes.BAD_REQUEST, "修改手机号相关参数不合法");
+            }
+            if (!commonUtil.checkShortMessage(phone, code)) {
+                throw new BusinessException(ResultCodes.UNAUTHORIZED, "验证码错误");
+            }
+            user.setPhone(phone);
+        }
+        // 修改用户数据
+        userMapper.updateById(user);
     }
 
     /**
@@ -118,84 +195,54 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @return
      */
     @Override
-    public User selectByAccount(String account) {
+    public User getByAccount(String account) {
         if (account == null) {
             return null;
         } else {
             if (IdcardUtil.isValidCard(account)) {
                 // 当前账户使用的身份证作为账号
-                UserInfo userInfo = userInfoMapper.selectOne(new QueryWrapper<UserInfo>()
-                        .eq(UserConstant.ID_NUMBER, account));
+                UserInfo userInfo = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>()
+                        .eq(UserInfo::getIdNumber, account));
                 if (userInfo == null) {
                     return null;
                 }
-                return userMapper.selectOne(new QueryWrapper<User>()
-                        .eq(UserConstant.USER_INFO_ID, userInfo.getId()));
+                return userMapper.selectOne(new LambdaQueryWrapper<User>()
+                        .eq(User::getUserInfoId, userInfo.getId()));
             } else {
-                return userMapper.selectOne(new QueryWrapper<User>()
-                        .eq(UserConstant.PHONE, account));
+                return userMapper.selectOne(new LambdaQueryWrapper<User>()
+                        .eq(User::getPhone, account));
             }
-        }
-    }
-
-    /*
-     * 根据用户id返回脱敏后的用户信息
-     *
-     * @param id
-     * @return
-     */
-    @Override
-    public User selectInsensitiveUserById(Long id) {
-        if (id == null) {
-            return null;
-        } else {
-            User user = userMapper.selectById(id);
-            if (user == null) {
-                throw new BusinessException(ResultCodes.FORBIDDEN, "未能检测到您的用户信息");
-            }
-            // 敏感信息脱敏
-            // 学号脱敏
-            String afterStudentId = DesensitizedUtil.idCardNum(user.getStudentId(),
-                    userProperties.getStudentIdParam1(),
-                    userProperties.getStudentIdParam2());
-            user.setStudentId(afterStudentId);
-            // 密码脱敏
-            user.setPassword(UserConstant.INSENSITIVE_PASSWORD);
-            // 手机号脱敏
-            user.setPhone(DesensitizedUtil.mobilePhone(user.getPhone()));
-            // 积分脱敏
-            user.setPoint(null);
-            // 学校相关信息脱敏
-            user.setIdentified(null);
-            user.setSchoolId(null);
-            user.setDeptId(null);
-            user.setClazzId(null);
-            // 用户数据库信息脱敏
-            user.setCreateTime(null);
-            user.setUpdateTime(null);
-            user.setDeleted(null);
-
-            return user;
         }
     }
 
     /**
-     * 根据传入的数据传输对象中的非空属性进行用户查询
+     * 根据传入手机号查找用户（方法内部不再做参数合法性校验）
+     *
+     * @param phone 用户手机号
+     * @return 查找到的用户数据行
+     */
+    @Override
+    public User getByPhone(String phone) {
+        return userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getPhone, phone));
+    }
+
+    /**
+     * 根据传入的数据传输对象中的非空属性进行用户查询，其中的用户名和真实姓名会进行右模糊查询
      *
      * @param userQueryDTO 用来查询的数据
      * @return 查询到的数据
      */
     @Override
-    public List<User> list(UserQueryDTO userQueryDTO) {
-        Map<String, Object> map = BeanUtil.beanToMap(userQueryDTO, true, true);
-
-        // 特殊字段处理
-        Object isIdentified = map.get(UserConstant.IS_IDENTIFIED_JAVA);
-        if (isIdentified != null) {
-            map.remove(UserConstant.IS_IDENTIFIED_JAVA);
-            map.put(UserConstant.IS_IDENTIFIED, isIdentified);
+    public List<UserVO> listByConditions(UserQueryDTO userQueryDTO) {
+        String name = userQueryDTO.getName();
+        if (!StrUtil.isBlank(name)) {
+            userQueryDTO.setName(name + "%");
         }
-        return listByMap(map);
+        userQueryDTO.setCurrentPage((userQueryDTO.getCurrentPage() - 1) * userQueryDTO.getPageSize());
+        List<UserVO> userVOList = userMapper.listByConditions(userQueryDTO);
+        userVOList.forEach(userVO -> userVO.setPassword(UserConstant.INSENSITIVE_PASSWORD));
+        return userVOList;
     }
 
     /**
@@ -219,21 +266,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (!PhoneUtil.isPhone(userLoginDTO.getPhone())) {
                 throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写正确的手机号");
             }
-            String phoneCodeKey = RedisConstant.USER_PHONE_CODE_PREFIX + userLoginDTO.getPhone();
-            String code = redisTemplate.opsForValue().get(phoneCodeKey);
-            if (!userLoginDTO.getCode().equals(code)) {
+            if (!commonUtil.checkShortMessage(userLoginDTO.getPhone(), userLoginDTO.getCode())) {
                 // 验证码不同
                 throw new BusinessException(ResultCodes.UNAUTHORIZED, "验证码错误");
             }
-            user = userMapper.selectOne(new QueryWrapper<User>()
-                    .eq(UserConstant.PHONE, userLoginDTO.getPhone()));
+            user = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                    .eq(User::getPhone, userLoginDTO.getPhone()));
             if (user == null) {
                 // 查询用户数据为空
                 throw new BusinessException(ResultCodes.UNAUTHORIZED, "当前手机号尚未注册账号");
             }
         } else {
             // 账户密码登录
-            user = selectByAccount(userLoginDTO.getAccount());
+            user = getByAccount(userLoginDTO.getAccount());
             if (user == null) {
                 // 用户不存在
                 throw new BusinessException(ResultCodes.UNAUTHORIZED, "用户不存在");
@@ -296,15 +341,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 校验验证码
-        String phoneCodeKey = RedisConstant.USER_PHONE_CODE_PREFIX + userRegisterDTO.getPhone();
-        String code = redisTemplate.opsForValue().get(phoneCodeKey);
-        if (!userRegisterDTO.getCode().equals(code)) {
+        if (!commonUtil.checkShortMessage(userRegisterDTO.getPhone(), userRegisterDTO.getCode())) {
             throw new BusinessException(ResultCodes.UNAUTHORIZED, "验证码错误");
         }
 
         // 在数据库中查询当前用户数据
-        User selectOne = userMapper.selectOne(new QueryWrapper<User>()
-                .eq(UserConstant.PHONE, userRegisterDTO.getPhone()));
+        User selectOne = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getPhone, userRegisterDTO.getPhone()));
         // 用户已存在，报错
         if (selectOne != null) {
             throw new BusinessException(ResultCodes.FORBIDDEN, "用户已存在");
@@ -321,8 +364,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 throw new BusinessException(ResultCodes.FORBIDDEN, "用户已存在");
             }
             // 拿到锁后进行double check，避免并发时的冲突
-            selectOne = userMapper.selectOne(new QueryWrapper<User>()
-                    .eq(UserConstant.PHONE, userRegisterDTO.getPhone()));
+            selectOne = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                    .eq(User::getPhone, userRegisterDTO.getPhone()));
             // 用户已存在，报错
             if (selectOne != null) {
                 throw new BusinessException(ResultCodes.FORBIDDEN, "用户已存在");
@@ -406,47 +449,115 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return Boolean.TRUE.equals(sign);
     }
 
+    @Override
+    public Boolean[] listSign() {
+        User user = UserHolder.getUser();
+        String signHistoryKey = RedisConstant.USER_SIGN_PREFIX +
+                LocalDate.now().format(DateTimeFormatter.ofPattern(RedisConstant.USER_SIGN_PERMOUTH_PATTERN)) +
+                user.getId();
+        String signStr = redisTemplate.opsForValue().get(signHistoryKey);
+        Boolean[] signList = new Boolean[32];
+        if (signStr == null) {
+            return signList;
+        }
+        byte[] bytes = signStr.getBytes();
+        // 设置本月所有的签到信息
+        for (byte i = 0; i < bytes.length; i++) {
+            byte num = bytes[i];
+            for (byte j = 0; j < 8; j++) {
+                signList[i * 8 + j] = (num >> (7 - j) & 1) == 1;
+            }
+        }
+        return signList;
+    }
+
     /**
-     * 向指定的电话号码发送验证码
+     * 根据传入参数修改用户信息，默认不修改用户的学校信息
      *
-     * @param phone 指定的电话号
-     * @throws Exception 发送验证码失败的异常
+     * @param userInsertDTO 用户修改信息数据传输对象
+     * @param id            用户id
      */
+    @Override
+    @Transactional
+    public void updateUserById(UserInsertDTO userInsertDTO, Long id) throws Exception {
+        // 参数校验
+        // 校验身份证
+        String idNumber = userInsertDTO.getIdNumber();
+        if (!StrUtil.isBlank(idNumber)) {
+            if (!IdcardUtil.isValidCard(idNumber)) {
+                throw new BusinessException(ResultCodes.BAD_REQUEST, "请输入正确的身份证号码");
+            }
+            UserInfo selectByIdNumber = userInfoMapper.selectOne(new LambdaQueryWrapper<UserInfo>()
+                    .eq(UserInfo::getIdNumber, idNumber));
+            if (selectByIdNumber != null) {
+                User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                        .eq(User::getUserInfoId, selectByIdNumber.getId()));
+                if (!id.equals(user.getId())) {
+                    throw new BusinessException(ResultCodes.BAD_REQUEST, "该身份证号已被注册");
+                }
+            }
+        }
+        // 校验学号
+        String studentId = userInsertDTO.getStudentId();
+        if (StrUtil.isBlank(studentId)) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "用户学号不能为空");
+        }
+        Coladmin coladmin = ColadminHolder.getColadmin();
+        User selectByStudentID = userMapper.selectOne(new LambdaQueryWrapper<User>()
+                .eq(User::getSchoolId, coladmin.getSchoolId())
+                .eq(User::getStudentId, studentId));
+        if (selectByStudentID != null && !selectByStudentID.getId().equals(id)) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "该学号已被注册");
+        }
+        String realPhoto = userInsertDTO.getRealPhoto();
+        if (!StrUtil.isBlank(realPhoto)) {
+            aliUtil.faceDetect(realPhoto);
+        }
+
+        User user = userMapper.selectById(id);
+        UserInfo userInfo = userInfoMapper.selectById(user.getUserInfoId());
+        BeanUtil.copyProperties(userInsertDTO, user);
+        BeanUtil.copyProperties(userInsertDTO, userInfo);
+        userMapper.updateById(user);
+        userInfoMapper.updateById(userInfo);
+    }
+
+    @Override
+    public UserVO getUserVOById(Long id) {
+        User user = userMapper.selectById(id);
+        UserInfo userInfo = userInfoMapper.selectById(user.getUserInfoId());
+        return new UserVO(user, userInfo);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUserById(Long id) {
+        User user = userMapper.selectById(id);
+        userInfoMapper.deleteById(user.getUserInfoId());
+        userMapper.deleteById(id);
+    }
+
+    @Override
+    public User getUser() {
+        User user = UserHolder.getUser();
+        user.setPassword(UserConstant.INSENSITIVE_PASSWORD);
+        return user;
+    }
+
+
     @Override
     public void sendShortMessage(String phone) throws Exception {
         // 校验手机号
         if (!PhoneUtil.isPhone(phone)) {
             throw new BusinessException(ResultCodes.BAD_REQUEST, "请输入正确的手机号");
         }
-        // 生成存储验证码Key
-        String phoneCodeKey = RedisConstant.USER_PHONE_CODE_PREFIX + phone;
-        // 校验是否可以发送
-        Long expire = redisTemplate.opsForValue().getOperations().getExpire(phoneCodeKey);
-        if (expire != null && expire > userProperties.getPhoneCodeTtl() - userProperties.getResendCodeTimeInterval()) {
-            throw new BusinessException(ResultCodes.FORBIDDEN, "请在一分钟后重试");
-        }
-        // 发送验证码
-        String code = aliUtil.sendShortMessage(phone);
-        // 存储验证码
-        redisTemplate.opsForValue().set(phoneCodeKey, code, userProperties.getPhoneCodeTtl(), TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    @Transactional
-    public void saveUserAndUserInfoBatch(List<User> userList, List<UserInfo> userInfoList) {
-        for (int i = 0; i < userList.size(); i++) {
-            UserInfo userInfo = userInfoList.get(i);
-            userInfoMapper.insert(userInfo);
-            User user = userList.get(i);
-            user.setUserInfoId(userInfo.getId());
-            userMapper.insert(user);
-        }
+        commonUtil.sendShortMessage(phone);
     }
 
     /**
      * 根据传入的身份证图片识别身份证信息，同时为相关用户设置身份证相关信息
      *
-     * @param idCardOss
+     * @param idCardOss 身份证图片的阿里云OSS存放访问路径
      * @throws Exception
      */
     @Override
@@ -542,18 +653,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 */
     @Override
     @Transactional
-    public void addUserBatch(MultipartFile multipartFile) throws IOException {
-        InputStream inputStream = multipartFile.getInputStream();
-        ExcelReader reader = ExcelUtil.getReader(inputStream);
-
-        Map<String, String> headerAliasMap = Map.of("学院", "deptName",
-                "班级", "clazzName",
-                "学号", "studentId",
-                "姓名", "name",
-                "身份证号", "idNumber",
-                "手机号", "photo");
-        reader.setHeaderAlias(headerAliasMap);
-        List<UserInsertBatchDTO> userInsertBatchDTOList = reader.readAll(UserInsertBatchDTO.class);
+    public void addUserBatch(List<UserInsertBatchDTO> userInsertBatchDTOList) throws IOException {
         // 重复性校验集合
         Set<String> validateUserStudentIdSet = new HashSet<>();
         Set<String> validateUserIdNumberSet = new HashSet<>();
@@ -587,8 +687,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         List<User> userList = new ArrayList<>();
         List<UserInfo> userInfoList = new ArrayList<>();
 
-        // 批量设置待新增的数据
-        for (UserInsertBatchDTO userInsertBatchDTO : userInsertBatchDTOList) {
+        // 批量设置待新增的数据(检查数据合法性)
+        for (int i = 0; i < userInsertBatchDTOList.size(); i++) {
+            UserInsertBatchDTO userInsertBatchDTO = userInsertBatchDTOList.get(i);
             String phone = userInsertBatchDTO.getPhone();
             String studentId = userInsertBatchDTO.getStudentId();
             String idNumber = userInsertBatchDTO.getIdNumber();
@@ -598,7 +699,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     || !IdcardUtil.isValidCard(idNumber)
                     || StrUtil.isBlankIfStr(studentId)
                     || StrUtil.isBlankIfStr(name)) {
-                throw new BusinessException(ResultCodes.BAD_REQUEST, "请核对必填数据");
+                throw new BusinessException(ResultCodes.BAD_REQUEST,
+                        "[第" + i + 1 + "行] 新增用户(身份证号: " + idNumber +
+                                " , 学号: " + studentId +
+                                " , 姓名: " + name +
+                                " , 手机号: " + phone + ")的用户数据有误");
             }
             if (validateUserPhoneSet.contains(phone)) {
                 throw new BusinessException(ResultCodes.BAD_REQUEST, "存在重复手机号");
@@ -619,15 +724,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String deptName = userInsertBatchDTO.getDeptName();
             if (deptName != null && !deptMap.containsKey(deptName)) {
                 throw new BusinessException(ResultCodes.BAD_REQUEST,
-                        "新增用户(身份证号: " + idNumber + " , 学号: " + studentId + " , 手机号: " + phone + ")的学院不存在");
+                        "[第" + i + 1 + "行] 新增用户(身份证号: " + idNumber +
+                                " , 学号: " + studentId +
+                                " , 姓名: " + name +
+                                " , 手机号: " + phone + ")的学院不存在");
             }
             String clazzName = userInsertBatchDTO.getClazzName();
             if (clazzName != null && !clazzMap.containsKey(clazzName)) {
                 throw new BusinessException(ResultCodes.BAD_REQUEST,
-                        "新增用户(身份证号: " + idNumber + " , 学号: " + studentId + " , 手机号: " + phone + ")的班级不存在");
+                        "[第" + i + 1 + "行] 新增用户(身份证号: " + idNumber +
+                                " , 学号: " + studentId +
+                                " , 姓名: " + name +
+                                " , 手机号: " + phone + ")的班级不存在");
             }
 
             user.setPhone(phone);
+            user.setStudentId(studentId);
             user.setSchoolId(schoolId);
             if (!StrUtil.isBlankIfStr(deptName)) {
                 user.setDeptId(deptMap.get(deptName));
@@ -649,6 +761,58 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             userList.add(user);
             userInfoList.add(userInfo);
         }
-        // 批量新增数据 TODO
+        userInfoService.saveBatch(userInfoList);
+        for (int i = 0; i < userList.size(); i++) {
+            userList.get(i).setUserInfoId(userInfoList.get(i).getId());
+        }
+        saveBatch(userList);
+    }
+
+    @Override
+    @Transactional
+    public void updatePassword(UserUpdatePasswordDTO userUpdatePasswordDTO) {
+        // 校验属性中是否含有null值
+        if (BeanUtil.hasNullField(userUpdatePasswordDTO)) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写所有参数信息");
+        }
+        if (!userUpdatePasswordDTO.getPassword().equals(userUpdatePasswordDTO.getRepassword())) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "两次输入密码不一致");
+        }
+        if (!commonUtil.checkShortMessage(userUpdatePasswordDTO.getPhone(), userUpdatePasswordDTO.getCode())) {
+            throw new BusinessException(ResultCodes.UNAUTHORIZED, "验证码错误");
+        }
+        // 查询相关用户
+        User byPhone = getByPhone(userUpdatePasswordDTO.getPhone());
+        if (byPhone == null) {
+            throw new BusinessException(ResultCodes.UNAUTHORIZED, "当前手机号还未注册");
+        }
+        // 修改用户数据
+        byPhone.setPassword(BCrypt.hashpw(userUpdatePasswordDTO.getPassword()));
+        userMapper.updateById(byPhone);
+    }
+
+    @Override
+    public String upload(MultipartFile file) {
+        long size = file.getSize();
+        if (size > Integer.MAX_VALUE) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "上传文件过大");
+        }
+        //获取上传文件的名字
+        String originalFilename = file.getOriginalFilename();
+        // 获取创传文件的后缀名
+        String suffix = Objects.requireNonNull(originalFilename).substring(originalFilename.lastIndexOf("."));
+        if (!photoProperties.getSupportedTypes().contains(suffix)) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "当前图片类型不支持");
+        }
+        try {
+            // 获取出入流
+            InputStream inputStream = file.getInputStream();
+            //获取随机UUID同时拼接上上传文件的后缀名
+            String name = UUID.randomUUID() + suffix;
+            return aliUtil.upload(inputStream, (int) size, name);
+        } catch (IOException e) {
+            log.error("文件上传失败 ->", e);
+            throw new BusinessException(ResultCodes.SERVER_ERROR, "文件上传异常");
+        }
     }
 }
