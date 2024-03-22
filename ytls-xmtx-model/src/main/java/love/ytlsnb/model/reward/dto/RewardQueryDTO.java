@@ -7,6 +7,10 @@ import lombok.ToString;
 @ToString
 public class RewardQueryDTO {
     /**
+     * 奖品id
+     */
+    private  String id;
+    /**
      * 奖品标题
      */
     private String title;

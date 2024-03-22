@@ -2,8 +2,10 @@ package love.ytlsnb.model.reward.vo;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import love.ytlsnb.model.reward.po.RewardPhoto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class RewardVO {
@@ -31,5 +33,13 @@ public class RewardVO {
      * 奖品状态
      */
     private Byte status;
+    /**
+     * 奖品所属学校主键
+     */
+    private Long schoolId;
+    /**
+     * 奖品图片
+     */
+    private List<RewardPhoto> rewardPhotos;
 
 }

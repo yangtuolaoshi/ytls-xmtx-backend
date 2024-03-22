@@ -3,9 +3,12 @@ package love.ytlsnb.reward.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.reward.dto.RewardDTO;
+import love.ytlsnb.model.reward.dto.RewardPhotoDTO;
 import love.ytlsnb.model.reward.dto.RewardQueryDTO;
 import love.ytlsnb.model.reward.po.Reward;
+import love.ytlsnb.model.reward.po.RewardPhoto;
 import love.ytlsnb.model.reward.vo.RewardVO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,5 +23,11 @@ public interface RewardService extends IService<Reward> {
 
     Boolean update(RewardDTO rewardDTO);
 
-    Boolean deleteById(Long id);
+    void deleteWithPhotoById(Long id);
+
+    List<Reward> selectBySchoolId(Long schoolId);
+
+    void deleteByPhoto(RewardPhotoDTO rewardPhotoDTO);
+
+    String upload(MultipartFile file);
 }

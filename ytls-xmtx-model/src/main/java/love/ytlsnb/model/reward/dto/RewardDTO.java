@@ -2,11 +2,18 @@ package love.ytlsnb.model.reward.dto;
 
 import lombok.Data;
 import lombok.ToString;
+import love.ytlsnb.model.reward.po.RewardPhoto;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @ToString
 public class RewardDTO {
 
+    /**
+     * 奖品主键
+     */
     private Long id;
     /**
      * 奖品标题
@@ -36,6 +43,10 @@ public class RewardDTO {
      * 奖品状态
      */
     private Byte status;
+    /**
+     * 奖品图片
+     */
+    private List<RewardPhoto> rewardPhotos = new ArrayList<>();
 
 
 

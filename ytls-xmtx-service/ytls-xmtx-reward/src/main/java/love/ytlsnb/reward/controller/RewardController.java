@@ -4,11 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.reward.dto.RewardDTO;
+import love.ytlsnb.model.reward.dto.RewardPhotoDTO;
 import love.ytlsnb.model.reward.dto.RewardQueryDTO;
+import love.ytlsnb.model.reward.po.Reward;
+import love.ytlsnb.model.reward.po.RewardPhoto;
 import love.ytlsnb.model.reward.vo.RewardVO;
 import love.ytlsnb.reward.service.RewardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,6 +26,7 @@ import java.util.List;
 public class RewardController {
     @Autowired
     private RewardService rewardService;
+
 
     /**
      * 新增奖品
@@ -50,6 +55,18 @@ public class RewardController {
     }
 
     /**
+     * 根据学校id查询奖品
+     * @param schoolId
+     * @return
+     */
+    @GetMapping("/{schoolId}")
+    public Result<List<Reward>> getPageBySchoolId(@PathVariable Long schoolId){
+        log.info("根据学校id查询奖品");
+        List<Reward> rewards= rewardService.selectBySchoolId(schoolId);
+        return Result.ok(rewards);
+    }
+
+    /**
      * 修改奖品呢信息
      * @param rewardDTO
      * @return
@@ -66,9 +83,19 @@ public class RewardController {
      * @return
      */
     @DeleteMapping("/{id}")
-    public Result<Boolean>deleteById(@PathVariable Long id){
-        log.info("删除奖品信息:{}",id);
-        return Result.ok(rewardService.deleteById(id));
+    public Result deleteWithPhotoById(@PathVariable Long id){
+        log.info("删除奖品所有信息:{}",id);
+        rewardService.deleteWithPhotoById(id);
+        return Result.ok();
 
     }
+
+    @DeleteMapping("/photo/delete")
+    public Result deletePhoto(RewardPhotoDTO rewardPhotoDTO){
+        log.info("删除奖品图片id：{}",rewardPhotoDTO);
+        rewardService.deleteByPhoto(rewardPhotoDTO);
+        return Result.ok();
+    }
+
+
 }

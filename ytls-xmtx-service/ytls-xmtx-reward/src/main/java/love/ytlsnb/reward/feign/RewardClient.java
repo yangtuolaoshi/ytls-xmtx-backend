@@ -4,6 +4,7 @@ import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.reward.dto.RewardDTO;
 import love.ytlsnb.model.reward.dto.RewardQueryDTO;
+import love.ytlsnb.model.reward.po.Reward;
 import love.ytlsnb.model.reward.vo.RewardVO;
 import love.ytlsnb.reward.service.RewardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +62,15 @@ public class RewardClient {
      * @return
      */
     @DeleteMapping("/{id}")
-    public Result<Boolean>deleteById(@PathVariable Long id){
-        return Result.ok(rewardService.deleteById(id));
+    public Result deleteById(@PathVariable Long id){
+        rewardService.deleteWithPhotoById(id);
+        return Result.ok();
 
+    }
+
+    @GetMapping("/{schoolId}")
+    public Result<List<Reward>> getPageBySchoolId(@PathVariable Long schoolId){
+        List<Reward> rewards= rewardService.selectBySchoolId(schoolId);
+        return Result.ok(rewards);
     }
 }

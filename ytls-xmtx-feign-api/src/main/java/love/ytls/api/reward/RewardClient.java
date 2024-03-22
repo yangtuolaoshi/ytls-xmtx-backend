@@ -6,6 +6,7 @@ import love.ytlsnb.model.quest.dto.QuestQueryDTO;
 import love.ytlsnb.model.quest.vo.QuestVo;
 import love.ytlsnb.model.reward.dto.RewardDTO;
 import love.ytlsnb.model.reward.dto.RewardQueryDTO;
+import love.ytlsnb.model.reward.po.Reward;
 import love.ytlsnb.model.reward.vo.RewardVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
@@ -35,4 +36,7 @@ public interface RewardClient {
 
     @DeleteMapping("/api/reward/{id}")
     Result<Boolean>deleteById(@PathVariable Long id);
+
+    @GetMapping("/api/reward/{schoolId}")
+    Result<List<Reward>> getPageBySchoolId(@PathVariable Long schoolId);
 }
