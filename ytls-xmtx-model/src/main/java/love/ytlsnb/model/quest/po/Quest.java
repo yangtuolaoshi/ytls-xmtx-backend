@@ -85,6 +85,12 @@ public class Quest {
     private Integer rightValue;
 
     /**
+     * 树ID-指第几棵树
+     */
+    @TableField("tree_id")
+    private Integer treeId;
+
+    /**
      * 创建时间
      */
     @TableField("create_time")
@@ -104,4 +110,22 @@ public class Quest {
     @TableField("is_deleted")
     @TableLogic(value = "0", delval = "1")
     private Integer isDeleted;
+
+    // 重写哈希值和equals，方便使用哈希表
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Quest quest = (Quest) o;
+        return id != null ? id.equals(quest.id) : quest.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 }

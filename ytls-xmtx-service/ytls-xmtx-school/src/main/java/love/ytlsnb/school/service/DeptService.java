@@ -13,5 +13,5 @@ import java.util.List;
 public interface DeptService extends IService<Dept> {
     void addDept(DeptInsertDTO deptInsertDTO);
 
-    List<Dept> listDeptBySchoolId(Long schoolId);
+    List<Dept> listDeptBySchoolId();
 }

@@ -34,36 +34,6 @@ public class QuestSchedule {
     private String scheduleTitle;
 
     /**
-     * 管理员审核
-     */
-    @TableField("admin_check")
-    private Integer adminCheck;
-
-    /**
-     * 照片识别
-     */
-    @TableField("photo_check")
-    private Integer photoCheck;
-
-    /**
-     * 地点识别
-     */
-    @TableField("location_check")
-    private Integer locationCheck;
-
-    /**
-     * 面部识别（硬件）
-     */
-    @TableField("face_check")
-    private Integer faceCheck;
-
-//    /**
-//     * 打卡方式 三位二进制表示 XXX-上传图片/地点检测/人工审核 0为禁用 1为开启
-//     */
-//    @TableField("clock_in_method")
-//    private Integer clockInMethod;
-
-    /**
      * 启用地点 0-禁用 1-启用
      */
     @TableField("need_location")

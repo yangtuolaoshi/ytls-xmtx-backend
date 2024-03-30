@@ -31,6 +31,7 @@
         where right_value > #{rightValue}
           and left_value > #{leftValue}
           and school_id = #{schoolId}
+          and tree_id = #{treeId}
           and is_deleted = 0;
     </update>
 
@@ -39,6 +40,7 @@
         set right_value = (right_value + 2)
         where right_value >= #{rightValue}
           and school_id = #{schoolId}
+          and tree_id = #{treeId}
           and is_deleted = 0;
     </update>
 
@@ -47,6 +49,7 @@
         set left_value = (left_value - 2)
         where left_value > #{leftValue}
           and school_id = #{schoolId}
+          and tree_id = #{treeId}
           and is_deleted = 0;
     </update>
 
@@ -55,6 +58,7 @@
         set right_value = (right_value - 2)
         where right_value > #{rightValue}
           and school_id = #{schoolId}
+          and tree_id = #{treeId}
           and is_deleted = 0;
     </update>
 </mapper>

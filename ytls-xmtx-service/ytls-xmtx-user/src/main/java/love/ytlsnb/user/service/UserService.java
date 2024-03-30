@@ -59,4 +59,11 @@ public interface UserService extends IService<User> {
     void deleteUserById(Long id);
 
     User getUser();
+
+    /**
+     * 添加积分
+     * @param reward 任务奖励
+     * @return 是否添加成功
+     */
+    Boolean addPoint(int reward);
 }

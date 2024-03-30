@@ -1,0 +1,43 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://sh-cdb-l0mn910i.sql.tencentcdb.com:63660/ytls_xmtx_quest?useSSL=false&useUnicode=true&characterEncoding=utf-8
+    username: dev
+    password: yangtuo233
+  data:
+    redis:
+      host: 139.196.230.249
+      password: yangtuo233
+      port: 6379
+      database: 0
+logging:
+  level:
+    love.ytlsnb.quest.mapper: debug
+xmtx:
+  cache:
+    null-ttl: 30000   # 三十秒
+  jwt:
+    user-secret-key: abcdefghabcdefghabcdefghabcdefgh   # 32位
+    user-ttl: 1800000000   # 三十分钟*1000
+    user-token-name: Authentication-User
+    admin-secret-key: abcdefghabcdefghabcdefghabcdefgh   # 32位
+    admin-ttl: 1800000000   # 三十分钟*1000
+    admin-token-name: Authentication-Coladmin
+  user:
+    student-id-param1: 3    # 用户学号脱敏保留前几位
+    student-id-param2: 4    # 用户学号脱敏保留后几位
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+feign:
+  client:
+    config:
+      default: # 表示全局生效
+        loggerLevel: FULL

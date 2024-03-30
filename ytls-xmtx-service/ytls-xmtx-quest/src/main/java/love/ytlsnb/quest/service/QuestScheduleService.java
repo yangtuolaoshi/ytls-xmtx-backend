@@ -4,9 +4,9 @@ import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.quest.dto.MapFilterDTO;
 import love.ytlsnb.model.quest.dto.QuestDTO;
 import love.ytlsnb.model.quest.po.QuestSchedule;
-import love.ytlsnb.model.quest.vo.QuestScheduleInfoVO;
-import love.ytlsnb.model.quest.vo.QuestScheduleVo;
+import love.ytlsnb.model.quest.vo.*;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -72,4 +72,24 @@ public interface QuestScheduleService {
      * @return 总进度数
      */
     Long getCountByQuestId(Long questId);
+
+    /**
+     * 根据任务ID查询它的所有进度，并展示进度的完成情况
+     * @return 这个任务的进度集合
+     */
+    Collection<QuestScheduleCompletionVO> getQuestInfoPageSchedule(Long questId);
+
+    /**
+     * 根据任务ID获取这个任务进度的坐标点，排除已完成的进度
+     * @param questId 任务ID
+     * @return 坐标点集合
+     */
+    List<QuestScheduleMapPoint> getQuestInfoPageMap(Long questId);
+
+    /**
+     * 根据进度ID获取进度详情页数据
+     * @param id 进度ID
+     * @return 进度详情页数据
+     */
+    QuestSchedulePageInfoVO getQuestScheduleInfoPage(Long id);
 }

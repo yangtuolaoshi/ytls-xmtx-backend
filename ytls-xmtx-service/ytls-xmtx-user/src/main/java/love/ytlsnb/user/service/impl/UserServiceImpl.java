@@ -37,7 +37,9 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +50,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static love.ytlsnb.common.constants.RedisConstant.POINT_RANKING_PREFIX;
 
 /**
  * 用户基本信息业务层实现类
@@ -485,7 +489,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return user;
     }
 
-
     @Override
     public void sendShortMessage(String phone) throws Exception {
         // 校验手机号
@@ -716,5 +719,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.error("文件上传失败 ->", e);
             throw new BusinessException(ResultCodes.SERVER_ERROR, "文件上传异常");
         }
+    }
+
+    @Transactional
+    @Override
+    public Boolean addPoint(int reward) {
+        // 设置用户信息
+        Long userId = UserHolder.getUser().getId();
+        User user = userMapper.selectById(userId);
+        Long point = user.getPoint();
+        user.setPoint(point + reward);
+        // 更新排行榜
+        ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
+        Set<ZSetOperations.TypedTuple<String>> tuples = new HashSet<>();
+        ZSetOperations.TypedTuple<String> typedTuple = new DefaultTypedTuple<String>(userId.toString(), Double.valueOf(user.getPoint()));
+        tuples.add(typedTuple);
+        zSetOperations.add(POINT_RANKING_PREFIX, tuples);
+        return userMapper.updateById(user) > 0;
     }
 }

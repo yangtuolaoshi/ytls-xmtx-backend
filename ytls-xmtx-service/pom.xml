@@ -93,5 +93,9 @@
             <artifactId>mybatis-plus-extension</artifactId>
             <version>3.5.3.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+        </dependency>
     </dependencies>
 </project>
