@@ -67,7 +67,7 @@ public class CommonUtil {
             return false;
         } else {
             // 验证码已使用，删除
-            redisTemplate.opsForValue().getOperations().delete(phoneCodeKey);
+            redisTemplate.delete(phoneCodeKey);
             return true;
         }
     }
