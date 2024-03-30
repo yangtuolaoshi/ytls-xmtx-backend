@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="ytls-xmtx-common" />
         <module name="ytls-xmtx-quest" />
+        <module name="ytls-xmtx-ad" />
         <module name="ytls-xmtx-admin-gateway" />
         <module name="ytls-xmtx-user" />
         <module name="ytls-xmtx-feign-api" />
@@ -31,6 +32,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="ytls-xmtx" options="" />
+      <module name="ytls-xmtx-ad" options="-parameters" />
       <module name="ytls-xmtx-admin-gateway" options="-parameters" />
       <module name="ytls-xmtx-app-gateway" options="-parameters" />
       <module name="ytls-xmtx-coladmin" options="-parameters" />

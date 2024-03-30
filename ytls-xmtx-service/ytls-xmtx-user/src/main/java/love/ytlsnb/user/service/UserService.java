@@ -24,7 +24,7 @@ public interface UserService extends IService<User> {
 
     List<UserVO> listByConditions(UserQueryDTO userQueryDTO);
 
-    String login(UserLoginDTO userLoginDTO, HttpServletRequest request);
+    String login(UserLoginDTO userLoginDTO);
 
     void register(UserRegisterDTO userRegisterDTO);
 
