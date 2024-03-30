@@ -114,11 +114,13 @@ public class Quest {
     // 重写哈希值和equals，方便使用哈希表
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Quest quest = (Quest) o;
-
         return id != null ? id.equals(quest.id) : quest.id == null;
     }
 
