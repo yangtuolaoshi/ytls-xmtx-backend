@@ -26,7 +26,7 @@ public class User {
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     /**
-     * 主键ID
+     * 用户信息ID
      */
     private Long userInfoId;
     /**
