@@ -4,7 +4,9 @@ import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.quest.dto.QuestDTO;
 import love.ytlsnb.model.quest.dto.QuestQueryDTO;
 import love.ytlsnb.model.quest.po.Quest;
+import love.ytlsnb.model.quest.vo.QuestInfoPageVO;
 import love.ytlsnb.model.quest.vo.QuestInfoVo;
+import love.ytlsnb.model.quest.vo.QuestListItemVO;
 import love.ytlsnb.model.quest.vo.QuestVo;
 
 import java.util.List;
@@ -59,4 +61,32 @@ public interface QuestService {
      * @return 是否删除成功
      */
     Boolean deleteById(Long id, Long schoolId);
+
+    /**
+     * 根据ID获取详细信息，包括进度的完成情况
+     * @param id 任务ID
+     * @return 任务的详细信息
+     */
+    QuestInfoPageVO getQuestInfoById(Long id);
+
+    /**
+     * 获取当前用户正在进行中的任务
+     * @param type 任务类型
+     * @return 进行中的任务集合
+     */
+    List<QuestListItemVO> getOngoingQuests(Integer type);
+
+    /**
+     * 获取当前用户已完成的任务
+     * @param type 任务类型
+     * @return 已完成的任务集合
+     */
+    List<QuestListItemVO> getFinishedQuests(Integer type);
+
+    /**
+     * 获取未开始的任务
+     * @param type 任务类型
+     * @return 未开始的任务集合
+     */
+    List<QuestListItemVO> getUnstartedQuests(Integer type);
 }

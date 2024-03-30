@@ -15,4 +15,18 @@ public interface QuestLocationPhotoService {
      * @return 是否添加成功
      */
     Boolean addBatchByUrls(List<String> urls, Long locationId);
+
+    /**
+     * 根据ID批量删除
+     * @param locationId 图片ID集合
+     * @return 是否删除成功
+     */
+    Boolean deleteByLocationId(Long locationId);
+
+    /**
+     * 删除一组地点对应的图片
+     * @param locationIds 地点ID集合
+     * @return 是否删除成功
+     */
+    Boolean deleteByLocationIds(List<Long> locationIds);
 }

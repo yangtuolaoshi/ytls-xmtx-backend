@@ -1,10 +1,12 @@
 package love.ytlsnb.quest.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import love.ytlsnb.model.quest.po.QuestLocationPhoto;
 import love.ytlsnb.quest.mapper.QuestLocationPhotoMapper;
 import love.ytlsnb.quest.service.QuestLocationPhotoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
@@ -21,6 +23,7 @@ public class QuestLocationPhotoServiceImpl implements QuestLocationPhotoService 
     @Autowired
     private QuestLocationPhotoMapper questLocationPhotoMapper;
 
+    @Transactional
     @Override
     public Boolean addBatchByUrls(List<String> urls, Long locationId) {
         // TODO 消除for循环，实现真正的批量插入
@@ -40,5 +43,20 @@ public class QuestLocationPhotoServiceImpl implements QuestLocationPhotoService 
             questLocationPhotoMapper.insert(photo);
         }
         return true;
+    }
+
+    @Transactional
+    @Override
+    public Boolean deleteByLocationId(Long locationId) {
+        LambdaQueryWrapper<QuestLocationPhoto> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(QuestLocationPhoto::getLocationId, locationId);
+        return questLocationPhotoMapper.delete(queryWrapper) > 0;
+    }
+
+    @Override
+    public Boolean deleteByLocationIds(List<Long> locationIds) {
+        LambdaQueryWrapper<QuestLocationPhoto> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(QuestLocationPhoto::getLocationId, locationIds);
+        return questLocationPhotoMapper.delete(queryWrapper) > 0;
     }
 }

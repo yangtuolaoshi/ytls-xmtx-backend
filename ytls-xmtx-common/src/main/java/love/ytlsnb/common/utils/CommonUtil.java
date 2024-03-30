@@ -41,13 +41,16 @@ public class CommonUtil {
         String phoneCodeKey = RedisConstant.PHONE_CODE_PREFIX + phone;
         // 校验是否可以发送
         Long expire = redisTemplate.opsForValue().getOperations().getExpire(phoneCodeKey);
-        if (expire != null && expire > commonProperties.getPhoneCodeTtl() - commonProperties.getResendCodeTimeInterval()) {
+        // TODO 这个地方也没法正常从配置中获取，只能写死
+//        if (expire != null && expire > commonProperties.getPhoneCodeTtl() - commonProperties.getResendCodeTimeInterval()) {
+        if (expire != null && expire > 864000000 - 60000) {
             throw new BusinessException(ResultCodes.FORBIDDEN, "请在一分钟后重试");
         }
         // 发送验证码
         String code = aliUtil.sendShortMessage(phone);
         // 存储验证码
-        redisTemplate.opsForValue().set(phoneCodeKey, code, commonProperties.getPhoneCodeTtl(), TimeUnit.MILLISECONDS);
+//        redisTemplate.opsForValue().set(phoneCodeKey, code, commonProperties.getPhoneCodeTtl(), TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set(phoneCodeKey, code, 864000000, TimeUnit.MILLISECONDS);
     }
 
     /**

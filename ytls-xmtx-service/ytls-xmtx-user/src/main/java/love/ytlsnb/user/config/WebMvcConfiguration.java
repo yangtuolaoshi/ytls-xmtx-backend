@@ -31,7 +31,10 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 .excludePathPatterns(UserConstant.USER_REGISTER_URL)
                 .excludePathPatterns(UserConstant.USER_LOGIN_URL)
                 .excludePathPatterns(UserConstant.USER_REPASSWORD_URL)
-                .excludePathPatterns(UserConstant.USER_GETCODE_URL);
+                .excludePathPatterns(UserConstant.USER_GETCODE_URL)
+                .addPathPatterns("/userInfo/**")
+                .addPathPatterns("/user/**")
+                .addPathPatterns("/ranking/**");
     }
 
     /**

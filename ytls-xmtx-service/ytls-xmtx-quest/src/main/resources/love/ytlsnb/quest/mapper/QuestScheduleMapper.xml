@@ -30,4 +30,30 @@
         and l.latitude IS NOT NULL
         ;
     </select>
+
+    <select id="getByQuestAndUserId" resultType="love.ytlsnb.model.quest.vo.QuestScheduleCompletionVO">
+        SELECT s.id                   as scheduleId,
+               s.quest_id             as questId,
+               s.schedule_title       as scheduleTitle,
+               sl.id                  as scheduleLogId,
+        FROM tb_quest_schedule s
+                 LEFT JOIN tb_quest_schedule_log sl ON s.id = sl.quest_schedule_id
+            AND sl.user_id = #{userId}
+        WHERE s.is_deleted = 0
+          AND s.quest_id = #{questId};
+    </select>
+
+    <select id="getMapByQuestAndUserId" resultType="love.ytlsnb.model.quest.vo.QuestScheduleMapPoint">
+        SELECT s.id             AS scheduleId,
+               s.schedule_title AS scheduleTitle,
+               l.longitude,
+               l.latitude
+        FROM tb_quest_schedule s
+                 LEFT JOIN tb_quest_schedule_log sl
+                           ON (s.id = sl.quest_schedule_id AND sl.user_id = #{userId})
+                 LEFT JOIN tb_quest_location l ON s.location_id = l.id
+        WHERE s.is_deleted = 0
+          AND s.quest_id = #{questId}
+          AND sl.id IS NULL;
+    </select>
 </mapper>

@@ -1,5 +1,6 @@
 package love.ytlsnb.quest.utils;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.model.quest.dto.QuestDTO;
 import love.ytlsnb.model.quest.po.Quest;
@@ -8,6 +9,7 @@ import love.ytlsnb.model.quest.po.QuestLocation;
 import love.ytlsnb.model.quest.po.QuestSchedule;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static love.ytlsnb.common.constants.ResultCodes.UNPROCESSABLE_ENTITY;
 
@@ -18,6 +20,66 @@ import static love.ytlsnb.common.constants.ResultCodes.UNPROCESSABLE_ENTITY;
  */
 public final class QuestUtil {
     private QuestUtil() {}
+
+    /**
+     * 任务参数检测
+     *
+     * @param questDTO 任务添加表单
+     */
+    public static void checkQuestParams(QuestDTO questDTO) {
+        // 标题
+        String questTitle = questDTO.getQuestTitle();
+        if (questTitle == null || "".equals(questTitle)) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "请输入任务标题");
+        }
+        if (questTitle.length() > 16) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务标题不能超过16个字符");
+        }
+        // 任务类型
+        Integer type = questDTO.getType();
+        if (type == null) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "请选择任务类型");
+        }
+        if (type < 0 || type > 3) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务类型非法");
+        }
+        // 任务目标
+        String objective = questDTO.getObjective();
+        if (objective == null || "".equals(objective)) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "请输入任务目标");
+        }
+        if (objective.length() > 64) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务目标不能超过64个字符");
+        }
+        // 任务详情
+        String questDescription = questDTO.getQuestDescription();
+        if (questDescription != null && questDescription.length() > 256) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务详情不能超过256个字符");
+        }
+        // 准备物品
+        String requiredItem = questDTO.getRequiredItem();
+        if (requiredItem != null && requiredItem.length() > 64) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "准备物品不能超过64个字符");
+        }
+        // 任务提示
+        String tip = questDTO.getTip();
+        if (tip != null && tip.length() > 64) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "任务提示不能超过64个字符");
+        }
+        // 任务奖励
+        Integer reward = questDTO.getReward();
+        if (reward == null) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "请设置任务完成奖励");
+        }
+        if (reward < 0) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "奖励数据非法");
+        }
+        // 启用状态
+        Integer questStatus = questDTO.getQuestStatus();
+        if (questStatus == null || questStatus > 1 || questStatus < 0) {
+            throw new BusinessException(UNPROCESSABLE_ENTITY, "请选择启用状态");
+        }
+    }
 
     /**
      * 进度参数检测
@@ -32,13 +94,11 @@ public final class QuestUtil {
             throw new BusinessException(UNPROCESSABLE_ENTITY, "进度标题不能超过16个字符");
         }
         // 打卡方式
-        Integer adminCheck = questDTO.getAdminCheck();
-        Integer photoCheck = questDTO.getPhotoCheck();
-        Integer locationCheck = questDTO.getLocationCheck();
-        Integer faceCheck = questDTO.getFaceCheck();
-        if (adminCheck == null && photoCheck == null && locationCheck == null && faceCheck == null) {
+        List<Long> clockMethodIds = questDTO.getClockMethodIds();
+        if (clockMethodIds == null || clockMethodIds.size() == 0) {
             throw new BusinessException(UNPROCESSABLE_ENTITY, "请至少选择一种打卡方式");
         }
+        // 进度启用状态
         Integer scheduleStatus = questDTO.getScheduleStatus();
         if (scheduleStatus == null || scheduleStatus > 1 || scheduleStatus < 0) {
             throw new BusinessException(UNPROCESSABLE_ENTITY, "请设置进度状态");
@@ -117,10 +177,7 @@ public final class QuestUtil {
         questSchedule.setScheduleStatus(questDTO.getScheduleStatus());
         questSchedule.setCreateTime(LocalDateTime.now());
         questSchedule.setNeedLocation(questDTO.getNeedLocation());
-        questSchedule.setAdminCheck(questDTO.getAdminCheck());
-        questSchedule.setPhotoCheck(questDTO.getPhotoCheck());
-        questSchedule.setLocationCheck(questDTO.getLocationCheck());
-        questSchedule.setFaceCheck(questDTO.getFaceCheck());
+        // TODO 设置打卡方式
         questSchedule.setIsDeleted(0);
         return questSchedule;
     }

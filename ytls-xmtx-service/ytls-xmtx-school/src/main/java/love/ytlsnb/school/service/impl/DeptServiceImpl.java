@@ -51,7 +51,8 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
     }
 
     @Override
-    public List<Dept> listDeptBySchoolId(Long schoolId) {
+    public List<Dept> listDeptBySchoolId() {
+        Long schoolId = ColadminHolder.getColadmin().getSchoolId();
         return deptMapper.selectList(new LambdaQueryWrapper<Dept>()
                 .eq(Dept::getSchoolId, schoolId));
     }

@@ -4,20 +4,16 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import love.ytlsnb.common.exception.BusinessException;
+import love.ytlsnb.common.utils.UserHolder;
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.quest.dto.MapFilterDTO;
 import love.ytlsnb.model.quest.dto.QuestDTO;
-import love.ytlsnb.model.quest.po.Quest;
-import love.ytlsnb.model.quest.po.QuestLocation;
-import love.ytlsnb.model.quest.po.QuestLocationPhoto;
-import love.ytlsnb.model.quest.po.QuestSchedule;
-import love.ytlsnb.model.quest.vo.QuestScheduleInfoVO;
-import love.ytlsnb.model.quest.vo.QuestScheduleVo;
-import love.ytlsnb.quest.mapper.QuestLocationMapper;
-import love.ytlsnb.quest.mapper.QuestLocationPhotoMapper;
-import love.ytlsnb.quest.mapper.QuestMapper;
-import love.ytlsnb.quest.mapper.QuestScheduleMapper;
+import love.ytlsnb.model.quest.po.*;
+import love.ytlsnb.model.quest.vo.*;
+import love.ytlsnb.quest.mapper.*;
+import love.ytlsnb.quest.service.ClockInMethodService;
 import love.ytlsnb.quest.service.QuestLocationPhotoService;
+import love.ytlsnb.quest.service.QuestScheduleClockInMethodService;
 import love.ytlsnb.quest.service.QuestScheduleService;
 import love.ytlsnb.quest.utils.QuestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static love.ytlsnb.common.constants.ResultCodes.*;
 
@@ -48,10 +43,22 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
     private QuestLocationMapper questLocationMapper;
 
     @Autowired
+    private QuestScheduleLogMapper questScheduleLogMapper;
+
+    @Autowired
     private QuestLocationPhotoMapper questLocationPhotoMapper;
 
     @Autowired
+    private ClockInLogMapper clockInLogMapper;
+
+    @Autowired
     private QuestLocationPhotoService questLocationPhotoService;
+
+    @Autowired
+    private ClockInMethodService clockInMethodService;
+
+    @Autowired
+    private QuestScheduleClockInMethodService questScheduleClockInMethodService;
 
     /**
      * 检查任务表单数据
@@ -94,20 +101,25 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
             questLocationPhotoService.addBatchByUrls(photoUrls, locationId);
         }
         // 添加进度
-        LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(QuestSchedule::getScheduleTitle, questDTO.getQuestTitle())
-                .eq(QuestSchedule::getQuestId, questDTO.getQuestId());
-        if (questScheduleMapper.selectOne(queryWrapper) != null) {
-            throw new BusinessException(UNPROCESSABLE_ENTITY, "标题重复了，换一个试试");
-        }
+//        LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(QuestSchedule::getScheduleTitle, questDTO.getQuestTitle())
+//                .eq(QuestSchedule::getQuestId, questDTO.getQuestId());
+//        if (questScheduleMapper.selectOne(queryWrapper) != null) {
+//            throw new BusinessException(UNPROCESSABLE_ENTITY, "标题重复了，换一个试试");
+//        }
         questSchedule.setQuestId(questDTO.getQuestId());
         questScheduleMapper.insert(questSchedule);
-        return questSchedule.getId();
+        // 添加打卡方式
+        Long questScheduleId = questSchedule.getId();
+        List<Long> clockMethodIds = questDTO.getClockMethodIds();
+        questScheduleClockInMethodService.addClockInMethod2Schedule(questScheduleId, clockMethodIds);
+        return questScheduleId;
     }
 
     @Override
     public QuestScheduleInfoVO getInfoById(Long id) {
         QuestScheduleInfoVO questScheduleInfoVO = new QuestScheduleInfoVO();
+        // 查询进度基本信息
         QuestSchedule questSchedule = questScheduleMapper.selectById(id);
         if (questSchedule == null) {
             throw new BusinessException(NOT_FOUND, "进度不存在");
@@ -118,6 +130,7 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
         }
         questScheduleInfoVO.setQuestTitle(quest.getQuestTitle());
         BeanUtil.copyProperties(questSchedule, questScheduleInfoVO);
+        // 查询地点信息
         if (questSchedule.getNeedLocation() == 1 && questSchedule.getLocationId() != null) {
             QuestLocation questLocation = questLocationMapper.selectById(questSchedule.getLocationId());
             if (questLocation == null) {
@@ -129,6 +142,9 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
             List<QuestLocationPhoto> photos = questLocationPhotoMapper.selectList(photoQueryWrapper);
             questScheduleInfoVO.setLocationPhotos(photos);
         }
+        // 查询打卡方式
+        List<ClockInMethod> clockInMethods = clockInMethodService.getByQuestScheduleId(id);
+        questScheduleInfoVO.setClockInMethods(clockInMethods);
         return questScheduleInfoVO;
     }
 
@@ -177,18 +193,26 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
         if (questSchedule == null) {
             return false;
         }
+        // 至少保留一个进度
         LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(QuestSchedule::getQuestId, questSchedule.getQuestId());
         List<QuestSchedule> questSchedules = questScheduleMapper.selectList(queryWrapper);
         if (questSchedules.size() < 2) {
             throw new BusinessException(FORBIDDEN, "请至少保留一个进度");
         }
-        questLocationMapper.deleteById(questSchedule.getLocationId());
+        // 删除地点信息
+        Long locationId = questSchedule.getLocationId();
+        questLocationMapper.deleteById(locationId);
+        questLocationPhotoService.deleteByLocationId(locationId);
+        // 删除打卡绑定
+        questScheduleClockInMethodService.deleteByQuestScheduleId(id);
         return questScheduleMapper.deleteById(id) > 0;
     }
 
+    @Transactional
     @Override
     public Boolean deleteByQuestId(Long questId) {
+        // 找到所有的进度
         LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(QuestSchedule::getQuestId, questId);
         List<QuestSchedule> questSchedules = questScheduleMapper.selectList(queryWrapper);
@@ -200,9 +224,15 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
                 questLocationIds.add(questSchedule.getLocationId());
             }
         });
+        // 删除所有地点信息
         if (questLocationIds.size() > 0) {
             questLocationMapper.deleteBatchIds(questLocationIds);
+            // 删除所有地点图片信息
+            questLocationPhotoService.deleteByLocationIds(questLocationIds);
         }
+        // 删除所有打卡绑定
+        questScheduleClockInMethodService.deleteByQuestScheduleIds(questScheduleIds);
+        // 删除进度信息
         return questScheduleMapper.deleteBatchIds(questScheduleIds) > 0;
     }
 
@@ -211,5 +241,83 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
         LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(QuestSchedule::getQuestId, questId);
         return questScheduleMapper.selectCount(queryWrapper);
+    }
+
+    @Override
+    public Collection<QuestScheduleCompletionVO> getQuestInfoPageSchedule(Long questId) {
+        Long userId = UserHolder.getUser().getId();
+//        return questScheduleMapper.getByQuestAndUserId(questId, userId);
+        // 先查询该任务下的所有进度
+        LambdaQueryWrapper<QuestSchedule> questScheduleQueryWrapper = new LambdaQueryWrapper<>();
+        questScheduleQueryWrapper.eq(QuestSchedule::getQuestId, questId);
+        List<QuestSchedule> questSchedules = questScheduleMapper.selectList(questScheduleQueryWrapper);
+        Map<Long, QuestScheduleCompletionVO> questScheduleMap = new HashMap<>();// 哈希表便于查找
+        List<Long> questScheduleIds = new LinkedList<>();
+        questSchedules.forEach(questSchedule -> {
+            Long questScheduleId = questSchedule.getId();
+            String scheduleTitle = questSchedule.getScheduleTitle();
+            // 暂存进度ID
+            questScheduleIds.add(questScheduleId);
+            // 创建完成情况对象
+            QuestScheduleCompletionVO questScheduleCompletionVO = new QuestScheduleCompletionVO();
+            questScheduleCompletionVO.setQuestId(questId);
+            questScheduleCompletionVO.setScheduleTitle(scheduleTitle);
+            questScheduleCompletionVO.setScheduleId(questScheduleId);
+            questScheduleCompletionVO.setIsFinished(0);
+            questScheduleMap.put(questScheduleId, questScheduleCompletionVO);
+        });
+        // 查询该用户的完成记录
+        LambdaQueryWrapper<QuestScheduleLog> questScheduleLogQueryWrapper = new LambdaQueryWrapper<>();
+        questScheduleLogQueryWrapper
+                .eq(QuestScheduleLog::getUserId, userId)
+                .in(QuestScheduleLog::getQuestScheduleId, questScheduleIds);
+        List<QuestScheduleLog> questScheduleLogs = questScheduleLogMapper.selectList(questScheduleLogQueryWrapper);
+        // 过滤已完成的进度
+        questScheduleLogs.forEach(questScheduleLog -> {
+            Long questScheduleId = questScheduleLog.getQuestScheduleId();
+            QuestScheduleCompletionVO questScheduleCompletionVO = questScheduleMap.get(questScheduleId);
+            // 不为null说明进度已完成了
+            if (questScheduleCompletionVO != null) {
+                questScheduleCompletionVO.setIsFinished(1);
+            }
+        });
+        return questScheduleMap.values();
+    }
+
+    @Override
+    public List<QuestScheduleMapPoint> getQuestInfoPageMap(Long questId) {
+        Long userId = UserHolder.getUser().getId();
+        return questScheduleMapper.getMapByQuestAndUserId(questId, userId);
+    }
+
+    @Override
+    public QuestSchedulePageInfoVO getQuestScheduleInfoPage(Long id) {
+        Long userId = UserHolder.getUser().getId();
+        // 查询基本信息
+        QuestSchedulePageInfoVO questSchedulePageInfoVO = new QuestSchedulePageInfoVO();
+        QuestSchedule questSchedule = questScheduleMapper.selectById(id);
+        BeanUtil.copyProperties(questSchedule, questSchedulePageInfoVO);
+        Long questId = questSchedule.getQuestId();
+        questSchedulePageInfoVO.setScheduleId(questId);
+        // 查询是否完成
+        LambdaQueryWrapper<QuestScheduleLog> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper
+                .eq(QuestScheduleLog::getQuestScheduleId, id)
+                .eq(QuestScheduleLog::getUserId, userId);
+        QuestScheduleLog questScheduleLog = questScheduleLogMapper.selectOne(queryWrapper);
+        if (questScheduleLog != null) {
+            questSchedulePageInfoVO.setIsFinished(1);
+        } else {
+            questSchedulePageInfoVO.setIsFinished(0);
+        }
+        // 查询打卡记录
+        LambdaQueryWrapper<ClockInLog> clockInLogQueryWrapper = new LambdaQueryWrapper<>();
+        clockInLogQueryWrapper.eq(ClockInLog::getQuestScheduleId, id);
+        List<ClockInLog> clockInLogs = clockInLogMapper.selectList(clockInLogQueryWrapper);
+        questSchedulePageInfoVO.setClockInLogs(clockInLogs);
+        // 查询这个进度所有的打卡方式
+        List<ClockInMethod> clockInMethods = questScheduleClockInMethodService.getClockInMethodsByQuestScheduleId(id);
+        questSchedulePageInfoVO.setClockInMethods(clockInMethods);
+        return questSchedulePageInfoVO;
     }
 }
