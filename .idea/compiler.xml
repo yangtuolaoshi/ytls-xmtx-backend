@@ -48,7 +48,7 @@
       <module name="ytls-xmtx-school" options="-parameters" />
       <module name="ytls-xmtx-school-gateway" options="-parameters" />
       <module name="ytls-xmtx-search" options="-parameters" />
-      <module name="ytls-xmtx-service" options="" />
+      <module name="ytls-xmtx-service" options="-parameters" />
       <module name="ytls-xmtx-user" options="-parameters" />
     </option>
   </component>

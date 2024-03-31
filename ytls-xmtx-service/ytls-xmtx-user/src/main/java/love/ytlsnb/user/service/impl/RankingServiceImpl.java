@@ -49,7 +49,7 @@ public class RankingServiceImpl implements RankingService {
     public List<RankingItemVO> getRanking(int page, int size) {
         List<RankingItemVO> rankingItemVOs = new ArrayList<>();
         ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
-        Set<String> range = zSetOperations.reverseRange(POINT_RANKING_PREFIX, page, size);
+        Set<String> range = zSetOperations.reverseRange(POINT_RANKING_PREFIX, (long) (page - 1) * size, size);
         List<User> users = userMapper.selectBatchIds(range);
         for (User user : users) {
             RankingItemVO rankingItemVO = new RankingItemVO();
