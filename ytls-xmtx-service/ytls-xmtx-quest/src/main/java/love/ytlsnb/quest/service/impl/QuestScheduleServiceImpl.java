@@ -368,4 +368,9 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
         questSchedulePageInfoVO.setClockInMethods(clockInMethods);
         return questSchedulePageInfoVO;
     }
+
+    @Override
+    public QuestCardVO getNearest(Double longitude, Double latitude) {
+        return null;
+    }
 }
