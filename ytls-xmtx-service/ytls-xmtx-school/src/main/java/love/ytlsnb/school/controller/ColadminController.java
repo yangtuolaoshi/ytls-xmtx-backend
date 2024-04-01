@@ -2,6 +2,9 @@ package love.ytlsnb.school.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import love.ytlsnb.model.common.LogOperation;
+import love.ytlsnb.model.common.Operator;
+import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.school.dto.ColadminLoginDTO;
 import love.ytlsnb.model.school.dto.ColadminRegisterDTO;
 import love.ytlsnb.model.school.po.Coladmin;
@@ -29,6 +32,7 @@ public class ColadminController {
         return Result.ok(coladmin);
     }
 
+    @LogOperation(Operator.COLADMIN)
     @PostMapping("/login")
     public Result<String> login(@RequestBody ColadminLoginDTO coladminLoginDTO, HttpServletRequest request) {
         log.info("管理员登录:{}", coladminLoginDTO);
@@ -36,6 +40,7 @@ public class ColadminController {
         return Result.ok(jwt);
     }
 
+    @LogOperation(Operator.COLADMIN)
     @PostMapping("/register")
     public Result register(@RequestBody ColadminRegisterDTO coladminRegisterDTO) {
         log.info("管理员注册:{}", coladminRegisterDTO);

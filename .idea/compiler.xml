@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="ytls-xmtx-common" />
         <module name="ytls-xmtx-quest" />
+        <module name="ytls-xmtx-ad" />
         <module name="ytls-xmtx-admin-gateway" />
         <module name="ytls-xmtx-user" />
         <module name="ytls-xmtx-feign-api" />
@@ -23,12 +24,15 @@
       <module name="ytls-xmtx-coladmin" target="17" />
       <module name="ytls-xmtx-coladmin-gateway (1)" target="17" />
       <module name="ytls-xmtx-colgadmin-gateway" target="17" />
+      <module name="ytls-xmtx-ranking" target="17" />
       <module name="ytls-xmtx-school-gateway" target="17" />
+      <module name="ytls-xmtx-search" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="ytls-xmtx" options="" />
+      <module name="ytls-xmtx-ad" options="-parameters" />
       <module name="ytls-xmtx-admin-gateway" options="-parameters" />
       <module name="ytls-xmtx-app-gateway" options="-parameters" />
       <module name="ytls-xmtx-coladmin" options="-parameters" />
@@ -39,10 +43,12 @@
       <module name="ytls-xmtx-gateway" options="" />
       <module name="ytls-xmtx-model" options="-parameters" />
       <module name="ytls-xmtx-quest" options="-parameters" />
+      <module name="ytls-xmtx-ranking" options="-parameters" />
       <module name="ytls-xmtx-reward" options="-parameters" />
       <module name="ytls-xmtx-school" options="-parameters" />
       <module name="ytls-xmtx-school-gateway" options="-parameters" />
-      <module name="ytls-xmtx-service" options="" />
+      <module name="ytls-xmtx-search" options="-parameters" />
+      <module name="ytls-xmtx-service" options="-parameters" />
       <module name="ytls-xmtx-user" options="-parameters" />
     </option>
   </component>

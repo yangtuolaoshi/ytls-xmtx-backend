@@ -29,11 +29,15 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(holderIntercepter)
-                .excludePathPatterns(SchoolConstant.COLADMIN_LOGIN_URL)
                 .addPathPatterns(SchoolConstant.COLADMIN_ALL_URL)
                 .addPathPatterns(SchoolConstant.SCHOOL_ALL_URL)
                 .addPathPatterns(SchoolConstant.QUEST_ALL_URL)
-                .addPathPatterns(SchoolConstant.SCHEDULE_ALL_URL);
+                .addPathPatterns(SchoolConstant.USER_ALL_URL)
+                .addPathPatterns(SchoolConstant.SCHEDULE_ALL_URL)
+                .addPathPatterns("/coladmin/**")
+                .addPathPatterns("/clazz/**")
+                .addPathPatterns("/dept/**")
+                .excludePathPatterns(SchoolConstant.COLADMIN_LOGIN_URL);
     }
     /**
      * 处理 Bean 对象与 JSON的转换，会添加一个转换器，可以处理对象中 LocalDateTime这一类消息的转换

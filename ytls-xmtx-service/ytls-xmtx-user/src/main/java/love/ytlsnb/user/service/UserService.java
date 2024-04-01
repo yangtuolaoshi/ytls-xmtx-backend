@@ -25,7 +25,7 @@ public interface UserService extends IService<User> {
 
     List<UserVO> listByConditions(UserQueryDTO userQueryDTO);
 
-    String login(UserLoginDTO userLoginDTO, HttpServletRequest request);
+    String login(UserLoginDTO userLoginDTO);
 
     void register(UserRegisterDTO userRegisterDTO);
 
@@ -61,5 +61,11 @@ public interface UserService extends IService<User> {
 
     User getUser();
 
+    /**
+     * 添加积分
+     * @param reward 任务奖励
+     * @return 是否添加成功
+     */
+    Boolean addPoint(int reward);
     Result exchangeReward(Long rewardId);
 }

@@ -1,6 +1,7 @@
 package love.ytlsnb.model.quest.vo;
 
 import lombok.Data;
+import love.ytlsnb.model.quest.po.ClockInMethod;
 import love.ytlsnb.model.quest.po.QuestLocationPhoto;
 
 import java.util.List;
@@ -24,24 +25,9 @@ public class QuestScheduleInfoVO {
     private String scheduleTitle;
 
     /**
-     * 管理员审核
+     * 打卡方式
      */
-    private Integer adminCheck;
-
-    /**
-     * 照片识别
-     */
-    private Integer photoCheck;
-
-    /**
-     * 地点识别
-     */
-    private Integer locationCheck;
-
-    /**
-     * 面部识别（硬件）
-     */
-    private Integer faceCheck;
+    private List<ClockInMethod> clockInMethods;
 
     /**
      * 启用地点

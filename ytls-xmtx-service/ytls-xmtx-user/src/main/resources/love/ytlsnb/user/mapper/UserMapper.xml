@@ -20,9 +20,9 @@
             </if>
             and u.school_id=#{schoolId}
             <if test="deptId != null">
-                and u.deptId=#{deptId}
+                and u.dept_id=#{deptId}
                 <if test="clazzId != null">
-                    and u.clazzId=#{clazzId}
+                    and u.clazz_id=#{clazzId}
                 </if>
             </if>
         </if>

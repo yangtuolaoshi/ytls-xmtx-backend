@@ -33,10 +33,10 @@ public class DeptController {
         return Result.ok();
     }
 
-    @GetMapping("/list/{schoolId}")
-    public Result<List<Dept>> listDeptBySchoolId(@PathVariable Long schoolId) {
-        log.info("根据学校Id获取所有的学院数据:{}", schoolId);
-        List<Dept> deptList = deptService.listDeptBySchoolId(schoolId);
+    @GetMapping("/all")
+    public Result<List<Dept>> listDeptBySchoolId() {
+        log.info("根据学校Id获取所有的学院数据");
+        List<Dept> deptList = deptService.listDeptBySchoolId();
         return Result.ok(deptList);
     }
 
