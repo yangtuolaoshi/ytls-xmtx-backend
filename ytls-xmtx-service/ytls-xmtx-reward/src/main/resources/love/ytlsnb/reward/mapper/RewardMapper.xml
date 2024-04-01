@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="love.ytlsnb.reward.mapper.RewardMapper">
+    <update id="updateStock">
+        update tb_reward set stock = #{stock} where id = #{id}
+    </update>
+
+
+    <select id="getPageByCondition" resultType="love.ytlsnb.model.reward.vo.RewardVO">
+    select * from tb_reward
+        <where>
+            <if test="title != null and title !=''">
+                and title like#{title}
+            </if>
+            <if test="status != null and title !=''">
+                and status =#{status}
+            </if>
+            <if test="cost != null and cost !=''">
+                and cost &lt;=#{cost}
+            </if>
+        </where>
+    </select>
+</mapper>

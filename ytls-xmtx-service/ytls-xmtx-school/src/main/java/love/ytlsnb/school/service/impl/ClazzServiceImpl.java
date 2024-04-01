@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import love.ytlsnb.common.constants.RedisConstant;
 import love.ytlsnb.common.utils.CacheClient;
+import love.ytlsnb.model.school.dto.ClazzDeleteDTO;
 import love.ytlsnb.model.school.dto.ClazzInsertDTO;
 import love.ytlsnb.model.school.dto.ClazzQueryDTO;
 import love.ytlsnb.model.school.po.Clazz;
@@ -53,5 +54,26 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
     public List<Clazz> listClazzByCondition(ClazzQueryDTO clazzQueryDTO) {
         // todo
         return clazzMapper.selectByMap(BeanUtil.beanToMap(clazzQueryDTO,false,true));
+    }
+
+
+
+    @Override
+    public Boolean updateClazz(ClazzInsertDTO clazzInsertDTO) {
+        Clazz clazz = BeanUtil.copyProperties(clazzInsertDTO,Clazz.class);
+        return clazzMapper.insert(clazz)>0;
+    }
+
+    @Override
+    public Boolean deleteClazz(ClazzDeleteDTO clazzDeleteDTO) {
+        Long clazzId = clazzDeleteDTO.getId();
+        clazzDeleteDTO.setDeleted((byte) 1);
+        return clazzMapper.deleteById(clazzId)>0;
+    }
+
+    @Override
+    public Clazz getClazzById(Long clazzId) {
+        Clazz clazz = clazzMapper.selectById(clazzId);
+        return clazz;
     }
 }
