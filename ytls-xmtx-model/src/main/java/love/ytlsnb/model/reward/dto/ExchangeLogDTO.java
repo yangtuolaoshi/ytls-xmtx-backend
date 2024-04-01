@@ -29,4 +29,6 @@ public class ExchangeLogDTO {
      */
     private Long userId;
 
+    private LocalDateTime createTime;
+
 }

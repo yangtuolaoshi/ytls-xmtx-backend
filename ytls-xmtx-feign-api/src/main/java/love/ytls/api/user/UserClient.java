@@ -35,4 +35,7 @@ public interface UserClient {
 
     @GetMapping("/api/user/listByConditions")
     PageResult<List<UserVO>> listByConditions(@SpringQueryMap UserQueryDTO userQueryDTO);
+
+    @PostMapping("/api/user/exchangeReward/{rewardId}")
+    Result exchangeReward(@PathVariable Long rewardId);
 }

@@ -3,4 +3,44 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="love.ytlsnb.reward.mapper.ExchangeLogMapper">
 
+    <select id="getPageByCondition" resultType="love.ytlsnb.model.reward.vo.ExchangeLogVO">
+        select e.create_time,
+        r.title,
+        ui.dept_name,ui.clazz_name,ui.name
+        from tb_exchange_log e
+        left outer join tb_reward r on e.reward_id = r.id,
+
+        tb_exchange_log ex
+        left outer join ytls_xmtx_user.tb_user u on ex.user_id = u.id,
+        ytls_xmtx_user.tb_user user
+        left outer join ytls_xmtx_user.tb_user_info ui on user.user_info_id = ui.id
+        <where>
+            <if test="exchangeLogQueryDTO.rewardTitle!=null and exchangeLogQueryDTO.rewardTitle!=''">
+                and r.title like concat ('%',#{exchangeLogQueryDTO.rewardTitle},'%')
+            </if>
+            <if test="exchangeLogQueryDTO.status!=null and exchangeLogQueryDTO.status!=''">
+                and r.status = #{exchangeLogQueryDTO.status}
+            </if>
+            <if test="exchangeLogQueryDTO.deptName !=null and exchangeLogQueryDTO.deptName!=''">
+                and ui.dept_name = #{exchangeLogQueryDTO.deptName}
+            </if>
+            <if test="exchangeLogQueryDTO.studentName!=null and exchangeLogQueryDTO.studentName!=''">
+                and ui.name= #{exchangeLogQueryDTO.studentName}
+            </if>
+            <if test="exchangeLogQueryDTO.clazzName!=null and exchangeLogQueryDTO.clazzName!=''">
+                and ui.clazz_name = #{exchangeLogQueryDTO.clazzName}
+            </if>
+            <if test="exchangeLogQueryDTO.startTime!=null and exchangeLogQueryDTO.startTime!=''
+            and exchangeLogQueryDTO.endTime!=null and exchangeLogQueryDTO.endTime!=''">
+                and e.create_time
+                BETWEEN
+                #{exchangeLogQueryDTO.startTime}
+                AND
+                #{exchangeLogQueryDTO.endTime}
+            </if>
+
+        </where>
+        limit #{page}, #{size};
+
+    </select>
 </mapper>

@@ -2,6 +2,7 @@ package love.ytlsnb.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
+import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.po.UserInfo;
@@ -59,4 +60,6 @@ public interface UserService extends IService<User> {
     void deleteUserById(Long id);
 
     User getUser();
+
+    Result exchangeReward(Long rewardId);
 }

@@ -56,6 +56,8 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
         return clazzMapper.selectByMap(BeanUtil.beanToMap(clazzQueryDTO,false,true));
     }
 
+
+
     @Override
     public Boolean updateClazz(ClazzInsertDTO clazzInsertDTO) {
         Clazz clazz = BeanUtil.copyProperties(clazzInsertDTO,Clazz.class);
@@ -67,5 +69,11 @@ public class ClazzServiceImpl extends ServiceImpl<ClazzMapper, Clazz> implements
         Long clazzId = clazzDeleteDTO.getId();
         clazzDeleteDTO.setDeleted((byte) 1);
         return clazzMapper.deleteById(clazzId)>0;
+    }
+
+    @Override
+    public Clazz getClazzById(Long clazzId) {
+        Clazz clazz = clazzMapper.selectById(clazzId);
+        return clazz;
     }
 }

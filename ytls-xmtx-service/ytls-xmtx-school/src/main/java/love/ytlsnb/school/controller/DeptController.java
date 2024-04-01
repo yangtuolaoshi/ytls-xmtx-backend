@@ -40,6 +40,12 @@ public class DeptController {
         return Result.ok(deptList);
     }
 
+    @GetMapping("/{deptId}")
+    public Result<Dept> selectByDeptId(@PathVariable Long deptId){
+        Dept dept = deptService.selectByDeptId(deptId);
+        return Result.ok(dept);
+    }
+
     @PutMapping("/update")
     public Result<Boolean> updateDept(@RequestBody DeptInsertDTO deptInsertDTO){
 

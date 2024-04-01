@@ -43,6 +43,11 @@ public class ExchangeLogController {
         return exchangeLogService.getPageByCondition(exchangeLogQueryDTO,page,size);
     }
 
+    @GetMapping("/{id}")
+    public Result<ExchangeLogVO> selectById(@PathVariable Long id){
+
+        return Result.ok(exchangeLogService.selectById(id));
+    }
 
 }
 

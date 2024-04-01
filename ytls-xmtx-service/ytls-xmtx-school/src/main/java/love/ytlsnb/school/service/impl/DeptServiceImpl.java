@@ -149,5 +149,11 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
 
     }
 
+    @Override
+    public Dept selectByDeptId(Long deptId) {
+        Dept dept = deptMapper.selectById(deptId);
+        return dept;
+    }
+
 
 }

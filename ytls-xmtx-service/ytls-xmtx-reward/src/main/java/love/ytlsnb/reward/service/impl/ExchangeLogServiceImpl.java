@@ -5,20 +5,24 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import love.ytls.api.school.SchoolClient;
 import love.ytls.api.user.UserClient;
+import love.ytlsnb.common.constants.RewardConstant;
+import love.ytlsnb.common.utils.UserHolder;
 import love.ytlsnb.model.common.PageResult;
+import love.ytlsnb.model.quest.vo.QuestVo;
 import love.ytlsnb.model.reward.dto.ExchangeLogDTO;
 import love.ytlsnb.model.reward.dto.ExchangeLogQueryDTO;
 import love.ytlsnb.model.reward.po.ExchangeLog;
 import love.ytlsnb.model.reward.po.Reward;
 import love.ytlsnb.model.reward.vo.ExchangeLogVO;
+import love.ytlsnb.model.school.po.Clazz;
 import love.ytlsnb.model.school.po.Dept;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.reward.mapper.ExchangeLogMapper;
 import love.ytlsnb.reward.mapper.RewardMapper;
 import love.ytlsnb.reward.service.ExchangeLogService;
-import love.ytlsnb.school.mapper.DeptMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,6 +42,7 @@ public class ExchangeLogServiceImpl extends ServiceImpl<ExchangeLogMapper, Excha
     private ExchangeLogMapper exchangeLogMapper;
     @Autowired
     private UserClient userClient;
+    @Lazy
     @Autowired
     private SchoolClient schoolClient;
 
@@ -66,49 +71,53 @@ public class ExchangeLogServiceImpl extends ServiceImpl<ExchangeLogMapper, Excha
 
     @Override
     public PageResult<List<ExchangeLogVO>> getPageByCondition(ExchangeLogQueryDTO exchangeLogQueryDTO, int page, int size) {
-        LambdaQueryWrapper<Reward> rewardQueryWrapper = new LambdaQueryWrapper<>();
-        LambdaQueryWrapper<Dept> deptQueryWrapper = new LambdaQueryWrapper<>();
         LambdaQueryWrapper<ExchangeLog> exchangeLogQueryWrapper = new LambdaQueryWrapper<>();
 
+        //获取用户id
         Long userId = exchangeLogQueryDTO.getUserId();
+        //获取奖品id
         Long rewardId = exchangeLogQueryDTO.getRewardId();
-        if (rewardId != null) {
-            rewardQueryWrapper.likeRight(Reward::getTitle, exchangeLogQueryDTO.getRewardTitle());// 百分号只在右侧，防止索引失效
+
+//        User user = UserHolder.getUser();
+//        Long userId = user.getId();
+        //查询总数
+        if(userId!=null){
+            exchangeLogQueryWrapper.eq(ExchangeLog::getUserId,userId);
         }
 
-
-        Byte status = exchangeLogQueryDTO.getStatus();
-        if (status != null) {
-            //状态查询
-            rewardQueryWrapper.eq(Reward::getStatus, status);
+        if (rewardId!=null){
+            exchangeLogQueryWrapper.eq(ExchangeLog::getRewardId,rewardId);
         }
 
-        String deptName = exchangeLogQueryDTO.getDeptName();
-
-        if (deptName != null) {
-            deptQueryWrapper.eq(Dept::getDeptName, deptName);
-        }
-
-        User user = userClient.getUserById(userId).getData();
-
-        Long clazzId = user.getClazzId();
-        Long deptId = user.getDeptId();
-        Long schoolId = exchangeLogQueryDTO.getSchoolId();
-        schoolClient.listClazzBySchoolId(schoolId);
-        schoolClient.listDeptBySchoolId(schoolId);
-        List<ExchangeLogVO> exchangeLogVOS = new ArrayList();
-
+        //List<ExchangeLogVO> exchangeLogVOS = new ArrayList<>();
         Long total = exchangeLogMapper.selectCount(exchangeLogQueryWrapper);
-        //List<ExchangeLog> rewards = rewardMapper.selectList(queryWrapper);
-        List<ExchangeLog> exchangeLogs = exchangeLogMapper.selectList(exchangeLogQueryWrapper);
-        BeanUtils.copyProperties(exchangeLogs, exchangeLogVOS);
-        ExchangeLogVO rewardVO = new ExchangeLogVO();
-
 
         //分页查询
+        List<ExchangeLogVO> exchangeLogVOS = exchangeLogMapper.getPageByCondition(exchangeLogQueryDTO, (page - 1) * size, size);
         PageResult<List<ExchangeLogVO>> pageResult = new PageResult<>(page, exchangeLogVOS.size(), total);
         pageResult.setData(exchangeLogVOS);
         return pageResult;
 
     }
+
+    @Override
+    public ExchangeLogVO selectById(Long id) {
+        ExchangeLog exchangeLog = exchangeLogMapper.selectById(id);
+        Long userId = exchangeLog.getUserId();
+        //远程调用用户端与学校端
+        User user = userClient.getUserById(userId).getData();
+        Clazz clazz = schoolClient.getClazzById(user.getClazzId()).getData();
+        Dept dept = schoolClient.selectByDeptId(user.getDeptId()).getData();
+        ExchangeLogVO exchangeLogVO = new ExchangeLogVO();
+        //添加返回到前端的数据，封装到VO内
+        BeanUtil.copyProperties(exchangeLog,exchangeLogVO);
+        exchangeLogVO.setExUserName(user.getNickname());
+        exchangeLogVO.setClazzName(clazz.getClazzName());
+        exchangeLogVO.setDeptName(dept.getDeptName());
+        exchangeLogVO.setRewardTitle(new Reward().getTitle());
+        // todo 兑换时间的添加
+        return null;
+    }
+
+
 }

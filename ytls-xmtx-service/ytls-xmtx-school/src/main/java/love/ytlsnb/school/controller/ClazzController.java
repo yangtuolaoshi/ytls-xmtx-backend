@@ -45,6 +45,12 @@ public class ClazzController {
         return Result.ok(clazzList);
     }
 
+    @GetMapping("/{clazzId}")
+    public Result<Clazz> getClazzById(@PathVariable Long clazzId){
+        Clazz clazz = clazzService.getClazzById(clazzId);
+        return Result.ok(clazz);
+    }
+
     @PutMapping("/update")
     public Result<Boolean> updateClazz(@RequestBody ClazzInsertDTO clazzInsertDTO){
         log.info("更新学校班级相关数据");

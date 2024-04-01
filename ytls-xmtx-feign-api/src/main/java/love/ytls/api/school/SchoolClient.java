@@ -48,6 +48,8 @@ public interface SchoolClient {
 
     @GetMapping("/coladmin/dept/page")
     public PageResult<List<DeptVO>> getPageByCondition(DeptInsertDTO deptQueryDTO, int page, int size);
+    @GetMapping("/coladmin/dept/{deptId}")
+    Result<Dept> selectByDeptId(@PathVariable Long deptId);
 
     @GetMapping("/coladmin/clazz/list/{schoolId}")
     Result<List<Clazz>> listClazzBySchoolId(@PathVariable Long schoolId);
@@ -57,7 +59,9 @@ public interface SchoolClient {
 
     @PutMapping("/coladmin/clazz/update")
     Result<Boolean> updateClazz(@RequestBody ClazzInsertDTO clazzInsertDTO);
+    @GetMapping("/coladmin/clazz/{clazzId}")
+    Result<Clazz> getClazzById(@PathVariable Long clazzId);
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/coladmin/clazz/delete")
     Result<Boolean>deleteClazz(ClazzDeleteDTO clazzDeleteDTO);
 }

@@ -2,10 +2,12 @@ package love.ytlsnb.reward.feign;
 
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.reward.dto.ExchangeLogDTO;
 import love.ytlsnb.model.reward.dto.RewardDTO;
 import love.ytlsnb.model.reward.dto.RewardQueryDTO;
 import love.ytlsnb.model.reward.po.Reward;
 import love.ytlsnb.model.reward.vo.RewardVO;
+import love.ytlsnb.reward.service.ExchangeLogService;
 import love.ytlsnb.reward.service.RewardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,8 @@ import java.util.List;
 public class RewardClient {
     @Autowired
     private RewardService rewardService;
+    @Autowired
+    private ExchangeLogService exchangeLogService;
 
     /**
      * 新增奖品
@@ -72,5 +76,17 @@ public class RewardClient {
     public Result<List<Reward>> getPageBySchoolId(@PathVariable Long schoolId){
         List<Reward> rewards= rewardService.selectBySchoolId(schoolId);
         return Result.ok(rewards);
+    }
+
+    @GetMapping("/id")
+    public Result<Reward> getByRewardId(@PathVariable Long id){
+        Reward reward = rewardService.getById(id);
+        return Result.ok(reward);
+    }
+
+    @PostMapping("/add/exchange")
+    public Result addExchangeLog(ExchangeLogDTO exchangeLogDTO){
+        exchangeLogService.addExchangeLog(exchangeLogDTO);
+        return Result.ok();
     }
 }

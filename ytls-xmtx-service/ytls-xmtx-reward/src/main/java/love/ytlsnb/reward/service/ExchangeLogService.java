@@ -18,4 +18,7 @@ public interface ExchangeLogService extends IService<ExchangeLog> {
     void addExchangeLog(ExchangeLogDTO exchangeLogDTO);
 
     PageResult<List<ExchangeLogVO>> getPageByCondition(ExchangeLogQueryDTO exchangeLogQueryDTO, int page, int size);
+
+
+    ExchangeLogVO selectById(Long id);
 }

@@ -17,17 +17,21 @@ import java.time.LocalDateTime;
 @ToString
 public class ExchangeLogVO {
     /**
-     * 奖品主键
+     * 奖品标题
      */
-    private Long id;
+    private String rewardTitle;
     /**
-     * 关联的奖品的主键
+     * 用户名
      */
-    private Long rewardId;
+    private String exUserName;
     /**
-     * 关联的用户的主键
+     * 学院名
      */
-    private Long userId;
+    private String deptName;
+    /**
+     * 学院名
+     */
+    private String clazzName;
     /**
      * 创建时间
      */

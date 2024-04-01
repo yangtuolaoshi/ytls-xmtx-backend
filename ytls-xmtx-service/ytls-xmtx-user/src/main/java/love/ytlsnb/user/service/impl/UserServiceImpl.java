@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import love.ytls.api.reward.RewardClient;
 import love.ytls.api.school.SchoolClient;
 import love.ytlsnb.common.constants.RedisConstant;
 import love.ytlsnb.common.constants.ResultCodes;
@@ -19,6 +20,9 @@ import love.ytlsnb.common.properties.JwtProperties;
 import love.ytlsnb.common.properties.PhotoProperties;
 import love.ytlsnb.common.properties.UserProperties;
 import love.ytlsnb.common.utils.*;
+import love.ytlsnb.model.reward.dto.ExchangeLogDTO;
+import love.ytlsnb.model.reward.dto.RewardDTO;
+import love.ytlsnb.model.reward.po.Reward;
 import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.school.po.Clazz;
@@ -45,6 +49,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -80,6 +85,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Lazy
     @Autowired
     private SchoolClient schoolClient;
+    @Autowired
+    private RewardClient rewardClient;
     @Autowired
     private AliUtil aliUtil;
     @Autowired
@@ -815,4 +822,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ResultCodes.SERVER_ERROR, "文件上传异常");
         }
     }
+
+
+    /**
+     * 用户兑换奖品
+     *
+     * @param rewardId 奖品id
+     */
+    @Override
+    public Result exchangeReward(Long rewardId) {
+
+        //判断按库存是否充足
+        Reward reward = rewardClient.getByRewardId(rewardId).getData();
+        if (reward.getStock()<0){
+            return  Result.fail(403,"库存不足！");
+        }
+        //库存充足
+        //库存-1，兑换量+1，用户积分减去相应量
+        reward.setStock(reward.getStock() - 1);
+        reward.setExchangeSum(reward.getExchangeSum() + 1);
+        User user = UserHolder.getUser();
+        Long userId = user.getId();
+        user.setPoint(user.getPoint() - reward.getCost());
+        RewardDTO rewardDTO = new RewardDTO();
+        BeanUtil.copyProperties(reward,rewardDTO);
+        rewardClient.update(rewardDTO);
+        //写入兑换日志
+        ExchangeLogDTO exchangeLogDTO = new ExchangeLogDTO();
+        exchangeLogDTO.setRewardId(rewardId);
+        exchangeLogDTO.setUserId(userId);
+        exchangeLogDTO.setCreateTime(LocalDateTime.now());
+        rewardClient.addExchangeLog(exchangeLogDTO);
+        return Result.ok();
+
+    }
+
 }

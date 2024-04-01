@@ -22,4 +22,6 @@ public interface ClazzService extends IService<Clazz> {
     Boolean updateClazz(ClazzInsertDTO clazzInsertDTO);
 
     Boolean deleteClazz(ClazzDeleteDTO clazzDeleteDTO);
+
+    Clazz getClazzById(Long clazzId);
 }

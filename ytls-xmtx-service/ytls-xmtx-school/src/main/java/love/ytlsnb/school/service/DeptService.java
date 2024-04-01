@@ -22,4 +22,6 @@ public interface DeptService extends IService<Dept> {
     Boolean deleteDept(DeptInsertDTO deptInsertDTO);
 
     PageResult<List<DeptVO>> getPageByCondition(DeptInsertDTO deptQueryDTO, int page, int size);
+
+    Dept selectByDeptId(Long deptId);
 }

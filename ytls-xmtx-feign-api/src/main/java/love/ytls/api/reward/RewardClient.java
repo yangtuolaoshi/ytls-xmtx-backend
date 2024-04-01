@@ -4,6 +4,7 @@ import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.quest.dto.QuestQueryDTO;
 import love.ytlsnb.model.quest.vo.QuestVo;
+import love.ytlsnb.model.reward.dto.ExchangeLogDTO;
 import love.ytlsnb.model.reward.dto.RewardDTO;
 import love.ytlsnb.model.reward.dto.RewardQueryDTO;
 import love.ytlsnb.model.reward.po.Reward;
@@ -39,4 +40,10 @@ public interface RewardClient {
 
     @GetMapping("/api/reward/{schoolId}")
     Result<List<Reward>> getPageBySchoolId(@PathVariable Long schoolId);
+
+    @GetMapping("/api/reward/{id}")
+    Result<Reward> getByRewardId(@PathVariable Long id);
+
+    @PostMapping("/api/reward/add/exchange")
+    Result addExchangeLog(ExchangeLogDTO exchangeLogDTO);
 }
