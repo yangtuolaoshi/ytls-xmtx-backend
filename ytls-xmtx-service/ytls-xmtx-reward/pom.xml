@@ -7,6 +7,14 @@
         <groupId>love.ytls-nb</groupId>
         <version>0.1</version>
     </parent>
+    <dependencies>
+        <dependency>
+            <groupId>love.ytls-nb</groupId>
+            <artifactId>ytls-xmtx-school</artifactId>
+            <version>0.1</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>ytls-xmtx-reward</artifactId>

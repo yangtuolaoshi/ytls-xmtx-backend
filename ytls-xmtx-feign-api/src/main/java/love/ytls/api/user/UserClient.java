@@ -38,4 +38,6 @@ public interface UserClient {
 
     @PostMapping("/api/user/addPoint")
     Result<Boolean> addPoint(@RequestParam int reward);
+    @PostMapping("/api/user/exchangeReward/{rewardId}")
+    Result exchangeReward(@PathVariable Long rewardId);
 }

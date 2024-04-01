@@ -54,6 +54,7 @@ public class SchoolConstant {
      */
     public static final String SCHOOL_ALL_URL = "/school/**";
     //-------------------------Dept-------------------------
+    public static final Byte IS_DELETED = 1;
     //-------------------------Clazz-------------------------
     //-------------------------Quest-------------------------
     /**
@@ -66,4 +67,5 @@ public class SchoolConstant {
      */
     public static final String SCHEDULE_ALL_URL = "/schedule/**";
     public static final String USER_ID = "user_id";
+
 }
