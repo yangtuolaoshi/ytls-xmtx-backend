@@ -11,6 +11,7 @@ import love.ytlsnb.model.common.RedisData;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,9 @@ import java.util.function.Function;
 @Component
 @Slf4j
 public class CacheClient {
+    @Autowired
+    @Qualifier("cacheRebuildExecutor")
+    private ExecutorService cacheRebuildExecutor;
     @Autowired
     private StringRedisTemplate redisTemplate;
     @Autowired
@@ -114,12 +118,6 @@ public class CacheClient {
         return r;
     }
 
-    private static final ExecutorService CACHE_REBUILD_EXECUTOR = new ThreadPoolExecutor(
-            3, 10,
-            0L, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>(1024), new ThreadFactoryBuilder()
-            .setNamePrefix("cache-pool-").build(), new ThreadPoolExecutor.AbortPolicy());
-
     /**
      * 热点数据的查询，会对数据进行封装，设置逻辑过期时间，逻辑过期后进行异步的缓存建立，用以解决缓存击穿问题
      *
@@ -178,7 +176,7 @@ public class CacheClient {
                 return JSONUtil.toBean((JSONObject) redisData.getData(), resultType);
             }
             // 缓存重建任务提交
-            CACHE_REBUILD_EXECUTOR.submit(() -> {
+            cacheRebuildExecutor.submit(() -> {
                 try {
                     R r = dbFallback.apply(id);
                     log.info("正在异步建立缓存:{}", r);
@@ -223,7 +221,7 @@ public class CacheClient {
                 }
             }
             // 缓存重建任务提交
-            CACHE_REBUILD_EXECUTOR.submit(() -> {
+            cacheRebuildExecutor.submit(() -> {
                 try {
                     R r = dbFallback.apply(id);
                     log.info("正在异步建立缓存:{}", r);

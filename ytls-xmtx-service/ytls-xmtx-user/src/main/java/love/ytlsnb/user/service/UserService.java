@@ -59,4 +59,6 @@ public interface UserService extends IService<User> {
     void deleteUserById(Long id);
 
     User getUser();
+
+    List<User> listBySharding(Integer total, Integer index);
 }

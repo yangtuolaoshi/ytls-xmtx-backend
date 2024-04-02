@@ -32,6 +32,9 @@ public class FeignConfiguration {
         return requestTemplate -> {
             //1、从RequestContextHolder获取原始请求的请求数据(请求参数、请求头等)
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+            if(attributes==null){
+                return;
+            }
             HttpServletRequest request = attributes.getRequest();
             //2、同步请求头数据
             String coladminTokenName = jwtProperties.getColadminTokenName();

@@ -485,6 +485,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return user;
     }
 
+    @Override
+    public List<User> listBySharding(Integer total, Integer index) {
+        if (total == 1) {
+            return list();
+        } else {
+            return userMapper.listBySharding(total, index);
+        }
+    }
+
 
     @Override
     public void sendShortMessage(String phone) throws Exception {

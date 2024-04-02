@@ -129,6 +129,13 @@ public class UserController {
         return Result.ok(userVO);
     }
 
+    @GetMapping("/list")
+    public Result<List<User>> list() {
+        log.info("查询所有用户");
+        List<User> userList = userService.list();
+        return Result.ok(userList);
+    }
+
     @GetMapping("/listByConditions")
     public PageResult<List<UserVO>> listByConditions(UserQueryDTO userQueryDTO) {
         log.info("查询用户，userQueryDTO:{}", userQueryDTO);
@@ -137,6 +144,13 @@ public class UserController {
                 userQueryDTO.getPageSize(),
                 userVOList,
                 (long) userVOList.size());
+    }
+
+    @GetMapping("/list/{total}/{index}")
+    public Result<List<User>> listBySharding(@PathVariable Integer total, @PathVariable Integer index) {
+        log.info("根据分片详情查询数据");
+        List<User> userList = userService.listBySharding(total, index);
+        return Result.ok(userList);
     }
 
     @LogOperation(Operator.USER)

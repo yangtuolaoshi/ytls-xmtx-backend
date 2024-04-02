@@ -33,6 +33,12 @@ public interface UserClient {
     @GetMapping("/api/user/detail/{id}")
     Result<UserVO> getUserVOById(@PathVariable Long id);
 
+    @GetMapping("/api/user/list")
+    public Result<List<User>> list();
+
     @GetMapping("/api/user/listByConditions")
     PageResult<List<UserVO>> listByConditions(@SpringQueryMap UserQueryDTO userQueryDTO);
+
+    @GetMapping("/api/user/list/{total}/{index}")
+    Result<List<User>> listBySharding(@PathVariable Integer total, @PathVariable Integer index);
 }
