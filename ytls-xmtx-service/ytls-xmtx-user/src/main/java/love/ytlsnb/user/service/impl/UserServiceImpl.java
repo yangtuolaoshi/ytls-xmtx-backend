@@ -6,6 +6,7 @@ import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import love.ytls.api.reward.RewardClient;
 import love.ytls.api.school.SchoolClient;
 import love.ytlsnb.model.common.LoginType;
 import love.ytlsnb.common.constants.RedisConstant;
@@ -17,6 +18,9 @@ import love.ytlsnb.common.properties.JwtProperties;
 import love.ytlsnb.common.properties.PhotoProperties;
 import love.ytlsnb.common.properties.UserProperties;
 import love.ytlsnb.common.utils.*;
+import love.ytlsnb.model.reward.dto.ExchangeLogDTO;
+import love.ytlsnb.model.reward.dto.RewardDTO;
+import love.ytlsnb.model.reward.po.Reward;
 import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.school.po.Clazz;
@@ -37,7 +41,9 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,9 +51,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static love.ytlsnb.common.constants.RedisConstant.POINT_RANKING_PREFIX;
 
 /**
  * 用户基本信息业务层实现类
@@ -79,6 +88,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Lazy
     @Autowired
     private SchoolClient schoolClient;
+    @Autowired
+    private RewardClient rewardClient;
     @Autowired
     private AliUtil aliUtil;
     @Autowired
@@ -485,15 +496,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return user;
     }
 
-    @Override
-    public List<User> listBySharding(Integer total, Integer index) {
-        if (total == 1) {
-            return list();
-        } else {
-            return userMapper.listBySharding(total, index);
-        }
-    }
-
 
     @Override
     public void sendShortMessage(String phone) throws Exception {
@@ -726,4 +728,55 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ResultCodes.SERVER_ERROR, "文件上传异常");
         }
     }
+
+    @Transactional
+    @Override
+    public Boolean addPoint(int reward) {
+        // 设置用户信息
+        Long userId = UserHolder.getUser().getId();
+        User user = userMapper.selectById(userId);
+        Long point = user.getPoint();
+        user.setPoint(point + reward);
+        // 更新排行榜
+        ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
+        Set<ZSetOperations.TypedTuple<String>> tuples = new HashSet<>();
+        ZSetOperations.TypedTuple<String> typedTuple = new DefaultTypedTuple<String>(userId.toString(), Double.valueOf(user.getPoint()));
+        tuples.add(typedTuple);
+        zSetOperations.add(POINT_RANKING_PREFIX, tuples);
+        return userMapper.updateById(user) > 0;
+    }
+
+    /**
+     * 用户兑换奖品
+     *
+     * @param rewardId 奖品id
+     */
+    @Override
+    public Result exchangeReward(Long rewardId) {
+
+        //判断按库存是否充足
+        Reward reward = rewardClient.getByRewardId(rewardId).getData();
+        if (reward.getStock()<0){
+            return  Result.fail(403,"库存不足！");
+        }
+        //库存充足
+        //库存-1，兑换量+1，用户积分减去相应量
+        reward.setStock(reward.getStock() - 1);
+        reward.setExchangeSum(reward.getExchangeSum() + 1);
+        User user = UserHolder.getUser();
+        Long userId = user.getId();
+        user.setPoint(user.getPoint() - reward.getCost());
+        RewardDTO rewardDTO = new RewardDTO();
+        BeanUtil.copyProperties(reward,rewardDTO);
+        rewardClient.update(rewardDTO);
+        //写入兑换日志
+        ExchangeLogDTO exchangeLogDTO = new ExchangeLogDTO();
+        exchangeLogDTO.setRewardId(rewardId);
+        exchangeLogDTO.setUserId(userId);
+        exchangeLogDTO.setCreateTime(LocalDateTime.now());
+        rewardClient.addExchangeLog(exchangeLogDTO);
+        return Result.ok();
+
+    }
+
 }

@@ -2,6 +2,7 @@ package love.ytlsnb.user.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
+import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.po.UserInfo;
@@ -61,4 +62,12 @@ public interface UserService extends IService<User> {
     User getUser();
 
     List<User> listBySharding(Integer total, Integer index);
+
+    /**
+     * 添加积分
+     * @param reward 任务奖励
+     * @return 是否添加成功
+     */
+    Boolean addPoint(int reward);
+    Result exchangeReward(Long rewardId);
 }

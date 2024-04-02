@@ -20,7 +20,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -36,7 +35,6 @@ import java.util.Objects;
  */
 @Aspect
 @Component
-@ConditionalOnBean(OperationLogService.class)
 public class OperationLogger {
     @Autowired
     OperationLogService operationLogService;

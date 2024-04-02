@@ -1,5 +1,6 @@
 package love.ytlsnb.quest.feign;
 
+import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.quest.dto.MapFilterDTO;
@@ -21,6 +22,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/schedule")
+@Slf4j
 public class QuestScheduleClient {
     @Autowired
     private QuestScheduleService questScheduleService;
@@ -51,6 +53,7 @@ public class QuestScheduleClient {
 
     @PutMapping
     public Result<Boolean> update(@RequestBody QuestDTO questDTO) {
+        // TODO 功能未完成
         return Result.ok(questScheduleService.update(questDTO));
     }
 

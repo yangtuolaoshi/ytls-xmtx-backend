@@ -24,4 +24,7 @@ public class RedisConstant {
     public static final String COLADMIN_LOGIN_PREFIX = "coladmin:login:";
     public static final String COLADMIN_REGISTER_LOCK_PREFIX = "lock:coladmin:register:";
     public static final String QUEST_LOCATION_PREFIX = "lock:quest:location:";
+    public static final String POINT_RANKING_PREFIX = "ranking:point";
+    public static final String QUEST_INFO = "quest:info:";
+    public static final String QUEST_SCHEDULE_GEO = "quest:schedule:geo:";
 }

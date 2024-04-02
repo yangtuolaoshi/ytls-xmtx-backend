@@ -2,6 +2,7 @@ package love.ytlsnb.school.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.school.dto.ClazzDeleteDTO;
 import love.ytlsnb.model.school.dto.ClazzInsertDTO;
 import love.ytlsnb.model.school.dto.ClazzQueryDTO;
 import love.ytlsnb.model.school.po.Clazz;
@@ -42,5 +43,24 @@ public class ClazzController {
         clazzQueryDTO.setDeptId(deptId);
         List<Clazz> clazzList=clazzService.listClazzByCondition(clazzQueryDTO);
         return Result.ok(clazzList);
+    }
+
+    @GetMapping("/{clazzId}")
+    public Result<Clazz> getClazzById(@PathVariable Long clazzId){
+        Clazz clazz = clazzService.getClazzById(clazzId);
+        return Result.ok(clazz);
+    }
+
+    @PutMapping("/update")
+    public Result<Boolean> updateClazz(@RequestBody ClazzInsertDTO clazzInsertDTO){
+        log.info("更新学校班级相关数据");
+        clazzService.updateClazz(clazzInsertDTO);
+        return Result.ok();
+    }
+
+    @DeleteMapping("/delete")
+    public Result<Boolean>deleteClazz(ClazzDeleteDTO clazzDeleteDTO){
+        clazzService.deleteClazz(clazzDeleteDTO);
+        return Result.ok();
     }
 }

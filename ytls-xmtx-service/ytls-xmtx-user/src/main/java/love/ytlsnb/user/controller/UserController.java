@@ -9,8 +9,10 @@ import love.ytlsnb.common.constants.UserConstant;
 import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.model.common.LogOperation;
 import love.ytlsnb.model.common.Operator;
+import love.ytlsnb.common.utils.ColadminHolder;
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.vo.UserVO;
@@ -259,6 +261,18 @@ public class UserController {
     public Result uploadRealPhoto(@RequestBody String realPhoto) throws Exception {
         log.info("上传真实照片:{}", realPhoto);
         userService.uploadRealPhoto(realPhoto);
+        return Result.ok();
+    }
+
+    /**
+     * 用户兑换奖品
+     * @param rewardId
+     * @return
+     */
+    @PostMapping("/exchangeReward/{rewardId}")
+    public Result exchangeReward(@PathVariable Long rewardId){
+        log.info("兑换奖品:",rewardId);
+        userService.exchangeReward(rewardId);
         return Result.ok();
     }
 }

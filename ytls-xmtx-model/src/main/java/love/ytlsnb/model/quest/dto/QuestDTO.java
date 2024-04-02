@@ -91,24 +91,9 @@ public class QuestDTO {
     private String scheduleTitle;
 
     /**
-     * 管理员审核
+     * 打卡方式的ID集合
      */
-    private Integer adminCheck;
-
-    /**
-     * 照片识别
-     */
-    private Integer photoCheck;
-
-    /**
-     * 地点识别
-     */
-    private Integer locationCheck;
-
-    /**
-     * 面部识别（硬件）
-     */
-    private Integer faceCheck;
+    private List<Long> clockMethodIds;
 
     /**
      * 进度启用状态
