@@ -85,6 +85,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Lazy
     @Autowired
     private SchoolClient schoolClient;
+    @Lazy
     @Autowired
     private RewardClient rewardClient;
     @Autowired

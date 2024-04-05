@@ -1,6 +1,8 @@
 package love.ytls.api.school;
 
 import love.ytlsnb.model.common.PageResult;
+import love.ytlsnb.model.reward.dto.RewardQueryDTO;
+import love.ytlsnb.model.reward.vo.RewardVO;
 import love.ytlsnb.model.school.dto.ClazzDeleteDTO;
 import love.ytlsnb.model.school.dto.ClazzInsertDTO;
 import love.ytlsnb.model.school.dto.DeptInsertDTO;
@@ -13,6 +15,7 @@ import love.ytlsnb.model.school.po.StudentPhoto;
 import love.ytlsnb.model.school.vo.DeptVO;
 import love.ytlsnb.model.school.vo.LocationVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -46,8 +49,12 @@ public interface SchoolClient {
     @DeleteMapping("/coladmin/dept/delete")
     public Result<Boolean>deleteDept(DeptInsertDTO deptInsertDTO);
 
-    @GetMapping("/coladmin/dept/page")
-    public PageResult<List<DeptVO>> getPageByCondition(DeptInsertDTO deptQueryDTO, int page, int size);
+    @RequestMapping(method = RequestMethod.GET, value = "/coladmin/dept/page")
+    PageResult<List<DeptVO>> getPageByCondition(
+            @SpringQueryMap DeptInsertDTO deptQueryDTO,
+            @RequestParam int page,
+            @RequestParam int size);
+
     @GetMapping("/coladmin/dept/{deptId}")
     Result<Dept> selectByDeptId(@PathVariable Long deptId);
 
