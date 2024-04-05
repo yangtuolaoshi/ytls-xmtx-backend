@@ -264,15 +264,15 @@ public class UserController {
         return Result.ok();
     }
 
-    /**
-     * 用户兑换奖品
-     * @param rewardId
-     * @return
-     */
-    @PostMapping("/exchangeReward/{rewardId}")
-    public Result exchangeReward(@PathVariable Long rewardId){
-        log.info("兑换奖品:",rewardId);
-        userService.exchangeReward(rewardId);
-        return Result.ok();
-    }
+//    /**
+//     * 用户兑换奖品
+//     * @param rewardId
+//     * @return
+//     */
+//    @PostMapping("/exchangeReward/{rewardId}")
+//    public Result exchangeReward(@PathVariable Long rewardId){
+//        log.info("兑换奖品:",rewardId);
+//        userService.exchangeReward(rewardId);
+//        return Result.ok();
+//    }
 }

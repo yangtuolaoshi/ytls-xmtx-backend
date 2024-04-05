@@ -27,12 +27,12 @@ import java.util.UUID;
 @Slf4j
 @RequestMapping("/reward")
 public class UploadPhotoController {
-    @Autowired
-    private RewardService rewardService;
-
-    @PostMapping("/uploadPhotos")
-    public Result<String> uploadPhotos(MultipartFile file) {
-        log.info("上传奖品图片{}到阿里云云端:", file);
-        return Result.ok(rewardService.upload(file));
-    }
+//    @Autowired
+//    private RewardService rewardService;
+//
+//    @PostMapping("/uploadPhotos")
+//    public Result<String> uploadPhotos(MultipartFile file) {
+//        log.info("上传奖品图片{}到阿里云云端:", file);
+//        return Result.ok(rewardService.upload(file));
+//    }
 }
