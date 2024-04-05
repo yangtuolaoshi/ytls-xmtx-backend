@@ -14,6 +14,6 @@ import java.util.List;
  */
 @Mapper
 public interface AdvertisementMapper extends BaseMapper<Advertisement> {
-    @Select("select * from tb_advertisement where mod(id,#{total})=#{index}) and is_deleted = 0")
+    @Select("select * from tb_advertisement where mod(id,#{shardTotal})=#{shardIndex} and is_deleted = 0")
     List<Advertisement> listBySharding(int shardTotal, int shardIndex);
 }

@@ -31,12 +31,14 @@ public class U2ABehaviorServiceImpl extends ServiceImpl<U2ABehaviorMapper, U2ABe
 
     @Override
     public BigDecimal getAdSumScoreByAdId(Long adId) {
-        return u2aBehaviorMapper.getAdSumScoreByAdId(adId);
+        BigDecimal adSumScore = u2aBehaviorMapper.getAdSumScoreByAdId(adId);
+        return adSumScore == null ? BigDecimal.ZERO : adSumScore;
     }
 
     @Override
     public BigDecimal getScoreByUserIdAndAdId(Long userId, Long adId) {
-        return u2aBehaviorMapper.getScoreByUserIdAndAdId(userId, adId);
+        BigDecimal score = u2aBehaviorMapper.getScoreByUserIdAndAdId(userId, adId);
+        return score == null ? BigDecimal.ZERO : score;
     }
 
     @Override

@@ -2,6 +2,7 @@ package love.ytlsnb.ad.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import love.ytls.api.school.SchoolClient;
+import love.ytlsnb.ad.job.AdvertisementJob;
 import love.ytlsnb.ad.service.AdvertisementService;
 import love.ytlsnb.model.ad.dto.AdvertisementInsertDTO;
 import love.ytlsnb.model.ad.dto.AdvertisementQueryDTO;
@@ -23,13 +24,14 @@ import java.util.List;
 @RequestMapping("/ad")
 public class AdvertisementController {
     @Autowired
-    private SchoolClient schoolClient;
-    @Autowired
     private AdvertisementService adService;
+    @Autowired
+    private AdvertisementJob adJob;
 
-    @GetMapping("/test")
-    public Result test() {
-        log.info("test");
+    @GetMapping("test")
+    public Result testJob() throws InterruptedException {
+        adJob.calculateAdvertisementSimilarity();
+        adJob.calculateRecommendationScore();
         return Result.ok();
     }
 
@@ -72,10 +74,11 @@ public class AdvertisementController {
         List<AdvertisementVO> adVOList = adService.getPageByConditions(adQueryDTO);
         return Result.ok(adVOList);
     }
+
     @GetMapping("/{userId}/{size}")
-    public Result<List<Advertisement>> list2User(@PathVariable Long userId,@PathVariable Integer size){
-        log.info("对用户{} 推送广告size{}",userId,size );
-        List<Advertisement> adList = adService.list2User(userId,size);
+    public Result<List<Advertisement>> list2User(@PathVariable Long userId, @PathVariable Integer size) {
+        log.info("对用户{} 推送广告size{}", userId, size);
+        List<Advertisement> adList = adService.list2User(userId, size);
         return Result.ok(adList);
     }
 }

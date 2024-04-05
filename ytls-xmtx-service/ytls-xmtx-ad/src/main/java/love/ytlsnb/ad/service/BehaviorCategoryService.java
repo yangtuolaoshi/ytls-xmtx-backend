@@ -8,4 +8,7 @@ import love.ytlsnb.model.ad.po.BehaviorCategory;
  * @date 2024/3/20 15:05
  */
 public interface BehaviorCategoryService extends IService<BehaviorCategory> {
+    void addBehaviorCategory(BehaviorCategory behaviorCategory);
+
+    void updateBehaviorCategory(BehaviorCategory behaviorCategory);
 }

@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.ad.mapper.AdvertisementSimilarityMapper;
 import love.ytlsnb.ad.service.AdvertisementSimilarityService;
 import love.ytlsnb.model.ad.po.AdvertisementSimilarity;
+import love.ytlsnb.model.ad.po.RecommendationScore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -41,6 +43,7 @@ public class AdvertisementSimilarityServiceImpl extends ServiceImpl<Advertisemen
                 success &= lambdaUpdate().eq(AdvertisementSimilarity::getAdvertisementId, ads.getSimilarAdvertisementId())
                         .eq(AdvertisementSimilarity::getSimilarAdvertisementId, ads.getSimilarAdvertisementId())
                         .set(AdvertisementSimilarity::getSimilarity, ads.getSimilarity())
+                        .set(AdvertisementSimilarity::getUpdateTime, LocalDateTime.now())
                         .update();
             }
         }

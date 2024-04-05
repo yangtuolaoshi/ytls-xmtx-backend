@@ -2,6 +2,8 @@ package love.ytlsnb.ad;
 
 import cn.hutool.core.util.RandomUtil;
 import love.ytls.api.school.SchoolClient;
+import love.ytlsnb.ad.job.AdvertisementJob;
+import love.ytlsnb.ad.service.AdvertisementService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -9,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -24,60 +27,20 @@ public class AdTest {
     public ExecutorService advertisementJobExecutor;
     @Autowired
     private SchoolClient client;
+    @Autowired
+    private AdvertisementService adService;
+
+    @Autowired
+    private AdvertisementJob adJob;
 
     @Test
-    public void testExecutor() throws InterruptedException {
-        Long begin1 = System.currentTimeMillis();
-        for (int i = 0; i < 5000; i++) {
-            BigDecimal sum = BigDecimal.ZERO;
-            for (int j = 0; j < 100; j++) {
-                sum = sum.add(new BigDecimal(RandomUtil.randomNumbers(5))).sqrt(MathContext.DECIMAL64)
-                        .pow(2).sqrt(MathContext.DECIMAL64)
-                        .pow(2).sqrt(MathContext.DECIMAL64)
-                        .pow(2).sqrt(MathContext.DECIMAL64)
-                        .pow(2).sqrt(MathContext.DECIMAL64)
-                        .pow(2).sqrt(MathContext.DECIMAL64)
-                        .pow(2).sqrt(MathContext.DECIMAL64)
-                        .pow(2).sqrt(MathContext.DECIMAL64)
-                        .pow(2).sqrt(MathContext.DECIMAL64)
-                        .pow(2).sqrt(MathContext.DECIMAL64)
-                        .pow(2).sqrt(MathContext.DECIMAL64)
-                        .pow(2).sqrt(MathContext.DECIMAL64)
-                        .pow(2)
-                ;
-            }
-        }
-        Long end1 = System.currentTimeMillis();
-        Long begin2 = System.currentTimeMillis();
-        CountDownLatch countDownLatch = new CountDownLatch(5000);
-        for (int i = 0; i < 5000; i++) {
-            advertisementJobExecutor.submit(() -> {
-                BigDecimal sum = BigDecimal.ZERO;
-                for (int j = 0; j < 100; j++) {
-                    sum = sum.add(new BigDecimal(RandomUtil.randomNumbers(5))).sqrt(MathContext.DECIMAL64)
-                            .pow(2).sqrt(MathContext.DECIMAL64)
-                            .pow(2).sqrt(MathContext.DECIMAL64)
-                            .pow(2).sqrt(MathContext.DECIMAL64)
-                            .pow(2).sqrt(MathContext.DECIMAL64)
-                            .pow(2).sqrt(MathContext.DECIMAL64)
-                            .pow(2).sqrt(MathContext.DECIMAL64)
-                            .pow(2).sqrt(MathContext.DECIMAL64)
-                            .pow(2).sqrt(MathContext.DECIMAL64)
-                            .pow(2).sqrt(MathContext.DECIMAL64)
-                            .pow(2).sqrt(MathContext.DECIMAL64)
-                            .pow(2).sqrt(MathContext.DECIMAL64)
-                            .pow(2);
-                }
-                countDownLatch.countDown();
-            });
-        }
-        countDownLatch.await();
-        Long end2 = System.currentTimeMillis();
-        System.out.println(end1 - begin1);
-        System.out.println(end2 - begin2);
+    public void testJob() throws InterruptedException {
+        adJob.calculateAdvertisementSimilarity();
+        adJob.calculateRecommendationScore();
     }
+
     @Test
-    public void test2(){
-        System.out.println(Byte.parseByte("2")==2);
+    public void test2() {
+        adService.listByIds(new ArrayList<>());
     }
 }

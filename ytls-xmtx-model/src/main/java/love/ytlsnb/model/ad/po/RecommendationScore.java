@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Builder
+@TableName("tb_recommendation_score")
 public class RecommendationScore {
     /**
      * 主键ID

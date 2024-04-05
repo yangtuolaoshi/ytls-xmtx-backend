@@ -1,5 +1,6 @@
 package love.ytlsnb.ad.job;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
@@ -61,8 +62,10 @@ public class AdvertisementJob {
     public void calculateRecommendationScore() throws InterruptedException {
         // 根据分片参数获取所有用户数据集
         log.info("执行calculateRecommendationScore");
-        int shardIndex = XxlJobHelper.getShardIndex();
-        int shardTotal = XxlJobHelper.getShardTotal();
+//        int shardIndex = XxlJobHelper.getShardIndex();
+//        int shardTotal = XxlJobHelper.getShardTotal();
+        int shardIndex = 1;
+        int shardTotal = 2;
         Result<List<User>> userListResult = userClient.listBySharding(shardTotal, shardIndex);
         if (userListResult.getCode() != ResultCodes.OK) {
             throw new BusinessException(userListResult.getCode(), userListResult.getMsg());
@@ -90,6 +93,9 @@ public class AdvertisementJob {
                         sum = sum.add(cbScore.get(ad.getId()));
                     }
                 }
+                if (sum.compareTo(BigDecimal.ONE) <= 0) {
+                    sum = BigDecimal.ONE;
+                }
                 RecommendationScore score = RecommendationScore.builder()
                         .userId(user.getId())
                         .advertisementId(ad.getId())
@@ -107,8 +113,11 @@ public class AdvertisementJob {
     @XxlJob("calculateAdvertisementSimilarity")
     public void calculateAdvertisementSimilarity() throws InterruptedException {
         // 获取当前分片参数下所有广告集
-        int shardIndex = XxlJobHelper.getShardIndex();
-        int shardTotal = XxlJobHelper.getShardTotal();
+//        int shardIndex = XxlJobHelper.getShardIndex();
+//        int shardTotal = XxlJobHelper.getShardTotal();
+        int shardIndex = 1;
+        int shardTotal = 2;
+
         List<Advertisement> adList = adService.listBySharding(shardTotal, shardIndex);
         // 提前获取所有广告集
         List<Advertisement> allAdList = adService.list();
@@ -140,6 +149,7 @@ public class AdvertisementJob {
                 }
                 // 执行完成后计数器减一
                 prepareCountDownLatch.countDown();
+                log.info("广告准备工作完成{}", ad.getId());
             });
         }
         prepareCountDownLatch.await();
@@ -166,6 +176,15 @@ public class AdvertisementJob {
                                 .build());
                     } else {
                         // 还未计算过，进行计算
+                        if (ad.getId().equals(similarAd.getId())) {
+                            // 自身和自身的相似度为一
+                            adSimilarityList.add(AdvertisementSimilarity.builder()
+                                    .advertisementId(ad.getId())
+                                    .similarAdvertisementId(similarAd.getId())
+                                    .similarity(BigDecimal.ONE)
+                                    .build());
+                            continue;
+                        }
                         // 取出当前待计算广告和对象广告的用户相关操作集合  <userId,score>
                         Map<Long, BigDecimal> u2aMap = u2aBehaviorScoreMap.get(ad.getId());
                         Map<Long, BigDecimal> u2saMap = u2aBehaviorScoreMap.get(similarAd.getId());
@@ -196,12 +215,18 @@ public class AdvertisementJob {
                                     .add(u2saScore.subtract(u2aAvgBehaviorScoreMap.get(similarAd.getId()))
                                             .pow(2));
                         }
-                        BigDecimal res = numerator.divide(aDenominator.sqrt(MathContext.DECIMAL64),
-                                        AdvertisementConstant.DEFAULT_BIGDECIMAL_SCALE,
-                                        RoundingMode.HALF_UP)
-                                .divide(saDenominator.sqrt(MathContext.DECIMAL64),
-                                        AdvertisementConstant.DEFAULT_BIGDECIMAL_SCALE,
-                                        RoundingMode.HALF_UP);
+                        BigDecimal res;
+                        if (numerator.compareTo(BigDecimal.ZERO) <= 0) {
+                            // 分子为零，直接赋值相似度为零
+                            res = BigDecimal.ZERO;
+                        } else {
+                            res = numerator.divide(aDenominator.sqrt(MathContext.DECIMAL64),
+                                            AdvertisementConstant.DEFAULT_BIGDECIMAL_SCALE,
+                                            RoundingMode.HALF_UP)
+                                    .divide(saDenominator.sqrt(MathContext.DECIMAL64),
+                                            AdvertisementConstant.DEFAULT_BIGDECIMAL_SCALE,
+                                            RoundingMode.HALF_UP);
+                        }
                         adSimilarityList.add(AdvertisementSimilarity.builder()
                                 .advertisementId(ad.getId())
                                 .similarAdvertisementId(similarAd.getId())
@@ -211,6 +236,7 @@ public class AdvertisementJob {
                 }
                 // 更新数据，落库
                 adSimilarityService.saveOrUpdateBatch(adSimilarityList);
+                log.info("广告的广告相似度计算完成{}", ad.getId());
             });
         }
     }
@@ -283,6 +309,7 @@ public class AdvertisementJob {
                     userRecommendationScoreMap.put(ad.getId(), userAdScore);
                 }
                 finalResultMap.put(user.getId(), userRecommendationScoreMap);
+                log.info("用户的CB推荐分值计算完成{}", user.getNickname());
                 countDownLatch.countDown();
             });
         }
@@ -313,19 +340,28 @@ public class AdvertisementJob {
         // 待计算的用户集合
         for (User user : userList) {
             advertisementJobExecutor.submit(() -> {
+                log.info("开始计算用户的CF得分集:{}", user.getNickname());
                 // 待计算的广告集
                 Set<Advertisement> adSet = new HashSet<>();
                 // 计算结果集（当前用户对于每个广告的推荐分值）
                 Map<Long, BigDecimal> recommendationScoreMap = new HashMap<>();
 
-                // 获取每个用户的喜欢广告（目前只要包含操作，就认为用户喜欢）
+                // 获取每个用户的喜欢广告（目前只要包含操作，就认为用户喜欢，若没有用户喜欢的广告，就使用全广告集）
                 List<Long> idList = u2aBehaviorService.listLikedAdIdsByUserId(user.getId());
-                List<Advertisement> likedAdList = adService.listByIds(idList);
+                List<Advertisement> likedAdList;
+                if (CollectionUtil.isEmpty(idList)) {
+                    likedAdList = adList;
+                } else {
+                    likedAdList = adService.listByIds(idList);
+                }
                 // 获取每个用户喜欢广告的相似广告，并加入待计算的广告集合中
                 for (Advertisement likedAd : likedAdList) {
                     List<Long> subIdList = adSimilarityService.listSimilarAdIdByAdId(likedAd.getId());
-                    List<Advertisement> similarAdList = adService.listByIds(subIdList);
-                    adSet.addAll(similarAdList);
+                    List<Advertisement> similarAdList;
+                    if (!CollectionUtil.isEmpty(idList)) {
+                        similarAdList = adService.listByIds(subIdList);
+                        adSet.addAll(similarAdList);
+                    }
                 }
 
                 // 获取用户对于所有广告的操作分值
@@ -367,6 +403,7 @@ public class AdvertisementJob {
                     recommendationScoreMap.put(ad.getId(), res);
                 }
                 finalResultMap.put(user.getId(), recommendationScoreMap);
+                log.info("用户的CF推荐分值计算完成{}", user.getNickname());
                 countDownLatch.countDown();
             });
         }

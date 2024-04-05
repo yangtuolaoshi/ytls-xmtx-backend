@@ -1,11 +1,13 @@
 package love.ytlsnb.ad.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import love.ytls.api.user.UserClient;
 import love.ytlsnb.ad.mapper.AdvertisementMapper;
 import love.ytlsnb.ad.service.*;
 import love.ytlsnb.common.constants.AdvertisementConstant;
@@ -15,7 +17,9 @@ import love.ytlsnb.model.ad.dto.AdvertisementInsertDTO;
 import love.ytlsnb.model.ad.dto.AdvertisementQueryDTO;
 import love.ytlsnb.model.ad.po.*;
 import love.ytlsnb.model.ad.vo.AdvertisementVO;
+import love.ytlsnb.model.ad.vo.TagVO;
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.user.po.User;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,7 +40,9 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class AdvertisementServiceImpl extends ServiceImpl<AdvertisementMapper, Advertisement> implements AdvertisementService {
+public class AdvertisementServiceImpl
+        extends ServiceImpl<AdvertisementMapper, Advertisement>
+        implements AdvertisementService {
     @Autowired
     private AdvertisementMapper adMapper;
     @Autowired
@@ -49,6 +55,8 @@ public class AdvertisementServiceImpl extends ServiceImpl<AdvertisementMapper, A
     private RecommendationScoreService recommendationScoreService;
     @Autowired
     private AdvertisementFrequencyService adFrequencyService;
+    @Autowired
+    private UserClient userClient;
 
     @Override
     public List<Advertisement> listBySharding(int shardTotal, int shardIndex) {
@@ -58,6 +66,14 @@ public class AdvertisementServiceImpl extends ServiceImpl<AdvertisementMapper, A
     @Override
     @Transactional
     public void addAdvertisement(AdvertisementInsertDTO adInsertDTO) {
+        // 必要参数校验
+        if (StrUtil.isBlank(adInsertDTO.getCustomerName()) ||
+                StrUtil.isBlank(adInsertDTO.getCustomerPhone()) ||
+                StrUtil.isBlank(adInsertDTO.getDescription()) ||
+                !adInsertDTO.getExpirationTime().isAfter(LocalDateTime.now())) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写或检查必要的参数");
+        }
+
         Advertisement ad = BeanUtil.copyProperties(adInsertDTO, Advertisement.class);
         List<Long> tagIdList = adInsertDTO.getTagIdList();
         Boolean eligible = tagService.checkTagIdList(tagIdList);
@@ -65,8 +81,12 @@ public class AdvertisementServiceImpl extends ServiceImpl<AdvertisementMapper, A
             throw new BusinessException(ResultCodes.BAD_REQUEST, "请添加正确的标签");
         }
         adMapper.insert(ad);
-        List<AdvertisementTag> adTagList = BeanUtil.copyToList(tagIdList, AdvertisementTag.class);
-        adTagList.forEach(adTag -> adTag.setAdvertisementId(ad.getId()));
+        List<AdvertisementTag> adTagList = tagIdList.stream().map(tagId -> {
+            AdvertisementTag adTag = new AdvertisementTag();
+            adTag.setTagId(tagId);
+            adTag.setAdvertisementId(ad.getId());
+            return adTag;
+        }).toList();
         adTagService.saveBatch(adTagList);
     }
 
@@ -81,15 +101,31 @@ public class AdvertisementServiceImpl extends ServiceImpl<AdvertisementMapper, A
 
     @Override
     public void updateAdvertisement(AdvertisementInsertDTO adUpdateDTO) {
-        Advertisement ad = BeanUtil.copyProperties(adUpdateDTO, Advertisement.class);
+        if (StrUtil.isBlank(adUpdateDTO.getCustomerName()) ||
+                StrUtil.isBlank(adUpdateDTO.getCustomerPhone()) ||
+                StrUtil.isBlank(adUpdateDTO.getDescription()) ||
+                !adUpdateDTO.getExpirationTime().isAfter(LocalDateTime.now())) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写或检查必要的参数");
+        }
+
+        Advertisement ad = adMapper.selectById(adUpdateDTO.getId());
+        if (ad == null) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写正确的广告ID");
+        }
+
+        BeanUtil.copyProperties(adUpdateDTO, ad);
         List<Long> tagIdList = adUpdateDTO.getTagIdList();
         Boolean eligible = tagService.checkTagIdList(tagIdList);
         if (!eligible) {
             throw new BusinessException(ResultCodes.BAD_REQUEST, "请添加正确的标签");
         }
         adMapper.updateById(ad);
-        List<AdvertisementTag> adTagList = BeanUtil.copyToList(tagIdList, AdvertisementTag.class);
-        adTagList.forEach(adTag -> adTag.setAdvertisementId(ad.getId()));
+        List<AdvertisementTag> adTagList = tagIdList.stream().map(tagId -> {
+            AdvertisementTag adTag = new AdvertisementTag();
+            adTag.setTagId(tagId);
+            adTag.setAdvertisementId(ad.getId());
+            return adTag;
+        }).toList();
         // 删除已有标签
         adTagService.remove(new LambdaQueryWrapper<AdvertisementTag>()
                 .eq(AdvertisementTag::getAdvertisementId, ad.getId()));
@@ -106,34 +142,58 @@ public class AdvertisementServiceImpl extends ServiceImpl<AdvertisementMapper, A
         }
         // 查询相关标签信息
         List<Tag> tagList = tagService.listAllByAdvertisementId(adId);
+        List<TagVO> tagVOList = BeanUtil.copyToList(tagList, TagVO.class);
         // 封装数据进行返回
         AdvertisementVO adVO = BeanUtil.copyProperties(ad, AdvertisementVO.class);
-        adVO.setTagList(tagList);
+        adVO.setTagList(tagVOList);
         return adVO;
     }
 
     @Override
     public List<AdvertisementVO> getPageByConditions(AdvertisementQueryDTO adQueryDTO) {
         Page<Advertisement> page = new Page<>();
+        if (adQueryDTO.getCurrentPage() == null || adQueryDTO.getPageSize() == null) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写完整的查询参数");
+        }
         page.setCurrent(adQueryDTO.getCurrentPage());
         page.setSize(adQueryDTO.getPageSize());
-        lambdaQuery().likeRight(Advertisement::getDescription, adQueryDTO.getDescription())
-                .likeRight(Advertisement::getCustomerName, adQueryDTO.getCustomerName())
-                .likeRight(Advertisement::getCustomerPhone, adQueryDTO.getCustomerPhone())
-                .page(page);
+        LambdaQueryChainWrapper<Advertisement> adLambdaQueryChainWrapper = lambdaQuery();
+        if (!StrUtil.isBlank(adQueryDTO.getCustomerName())) {
+            adLambdaQueryChainWrapper.likeRight(Advertisement::getCustomerName, adQueryDTO.getCustomerName());
+        }
+        if (!StrUtil.isBlank(adQueryDTO.getCustomerPhone())) {
+            adLambdaQueryChainWrapper.likeRight(Advertisement::getCustomerPhone, adQueryDTO.getCustomerPhone());
+        }
+        if (!StrUtil.isBlank(adQueryDTO.getDescription())) {
+            adLambdaQueryChainWrapper.likeRight(Advertisement::getDescription, adQueryDTO.getDescription());
+        }
+        adLambdaQueryChainWrapper.page(page);
         List<AdvertisementVO> adVOList = BeanUtil.copyToList(page.getRecords(), AdvertisementVO.class);
-        adVOList.forEach(adVO -> adVO.setTagList(tagService.listAllByAdvertisementId(adVO.getId())));
+        adVOList.forEach(adVO -> adVO.setTagList(BeanUtil
+                .copyToList(tagService.listAllByAdvertisementId(adVO.getId()), TagVO.class)));
         return adVOList;
     }
 
     @Override
     public List<Advertisement> list2User(Long userId, Integer size) {
+        if (size <= 0) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写正确的参数");
+        }
+        Result<User> userByIdResult = userClient.getUserById(userId);
+        if (userByIdResult.getCode() != ResultCodes.OK) {
+            throw new BusinessException(userByIdResult.getCode(), userByIdResult.getMsg());
+        }
+        if (userByIdResult.getData() == null) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写正确的查询参数");
+        }
+
         // 根据用户查询出所有广告的推荐得分
         Map<Long, BigDecimal> adRecommendationScoreMap = recommendationScoreService.listByUserId(userId).stream()
                 .collect(Collectors.toMap(RecommendationScore::getAdvertisementId, RecommendationScore::getScore));
         // 查询所有广告的当日推送频次
         Map<Long, Integer> adFrequencyMap = adFrequencyService.listTodaysByUserId(userId).stream()
-                .collect(Collectors.toMap(AdvertisementFrequency::getAdvertisementId, AdvertisementFrequency::getFrequency));
+                .collect(Collectors.toMap(AdvertisementFrequency::getAdvertisementId,
+                        AdvertisementFrequency::getFrequency));
         // 根据广告-用户当日推送频次重新计算广告用户推荐得分
         for (Map.Entry<Long, BigDecimal> entry : adRecommendationScoreMap.entrySet()) {
             Integer frequency = adFrequencyMap.get(entry.getKey());

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 import love.ytlsnb.model.ad.po.Tag;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -30,7 +31,19 @@ public class AdvertisementVO {
      */
     private String link;
     /**
+     * 投放广告的客户名
+     */
+    private String customerName;
+    /**
+     * 投放广告客户的联系方式
+     */
+    private String customerPhone;
+    /**
+     * 广告的投放结束时间
+     */
+    private LocalDateTime expirationTime;
+    /**
      * 广告的相关标签
      */
-    private List<Tag> tagList;
+    private List<TagVO> tagList;
 }

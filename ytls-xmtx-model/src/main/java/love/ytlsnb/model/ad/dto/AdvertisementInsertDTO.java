@@ -41,7 +41,8 @@ public class AdvertisementInsertDTO {
     /**
      * 广告的投放结束时间
      */
-    private LocalDateTime endTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime expirationTime;
     /**
      * 广告的相关标签ID
      */

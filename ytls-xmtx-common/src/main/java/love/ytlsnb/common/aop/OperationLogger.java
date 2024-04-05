@@ -35,6 +35,7 @@ import java.util.Objects;
  */
 @Aspect
 @Component
+@ConditionalOnBean(OperationLogService.class)
 public class OperationLogger {
     @Autowired
     OperationLogService operationLogService;

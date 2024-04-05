@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -38,6 +39,7 @@ public class RecommendationScoreServiceImpl extends ServiceImpl<RecommendationSc
                 success &= lambdaUpdate().eq(RecommendationScore::getUserId, rs.getUserId())
                         .eq(RecommendationScore::getAdvertisementId, rs.getAdvertisementId())
                         .set(RecommendationScore::getScore, rs.getScore())
+                        .set(RecommendationScore::getUpdateTime, LocalDateTime.now())
                         .update();
             }
         }
