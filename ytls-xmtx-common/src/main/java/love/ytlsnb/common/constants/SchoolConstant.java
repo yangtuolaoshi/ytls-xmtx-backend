@@ -9,11 +9,11 @@ public class SchoolConstant {
     /**
      * 拦截器用来鉴别用户操作的常量
      */
-    public static final String COLADMIN_ALL_URL = "/coladmin/**";
+    public static final String COLADMIN_ALL_URL = "/user/**";
     /**
      * 网关和拦截器用来鉴别注册操作的常量
      */
-    public static final String COLADMIN_REGISTER_URL = "/coladmin/register";
+    public static final String COLADMIN_REGISTER_URL = "/user/register";
     /**
      * 网关和拦截器用来鉴别登录操作的常量
      */
@@ -21,11 +21,11 @@ public class SchoolConstant {
     /**
      * 网关和拦截器用来鉴别重置密码操作的常量
      */
-    public static final String COLADMIN_REPASSWORD_URL = "/coladmin/repassword";
+    public static final String COLADMIN_REPASSWORD_URL = "/user/repassword";
     /**
      * 网关和拦截器用来鉴别发送验证码操作的常量
      */
-    public static final String COLADMIN_GETCODE_URL = "/coladmin/code";
+    public static final String COLADMIN_GETCODE_URL = "/user/code";
     /**
      * 账号ID字段常量：jwt信息存储
      */
@@ -42,6 +42,11 @@ public class SchoolConstant {
      * 学校ID字段常量：jwt信息存储
      */
     public static final String INSENSITIVE_PASSWORD = "********";
+    //-------------------------User-------------------------
+    /**
+     * 拦截器用来鉴别学校操作的常量
+     */
+    public static final String USER_ALL_URL = "/user/**";
     //-------------------------Location-------------------------
     //-------------------------School-------------------------
     /**

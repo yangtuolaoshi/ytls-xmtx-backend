@@ -21,6 +21,7 @@ public class SchoolTest {
     private UserClient userClient;
     @Test
     public void test() {
+        Result<User> byId = userClient.getUserById(1758018823723806722L);
         //Result<User> byId = userClient.getById(1758018823723806722L);
     }
 }

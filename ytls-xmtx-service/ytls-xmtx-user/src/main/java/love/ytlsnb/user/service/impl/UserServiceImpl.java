@@ -1,16 +1,14 @@
 package love.ytlsnb.user.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.util.*;
 import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import love.ytls.api.reward.RewardClient;
 import love.ytls.api.school.SchoolClient;
+import love.ytlsnb.model.common.LoginType;
 import love.ytlsnb.common.constants.RedisConstant;
 import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.common.constants.UserConstant;
@@ -33,15 +31,19 @@ import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.po.UserInfo;
 import love.ytlsnb.model.user.vo.UserVO;
+import love.ytlsnb.user.factory.UserLoginProcessorFactory;
 import love.ytlsnb.user.mapper.UserInfoMapper;
 import love.ytlsnb.user.mapper.UserMapper;
 import love.ytlsnb.user.service.UserInfoService;
+import love.ytlsnb.user.service.UserLoginProcessor;
 import love.ytlsnb.user.service.UserService;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.DefaultTypedTuple;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,8 +54,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static love.ytlsnb.common.constants.RedisConstant.POINT_RANKING_PREFIX;
 
 /**
  * 用户基本信息业务层实现类
@@ -257,77 +260,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 用户登录
      *
      * @param userLoginDTO 封装用户的登录账户，密码
-     * @param request      用户请求对象，用于获取用户的jwt令牌
      * @return
      */
     @Override
-    public String login(UserLoginDTO userLoginDTO, HttpServletRequest request) {
-        User user;
-        // 校验传入参数
-        if ((StrUtil.isBlankIfStr(userLoginDTO.getAccount()) || StrUtil.isBlankIfStr(userLoginDTO.getPassword()))) {
-            // 非账户密码登录
-            if ((StrUtil.isBlankIfStr(userLoginDTO.getPhone()) || StrUtil.isBlankIfStr(userLoginDTO.getCode()))) {
-                // 手机号验证码也为空
-                throw new BusinessException(ResultCodes.BAD_REQUEST, "登录请求参数错误");
-            }
-            //手机号验证码登录
-            if (!PhoneUtil.isPhone(userLoginDTO.getPhone())) {
-                throw new BusinessException(ResultCodes.BAD_REQUEST, "请填写正确的手机号");
-            }
-            if (!commonUtil.checkShortMessage(userLoginDTO.getPhone(), userLoginDTO.getCode())) {
-                // 验证码不同
-                throw new BusinessException(ResultCodes.UNAUTHORIZED, "验证码错误");
-            }
-            user = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                    .eq(User::getPhone, userLoginDTO.getPhone()));
-            if (user == null) {
-                // 查询用户数据为空
-                throw new BusinessException(ResultCodes.UNAUTHORIZED, "当前手机号尚未注册账号");
-            }
-        } else {
-            // 账户密码登录
-            user = getByAccount(userLoginDTO.getAccount());
-            if (user == null) {
-                // 用户不存在
-                throw new BusinessException(ResultCodes.UNAUTHORIZED, "用户不存在");
-            }
-            // 用户存在，校验密码
-            if (!BCrypt.checkpw(userLoginDTO.getPassword(), user.getPassword())) {
-                // 密码错误
-                throw new BusinessException(ResultCodes.UNAUTHORIZED, "密码错误");
-            }
-        }
-        // 提前创建jwt令牌
-        Map<String, Object> claims = new HashMap<>();
-        claims.put(UserConstant.USER_ID, user.getId());
-        String jwt = JwtUtil.createJwt(jwtProperties.getUserSecretKey(), jwtProperties.getUserTtl(), claims);
-        log.info("生成的JWT令牌:{}", jwt);
-        // jwt令牌中的签名，存储进redis用于进行用户账号的唯一登录
-        String newSignature = jwt.substring(jwt.lastIndexOf('.') + 1);
-        // 尝试登录
-        String loginLockName = RedisConstant.USER_LOGIN_LOCK_PREFIX + user.getId();
-        RLock lock = redissonClient.getLock(loginLockName);
-        try {
-            // 上锁，同一时间只允许一人进行登录操作
-            boolean success = lock.tryLock();
-            if (!success) {
-                // 多人同时登录同一账号
-                throw new BusinessException(ResultCodes.FORBIDDEN, "可能有其他用户正在登录您的账号，请检查您的账号");
-            }
-            redisTemplate.opsForValue()
-                    .set(RedisConstant.USER_LOGIN_PREFIX + user.getId(),
-                            newSignature,
-                            jwtProperties.getUserTtl(),
-                            TimeUnit.MILLISECONDS);
-            return jwt;
-        } finally {
-            // 释放锁
-            try {
-                lock.unlock();
-            } catch (Exception e) {
-                log.error("释放锁失败:{},锁已经释放", loginLockName);
-            }
-        }
+    public String login(UserLoginDTO userLoginDTO) {
+        LoginType loginType = LoginType.valueOf(userLoginDTO.getLoginType());
+        UserLoginProcessor userLoginProcessor = UserLoginProcessorFactory.getUserLoginProcessor(loginType);
+        return userLoginProcessor.login(userLoginDTO);
     }
 
     /**
@@ -523,6 +462,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         User user = userMapper.selectById(id);
+        if (user == null) {
+            throw new BusinessException(ResultCodes.BAD_REQUEST, "未查询到相关数据");
+        }
         UserInfo userInfo = userInfoMapper.selectById(user.getUserInfoId());
         BeanUtil.copyProperties(userInsertDTO, user);
         BeanUtil.copyProperties(userInsertDTO, userInfo);
@@ -533,6 +475,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public UserVO getUserVOById(Long id) {
         User user = userMapper.selectById(id);
+        if (user == null) {
+            return null;
+        }
         UserInfo userInfo = userInfoMapper.selectById(user.getUserInfoId());
         return new UserVO(user, userInfo);
     }
@@ -551,7 +496,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setPassword(UserConstant.INSENSITIVE_PASSWORD);
         return user;
     }
-
 
     @Override
     public void sendShortMessage(String phone) throws Exception {
@@ -580,7 +524,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         BeanUtil.copyProperties(idCard, userInfo);
         userInfoMapper.updateById(userInfo);
         log.info("修改UserInfo:{}", userInfo);
-        // TODO 检查是否修改了updatetime属性
     }
 
     @Override
@@ -621,44 +564,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         log.info("修改UserInfo:{}", userInfo);
     }
 
-
-    /*
-    @Override
-    public void addUser(UserInsertDTO userInsertDTO) throws Exception {
-        // 参数合法性校验
-        // 必填参数（手机号）为空
-        if (StrUtil.isBlankIfStr(userInsertDTO.getPhone())) {
-            throw new BusinessException(ResultCodes.BAD_REQUEST, "手机号不能为空");
-        }
-        // 手机号不合法
-        if (!PhoneUtil.isPhone(userInsertDTO.getPhone())) {
-            throw new BusinessException(ResultCodes.BAD_REQUEST, "请输入正确的手机号");
-        }
-        // 用户真实照片校验
-        if (userInsertDTO.getRealPhoto() != null) {
-            aliUtil.faceDetect(userInsertDTO.getRealPhoto());
-        }
-        if (userInsertDTO.getIdNumber() != null
-                && !IdcardUtil.isValidCard(userInsertDTO.getIdNumber())) {
-            throw new BusinessException(ResultCodes.BAD_REQUEST, "请输入正确的身份证号");
-        }
-
-        // 为用户添加学校相关属性
-        Coladmin coladmin = AdminHolder.getAdmin();
-        Long schoolId = coladmin.getSchoolId();
-        School school = schoolMapper.selectById(schoolId);
-        if (school == null) {
-            throw new BusinessException(ResultCodes.SERVER_ERROR, "当前学校信息为空");
-        }
-        userInsertDTO.setSchoolId(schoolId);
-        userInsertDTO.setSchoolName(school.getSchoolName());
-        Result<User> userResult = userClient.addUser(userInsertDTO);
-        if (userResult.getCode() != ResultCodes.OK) {
-            // 远程调用失败
-            throw new BusinessException(userResult.getCode(), userResult.getMsg());
-        }
-    }
-*/
     @Override
     @Transactional
     public void addUserBatch(List<UserInsertBatchDTO> userInsertBatchDTOList) throws IOException {
@@ -824,6 +729,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
     }
 
+    @Transactional
+    @Override
+    public Boolean addPoint(int reward) {
+        // 设置用户信息
+        Long userId = UserHolder.getUser().getId();
+        User user = userMapper.selectById(userId);
+        Long point = user.getPoint();
+        user.setPoint(point + reward);
+        // 更新排行榜
+        ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
+        Set<ZSetOperations.TypedTuple<String>> tuples = new HashSet<>();
+        ZSetOperations.TypedTuple<String> typedTuple = new DefaultTypedTuple<String>(userId.toString(), Double.valueOf(user.getPoint()));
+        tuples.add(typedTuple);
+        zSetOperations.add(POINT_RANKING_PREFIX, tuples);
+        return userMapper.updateById(user) > 0;
+    }
 
     /**
      * 用户兑换奖品

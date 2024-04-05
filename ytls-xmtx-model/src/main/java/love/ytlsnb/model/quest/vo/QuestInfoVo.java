@@ -2,6 +2,9 @@ package love.ytlsnb.model.quest.vo;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import love.ytlsnb.model.quest.po.QuestSchedule;
+
+import java.util.List;
 
 /**
  * 任务详细信息

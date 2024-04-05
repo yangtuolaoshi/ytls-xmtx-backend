@@ -6,8 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import love.ytls.api.school.SchoolClient;
 import love.ytlsnb.common.constants.ResultCodes;
 import love.ytlsnb.common.constants.UserConstant;
+import love.ytlsnb.common.exception.BusinessException;
+import love.ytlsnb.model.common.LogOperation;
+import love.ytlsnb.model.common.Operator;
+import love.ytlsnb.common.utils.ColadminHolder;
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.user.dto.*;
 import love.ytlsnb.model.user.po.User;
 import love.ytlsnb.model.user.vo.UserVO;
@@ -37,10 +42,12 @@ public class UserController {
     /**
      * 鼠鼠用来调试的接口
      */
+    @LogOperation(Operator.USER)
     @GetMapping("test")
-    public void test() {
+    public Result test() {
         log.info("user-test");
-        schoolClient.getColadminById(1L);
+//        throw new BusinessException(ResultCodes.BAD_REQUEST,"测试");
+        return Result.ok();
     }
 
     @PostMapping
@@ -70,6 +77,7 @@ public class UserController {
      * @param userUpdateDTO 用户修改数据传输对象
      * @return
      */
+    @LogOperation(Operator.USER)
     @PutMapping
     public Result updateUser(@RequestBody UserUpdateDTO userUpdateDTO) {
         log.info("修改用户:{}", userUpdateDTO);
@@ -92,6 +100,7 @@ public class UserController {
         return Result.ok();
     }
 
+    @LogOperation(Operator.USER)
     @PutMapping("/password")
     public Result updatePassword(@RequestBody UserUpdatePasswordDTO userUpdatePasswordDTO) {
         log.info("用户重置密码:{}", userUpdatePasswordDTO);
@@ -99,12 +108,14 @@ public class UserController {
         return Result.ok();
     }
 
+    @LogOperation(Operator.USER)
     @GetMapping
     public Result<User> getUser() {
         log.info("用户端查询用户");
         User user = userService.getUser();
         return Result.ok(user);
     }
+
     @GetMapping("/{id}")
     public Result<User> getUserById(@PathVariable Long id) {
         log.info("根据用户ID查询用户:{}", id);
@@ -130,19 +141,22 @@ public class UserController {
                 (long) userVOList.size());
     }
 
+    @LogOperation(Operator.USER)
     @PostMapping("/upload")
     public Result<String> upload(MultipartFile file) {
         log.info("正在上传文件 {} 至阿里云云端", file);
         return Result.ok(userService.upload(file));
     }
 
+    @LogOperation(Operator.USER)
     @PostMapping("/login")
-    public Result<String> login(@RequestBody UserLoginDTO userLoginDTO, HttpServletRequest request) {
+    public Result<String> login(@RequestBody UserLoginDTO userLoginDTO) {
         log.info("用户登录:{}", userLoginDTO);
-        String jwt = userService.login(userLoginDTO, request);
+        String jwt = userService.login(userLoginDTO);
         return Result.ok(jwt);
     }
 
+    @LogOperation(Operator.USER)
     @PostMapping("/register")
     public Result register(@RequestBody UserRegisterDTO userRegisterDTO) {
         log.info("用户注册:{}", userRegisterDTO);
@@ -156,6 +170,7 @@ public class UserController {
      *
      * @return 用户签到的结果
      */
+    @LogOperation(Operator.USER)
     @PostMapping("/sign")
     public Result sign() {
         if (userService.sign()) {
@@ -170,11 +185,13 @@ public class UserController {
      *
      * @return 用户今日的签到状态:true 已签到   false 未签到
      */
+    @LogOperation(Operator.USER)
     @GetMapping("/sign")
     public Result<Boolean> getSignStatus() {
         return Result.ok(userService.isSigned());
     }
 
+    @LogOperation(Operator.USER)
     @GetMapping("/sign/list")
     public Result<Boolean[]> listSign() {
         log.info("获取本月所有签到数据");
@@ -189,6 +206,7 @@ public class UserController {
      * @return 发送成功返回的结果
      * @throws Exception 发送失败的异常
      */
+    @LogOperation(Operator.USER)
     @GetMapping("/code/{phone}")
     public Result sendShortMessage(@PathVariable String phone) throws Exception {
         log.info("发送验证码:{}", phone);
@@ -200,6 +218,7 @@ public class UserController {
      * @param idCard 代表身份证的OSS存储路径
      * @return
      */
+    @LogOperation(Operator.USER)
     @PostMapping("/idCard")
     public Result uploadIdCard(@RequestBody String idCard) throws Exception {
         log.info("上传身份证:{}", idCard);
@@ -211,6 +230,7 @@ public class UserController {
      * @param admissionLetter 代表用户录取通知书的OSS存储路径
      * @return
      */
+    @LogOperation(Operator.USER)
     @PostMapping("/admissionLetter")
     public Result uploadAdmissionLetter(@RequestBody String admissionLetter) throws Exception {
         log.info("上传录取通知书:{}", admissionLetter);
@@ -222,6 +242,7 @@ public class UserController {
      * @param realPhoto 用户上传的真实照片
      * @return
      */
+    @LogOperation(Operator.USER)
     @PostMapping("/realPhoto")
     public Result uploadRealPhoto(@RequestBody String realPhoto) throws Exception {
         log.info("上传真实照片:{}", realPhoto);

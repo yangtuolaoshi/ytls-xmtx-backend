@@ -26,7 +26,7 @@ public class User {
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     /**
-     * 主键ID
+     * 用户信息ID
      */
     private Long userInfoId;
     /**
@@ -78,13 +78,13 @@ public class User {
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
     /**
      * 修改时间
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
     /**
      * 是否删除

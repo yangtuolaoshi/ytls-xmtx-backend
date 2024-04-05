@@ -1,0 +1,59 @@
+version: '3.8'
+services:
+  ytls-xmtx-app-gateway:
+    build:
+      context: ./ytls-xmtx-gateway/ytls-xmtx-app-gateway # 指定Dockerfile所在的目录
+      dockerfile: Dockerfile # Dockerfile的文件名
+    ports:
+      - "6660:6660" # 将容器的6660端口映射到主机的6660端口
+    networks:
+      - my_network
+
+  ytls-xmtx-coladmin-gateway:
+    build:
+      context: ./ytls-xmtx-gateway/ytls-xmtx-coladmin-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "6661:6661"
+    networks:
+      - my_network
+
+  ytls-xmtx-user:
+    build:
+      context: ./ytls-xmtx-service/ytls-xmtx-user
+      dockerfile: Dockerfile
+    ports:
+      - "6663:6663"
+    networks:
+      - my_network
+
+  ytls-xmtx-school:
+    build:
+      context: ./ytls-xmtx-service/ytls-xmtx-school
+      dockerfile: Dockerfile
+    ports:
+      - "6664:6664"
+    networks:
+      - my_network
+
+  ytls-xmtx-quest:
+    build:
+      context: ./ytls-xmtx-service/ytls-xmtx-quest
+      dockerfile: Dockerfile
+    ports:
+      - "6665:6665"
+    networks:
+      - my_network
+
+  ytls-xmtx-reward:
+    build:
+      context: ./ytls-xmtx-service/ytls-xmtx-reward
+      dockerfile: Dockerfile
+    ports:
+      - "6666:6666"
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge # 使用bridge网络驱动，这是Docker Compose的默认设置
