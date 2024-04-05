@@ -1,13 +1,12 @@
-package love.ytlsnb.reward.feign;
+package love.ytlsnb.school.controller;
 
+import love.ytls.api.reward.RewardClient;
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.reward.dto.*;
 import love.ytlsnb.model.reward.po.Reward;
 import love.ytlsnb.model.reward.vo.ExchangeLogVO;
 import love.ytlsnb.model.reward.vo.RewardVO;
-import love.ytlsnb.reward.service.ExchangeLogService;
-import love.ytlsnb.reward.service.RewardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,15 +14,14 @@ import java.util.List;
 
 /**
  * @author QiaoQiao
- * @date 2024/3/18 10:43
+ * @date 2024/4/5 15:59
  */
 @RestController
 @RequestMapping("/reward")
-public class RewardClient {
+public class RewardController {
     @Autowired
-    private RewardService rewardService;
-    @Autowired
-    private ExchangeLogService exchangeLogService;
+    private RewardClient rewardClient;
+
 
     /**
      * 新增奖品
@@ -32,7 +30,7 @@ public class RewardClient {
      */
     @PostMapping
     public Result addReward(@RequestBody RewardDTO rewardInsertDTO){
-        rewardService.add(rewardInsertDTO);
+        rewardClient.addReward(rewardInsertDTO);
         return Result.ok();
     }
 
@@ -45,8 +43,20 @@ public class RewardClient {
      */
     @GetMapping("/page")
     public PageResult<List<RewardVO>> getPageByCondition(RewardQueryDTO rewardQueryDTO, int page, int size){
-        return rewardService.getPageByCondition(rewardQueryDTO, page, size);
 
+        return rewardClient.getPageByCondition(rewardQueryDTO, page, size);
+
+    }
+
+    /**
+     * 根据学校id查询奖品
+     * @param schoolId
+     * @return
+     */
+    @GetMapping("/{schoolId}")
+    public Result<List<Reward>> getPageBySchoolId(@PathVariable Long schoolId){
+        Result<List<Reward>> pageBySchoolId = rewardClient.getPageBySchoolId(schoolId);
+        return pageBySchoolId;
     }
 
     /**
@@ -56,7 +66,8 @@ public class RewardClient {
      */
     @PutMapping("/update")
     public Result<Boolean> update(@RequestBody RewardDTO rewardDTO){
-        return Result.ok(rewardService.update(rewardDTO));
+
+        return rewardClient.update(rewardDTO);
     }
 
     /**
@@ -65,50 +76,35 @@ public class RewardClient {
      * @return
      */
     @DeleteMapping("/{id}")
-    public Result deleteById(@PathVariable Long id){
-        rewardService.deleteWithPhotoById(id);
+    public Result deleteWithPhotoById(@PathVariable Long id){
+
+        rewardClient.deleteById(id);
         return Result.ok();
 
-    }
-
-    @GetMapping("/{schoolId}")
-    public Result<List<Reward>> getPageBySchoolId(@PathVariable Long schoolId){
-        List<Reward> rewards= rewardService.selectBySchoolId(schoolId);
-        return Result.ok(rewards);
-    }
-
-    @GetMapping("/id")
-    public Result<Reward> getByRewardId(@PathVariable Long id){
-        Reward reward = rewardService.getById(id);
-        return Result.ok(reward);
-    }
-
-    @PostMapping("/add/exchange")
-    public Result addExchangeLog(ExchangeLogDTO exchangeLogDTO){
-        exchangeLogService.addExchangeLog(exchangeLogDTO);
-        return Result.ok();
     }
 
     @DeleteMapping("/photo/delete")
     public Result deletePhoto(RewardPhotoDTO rewardPhotoDTO){
-        rewardService.deleteByPhoto(rewardPhotoDTO);
+        rewardClient.deletePhoto(rewardPhotoDTO);
         return Result.ok();
     }
-    @DeleteMapping("/{id}")
-    public Result deleteWithPhotoById(@PathVariable Long id){
-        rewardService.deleteWithPhotoById(id);
-        return Result.ok();
+    @PostMapping("/add")
+    public Result addExchangeLog(ExchangeLogDTO exchangeLogDTO){
 
+        rewardClient.addExchangeLog(exchangeLogDTO);
+        return Result.ok();
     }
 
-
-    @GetMapping("/exchangeLog/page")
+    @GetMapping("/page")
     public PageResult<List<ExchangeLogVO>> getPageByCondition(ExchangeLogQueryDTO exchangeLogQueryDTO, int page, int size){
-        return exchangeLogService.getPageByCondition(exchangeLogQueryDTO,page,size);
+        return rewardClient.getPageByCondition(exchangeLogQueryDTO,page,size);
+
     }
 
-    @GetMapping("/exchangeLog/{id}")
+    @GetMapping("/{id}")
     public Result<ExchangeLogVO> selectById(@PathVariable Long id){
-        return Result.ok(exchangeLogService.selectById(id));
+    return rewardClient.selectById(id);
+
     }
+
 }
