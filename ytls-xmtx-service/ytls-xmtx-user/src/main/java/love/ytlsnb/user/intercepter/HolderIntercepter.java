@@ -30,6 +30,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class HolderIntercepter implements HandlerInterceptor {
     @Autowired
     private JwtProperties jwtProperties;
+    @Lazy
     @Autowired
     private UserService userService;
     @Lazy

@@ -21,7 +21,7 @@ import java.util.List;
  * @author ula
  * @date 2024/2/3 15:40
  */
-@Component
+//@Component
 @Slf4j
 public class SchoolUtil {
     /*@Autowired

@@ -57,6 +57,13 @@ public class User {
      * 积分
      */
     private Long point;
+
+    /**
+     * 任务完成数
+     */
+    @TableField(value = "quest_finish_count")
+    private Integer questFinishCount;
+
     /**
      * 是否认证
      */

@@ -81,6 +81,7 @@ public class LocationClockIn extends ClockInTemplate<LocationCheckDTO> {
                 latitude,
                 distance
         );
-        return distance < 30;
+        // TODO 这个距离以后应该做成能在管理平台设置的
+        return distance < 100;
     }
 }

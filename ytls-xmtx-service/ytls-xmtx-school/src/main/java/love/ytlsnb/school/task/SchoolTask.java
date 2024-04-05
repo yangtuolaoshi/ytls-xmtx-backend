@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  * @author ula
  * @date 2024/2/4 15:19
  */
-@Component
+//@Component
 public class SchoolTask {
     /*
     @Autowired

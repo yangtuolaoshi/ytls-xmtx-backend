@@ -18,7 +18,7 @@ import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.List;
 
-import static love.ytlsnb.common.constants.RedisConstant.QUEST_SCHEDULE_GEO;
+import static love.ytlsnb.common.constants.RedisConstant.QUEST_SCHEDULE_GEO_PREFIX;
 
 @SpringBootTest
 public class RedisTest {
@@ -52,7 +52,7 @@ public class RedisTest {
             queryWrapper.eq(QuestSchedule::getLocationId, questLocation.getId());
             QuestSchedule questSchedule = questScheduleMapper.selectOne(queryWrapper);
             geoOperations.add(
-                    QUEST_SCHEDULE_GEO + 1,
+                    QUEST_SCHEDULE_GEO_PREFIX + 1,
                     new Point(longitude, latitude),
                     questSchedule.getId().toString()
             );

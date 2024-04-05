@@ -69,5 +69,12 @@ public interface UserService extends IService<User> {
      * @return 是否添加成功
      */
     Boolean addPoint(int reward);
+
+    /**
+     * 添加任务完成数量
+     * @return 是否成功
+     */
+    Boolean addQuestFinishCount();
+
     Result exchangeReward(Long rewardId);
 }

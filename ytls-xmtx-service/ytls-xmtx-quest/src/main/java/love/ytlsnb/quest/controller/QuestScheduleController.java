@@ -12,6 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * 任务进度表现层
+ *
+ * @author 金泓宇
+ * @date 2024/3/12
+ */
 @RestController
 @RequestMapping("/schedule")
 public class QuestScheduleController {

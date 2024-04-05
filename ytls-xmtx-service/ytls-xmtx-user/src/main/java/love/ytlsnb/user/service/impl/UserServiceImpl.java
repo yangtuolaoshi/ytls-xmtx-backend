@@ -57,6 +57,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static love.ytlsnb.common.constants.RedisConstant.POINT_RANKING_PREFIX;
+import static love.ytlsnb.common.constants.RedisConstant.QUEST_FINISH_RANKING_PREFIX;
 
 /**
  * 用户基本信息业务层实现类
@@ -739,10 +740,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setPoint(point + reward);
         // 更新排行榜
         ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
-        Set<ZSetOperations.TypedTuple<String>> tuples = new HashSet<>();
-        ZSetOperations.TypedTuple<String> typedTuple = new DefaultTypedTuple<String>(userId.toString(), Double.valueOf(user.getPoint()));
-        tuples.add(typedTuple);
-        zSetOperations.add(POINT_RANKING_PREFIX, tuples);
+        zSetOperations.incrementScore(POINT_RANKING_PREFIX, userId.toString(), reward);
+        return userMapper.updateById(user) > 0;
+    }
+
+    @Override
+    public Boolean addQuestFinishCount() {
+        Long userId = UserHolder.getUser().getId();
+        User user = userMapper.selectById(userId);
+        Integer questFinishCount = user.getQuestFinishCount();
+        user.setQuestFinishCount(questFinishCount + 1);
+        // 更新排行榜
+        ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
+        zSetOperations.incrementScore(QUEST_FINISH_RANKING_PREFIX, userId.toString(), 1);
         return userMapper.updateById(user) > 0;
     }
 

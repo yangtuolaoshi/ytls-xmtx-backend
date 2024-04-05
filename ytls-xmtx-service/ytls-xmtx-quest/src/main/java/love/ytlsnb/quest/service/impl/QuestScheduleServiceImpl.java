@@ -25,6 +25,14 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.geo.Distance;
+import org.springframework.data.geo.GeoResult;
+import org.springframework.data.geo.GeoResults;
+import org.springframework.data.geo.Point;
+import org.springframework.data.redis.connection.RedisGeoCommands;
+import org.springframework.data.redis.core.GeoOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.domain.geo.GeoReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +40,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static love.ytlsnb.common.constants.RedisConstant.QUEST_SCHEDULE_GEO_PREFIX;
 import static love.ytlsnb.common.constants.ResultCodes.*;
 
 /**
@@ -74,6 +83,9 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
 
     @Autowired
     private RestHighLevelClient client;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     /**
      * 检查任务表单数据
@@ -195,11 +207,13 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
         }
         LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(QuestSchedule::getQuestId, questId);
-        Page<QuestSchedule> questSchedulePage = questScheduleMapper.selectPage(new Page<>(page, size), queryWrapper);
-        List<QuestSchedule> records = questSchedulePage.getRecords();
-        long total = questSchedulePage.getTotal();
+//        Page<QuestSchedule> questSchedulePage = questScheduleMapper.selectPage(new Page<>(page, size), queryWrapper);
+//        List<QuestSchedule> records = questSchedulePage.getRecords();
+//        long total = questSchedulePage.getTotal();
+        List<QuestSchedule> questSchedulePage = questScheduleMapper.selectList(queryWrapper);
+        long total = questSchedulePage.size();
         PageResult<List<QuestSchedule>> result = new PageResult<>(page, size, total);
-        result.setData(records);
+        result.setData(questSchedulePage);
         return result;
     }
 
@@ -345,8 +359,8 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
         QuestSchedulePageInfoVO questSchedulePageInfoVO = new QuestSchedulePageInfoVO();
         QuestSchedule questSchedule = questScheduleMapper.selectById(id);
         BeanUtil.copyProperties(questSchedule, questSchedulePageInfoVO);
-        Long questId = questSchedule.getQuestId();
-        questSchedulePageInfoVO.setScheduleId(questId);
+//        Long questId = questSchedule.getQuestId();
+        questSchedulePageInfoVO.setScheduleId(questSchedule.getId());
         // 查询是否完成
         LambdaQueryWrapper<QuestScheduleLog> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper
@@ -371,6 +385,45 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
 
     @Override
     public QuestCardVO getNearest(Double longitude, Double latitude) {
-        return null;
+        Long userId = UserHolder.getUser().getId();
+        Long schoolId = UserHolder.getUser().getSchoolId();
+        // 查询地理位置
+        GeoOperations<String, String> geoOperations = redisTemplate.opsForGeo();
+        GeoResults<RedisGeoCommands.GeoLocation<String>> geoResults = geoOperations.search(
+                QUEST_SCHEDULE_GEO_PREFIX + schoolId,
+                GeoReference.fromCoordinate(new Point(longitude, latitude)),
+                new Distance(2000),// 现在是500米
+                RedisGeoCommands.GeoSearchCommandArgs.newGeoSearchArgs()
+                        .includeDistance()
+//                        .limit(5)
+        );
+        assert geoResults != null;
+        List<GeoResult<RedisGeoCommands.GeoLocation<String>>> results = geoResults.getContent();// 这个是不可变的因此不能排序，需要复制
+        // 排序
+        List<GeoResult<RedisGeoCommands.GeoLocation<String>>> sortedResults = new ArrayList<>(results);
+        sortedResults.sort(Comparator.comparingDouble(r -> r.getDistance().getValue()));
+        System.out.println(sortedResults);
+        // 需要是自己没完成的
+        // TODO 需要是已解锁的
+        QuestCardVO questCardVO = new QuestCardVO();
+        for (GeoResult<RedisGeoCommands.GeoLocation<String>> result : sortedResults) {
+            String questScheduleId = result.getContent().getName();
+            LambdaQueryWrapper<QuestScheduleLog> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(QuestScheduleLog::getUserId, userId)
+                    .eq(QuestScheduleLog::getQuestScheduleId, questScheduleId);
+            QuestScheduleLog questScheduleLog = questScheduleLogMapper.selectOne(queryWrapper);
+            if (questScheduleLog == null) {// 需要是自己没完成的
+                questCardVO.setQuestScheduleId(Long.valueOf(questScheduleId));
+                QuestSchedule questSchedule = questScheduleMapper.selectById(questScheduleId);
+                BeanUtil.copyProperties(questSchedule, questCardVO);
+                Quest quest = questMapper.selectById(questSchedule.getQuestId());
+                BeanUtil.copyProperties(quest, questCardVO);
+                QuestInfo questInfo = questInfoMapper.selectById(quest.getInfoId());
+                questCardVO.setQuestDescription(questInfo.getQuestDescription());
+                questCardVO.setDistance(result.getDistance().getValue());
+                break;
+            }
+        }
+        return questCardVO;
     }
 }

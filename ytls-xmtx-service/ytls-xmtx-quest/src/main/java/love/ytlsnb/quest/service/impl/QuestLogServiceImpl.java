@@ -79,6 +79,11 @@ public class QuestLogServiceImpl implements QuestLogService {
             // 给用户加积分
             Integer reward = quest.getReward();
             userClient.addPoint(reward);
+            // 给用户加任务完成数
+            Integer type = quest.getType();
+            if (type == 1 || type == 2) {
+                userClient.addQuestFinishCount();
+            }
             return true;
         } else {
             return false;

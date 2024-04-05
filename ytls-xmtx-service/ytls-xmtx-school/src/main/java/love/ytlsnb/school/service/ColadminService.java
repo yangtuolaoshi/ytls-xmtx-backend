@@ -24,4 +24,17 @@ public interface ColadminService extends IService<Coladmin> {
     Coladmin selectInsensitiveAdminById(Long adminId);
 
     void register(ColadminRegisterDTO coladminRegisterDTO);
+
+
+//    void addUserBatch(MultipartFile file) throws IOException;
+//
+//    List<UserVO> listUserByConditions(UserQueryDTO userQueryDTO);
+//
+//    void addUser(UserInsertDTO userInsertDTO);
+//
+//    void deleteUserById(Long id);
+//
+//    void updateUserById(UserInsertDTO userInsertDTO, Long id);
+//
+//    UserVO getUserVOById(Long id);
 }

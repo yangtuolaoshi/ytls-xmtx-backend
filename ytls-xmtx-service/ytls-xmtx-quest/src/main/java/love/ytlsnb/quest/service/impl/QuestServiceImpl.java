@@ -22,7 +22,6 @@ import love.ytlsnb.quest.service.QuestScheduleClockInMethodService;
 import love.ytlsnb.quest.service.QuestScheduleService;
 import love.ytlsnb.quest.service.QuestService;
 import love.ytlsnb.quest.utils.QuestUtil;
-import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -30,6 +29,8 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +40,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import static love.ytlsnb.common.constants.RedisConstant.QUEST_INFO_PREFIX;
 import static love.ytlsnb.common.constants.ResultCodes.*;
 
 /**
@@ -77,6 +80,9 @@ public class QuestServiceImpl implements QuestService {
 
     @Autowired
     private RestHighLevelClient client;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     @Override
     public PageResult<List<QuestVo>> getPageByCondition(QuestQueryDTO questQueryDTO, int page, int size) {
@@ -293,11 +299,22 @@ public class QuestServiceImpl implements QuestService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // 删除缓存
+        redisTemplate.delete(QUEST_INFO_PREFIX + id);
         return rows > 0;
     }
 
     @Override
     public QuestInfoPageVO getQuestInfoById(Long id) {
+        // 先查缓存
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        String cacheJsonStr = valueOperations.get(QUEST_INFO_PREFIX + id);
+        // 缓存命中
+        if (cacheJsonStr != null && !"".equals(cacheJsonStr)) {
+            redisTemplate.expire(QUEST_INFO_PREFIX + id, 2, TimeUnit.HOURS);// 重置TTL
+            return JSONUtil.toBean(cacheJsonStr, QuestInfoPageVO.class);
+        }
+        // 缓存未命中
         // 任务信息
         QuestInfoPageVO questInfoPageVO = new QuestInfoPageVO();
         Quest quest = questMapper.selectById(id);
@@ -312,6 +329,10 @@ public class QuestServiceImpl implements QuestService {
         // 查询总进度数
         Long scheduleCount = questScheduleService.getCountByQuestId(questId);
         questInfoPageVO.setScheduleNum(scheduleCount);
+        // 插入缓存
+        String jsonStr = JSONUtil.toJsonStr(questInfoPageVO);
+        valueOperations.set(QUEST_INFO_PREFIX + id, jsonStr);
+        redisTemplate.expire(QUEST_INFO_PREFIX + id, 2, TimeUnit.HOURS);
         // 查询任务是否已完成
         LambdaQueryWrapper<QuestLog> queryWrapper = new LambdaQueryWrapper<>();
         Long userId = UserHolder.getUser().getId();

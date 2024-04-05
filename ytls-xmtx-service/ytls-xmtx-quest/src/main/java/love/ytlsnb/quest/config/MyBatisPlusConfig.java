@@ -20,8 +20,8 @@ public class MyBatisPlusConfig {
         return mpInterceptor;
     }
 
-    @Bean
-    public CustomSqlInjector customSqlInjector() {
-        return new CustomSqlInjector();
-    }
+//    @Bean
+//    public CustomSqlInjector customSqlInjector() {
+//        return new CustomSqlInjector();
+//    }
 }

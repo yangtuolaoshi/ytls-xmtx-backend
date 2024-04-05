@@ -1,11 +1,13 @@
 package love.ytlsnb.school.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import love.ytlsnb.common.utils.ColadminHolder;
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.reward.dto.RewardQueryDTO;
 import love.ytlsnb.model.reward.vo.RewardVO;
 import love.ytlsnb.model.school.dto.DeptInsertDTO;
+import love.ytlsnb.model.school.po.Coladmin;
 import love.ytlsnb.model.school.po.Dept;
 import love.ytlsnb.model.school.vo.DeptVO;
 import love.ytlsnb.school.service.DeptService;

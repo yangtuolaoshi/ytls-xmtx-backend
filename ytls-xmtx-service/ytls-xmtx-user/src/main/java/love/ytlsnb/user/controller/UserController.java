@@ -36,8 +36,8 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
-    @Autowired
-    private SchoolClient schoolClient;
+//    @Autowired
+//    private SchoolClient schoolClient;
 
     /**
      * 鼠鼠用来调试的接口

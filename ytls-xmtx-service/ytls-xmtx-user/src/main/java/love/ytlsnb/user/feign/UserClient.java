@@ -29,4 +29,13 @@ public class UserClient {
         userService.exchangeReward(rewardId);
         return Result.ok();
     }
+
+    /**
+     * 添加任务完成数
+     * @return 结果集
+     */
+    @PostMapping("/addQuestFinishCount")
+    public Result<Boolean> addQuestFinishCount() {
+        return Result.ok(userService.addQuestFinishCount());
+    }
 }

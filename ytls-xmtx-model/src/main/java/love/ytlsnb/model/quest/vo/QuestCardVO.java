@@ -26,6 +26,16 @@ public class QuestCardVO {
     private String questTitle;
 
     /**
+     * 任务描述
+     */
+    private String questDescription;
+
+    /**
+     * 任务类型
+     */
+    private Integer type;
+
+    /**
      * 进度标题
      */
     private String scheduleTitle;

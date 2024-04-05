@@ -31,6 +31,11 @@ public class RankingItemVO {
     private Integer point;
 
     /**
+     * 任务完成数
+     */
+    private Integer questFinishCount;
+
+    /**
      * 排名
      */
     private Long rank;
