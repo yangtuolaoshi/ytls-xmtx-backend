@@ -32,7 +32,12 @@ public class FeignConfiguration {
         return requestTemplate -> {
             // TODO 无法将coladmin正常注入jwtProperties，目前只能写死
             //1、从RequestContextHolder获取原始请求的请求数据(请求参数、请求头等)
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+            ServletRequestAttributes attributes;
+            try {
+                attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+            } catch (IllegalStateException ie) {
+                return;
+            }
             HttpServletRequest request = attributes.getRequest();
             //2、同步请求头数据
 //            String coladminTokenName = jwtProperties.getColadminTokenName();

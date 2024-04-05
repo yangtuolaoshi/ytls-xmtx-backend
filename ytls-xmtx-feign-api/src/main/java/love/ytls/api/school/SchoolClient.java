@@ -13,6 +13,7 @@ import love.ytlsnb.model.school.po.StudentPhoto;
 import love.ytlsnb.model.school.vo.DeptVO;
 import love.ytlsnb.model.school.vo.LocationVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,14 +41,16 @@ public interface SchoolClient {
 
     @GetMapping("/coladmin/dept/list/{schoolId}")
     Result<List<Dept>> listDeptBySchoolId(@PathVariable Long schoolId);
+
     @PutMapping("/coladmin/dept/update")
     public Result<Boolean> updateDept(@RequestBody DeptInsertDTO deptInsertDTO);
 
     @DeleteMapping("/coladmin/dept/delete")
-    public Result<Boolean>deleteDept(DeptInsertDTO deptInsertDTO);
+    public Result<Boolean> deleteDept(DeptInsertDTO deptInsertDTO);
 
     @GetMapping("/coladmin/dept/page")
-    public PageResult<List<DeptVO>> getPageByCondition(DeptInsertDTO deptQueryDTO, int page, int size);
+    public PageResult<List<DeptVO>> getPageByCondition(@SpringQueryMap DeptInsertDTO deptQueryDTO, @RequestParam int page, @RequestParam int size);
+
     @GetMapping("/coladmin/dept/{deptId}")
     Result<Dept> selectByDeptId(@PathVariable Long deptId);
 
@@ -59,9 +62,10 @@ public interface SchoolClient {
 
     @PutMapping("/coladmin/clazz/update")
     Result<Boolean> updateClazz(@RequestBody ClazzInsertDTO clazzInsertDTO);
+
     @GetMapping("/coladmin/clazz/{clazzId}")
     Result<Clazz> getClazzById(@PathVariable Long clazzId);
 
     @DeleteMapping("/coladmin/clazz/delete")
-    Result<Boolean>deleteClazz(ClazzDeleteDTO clazzDeleteDTO);
+    Result<Boolean> deleteClazz(ClazzDeleteDTO clazzDeleteDTO);
 }

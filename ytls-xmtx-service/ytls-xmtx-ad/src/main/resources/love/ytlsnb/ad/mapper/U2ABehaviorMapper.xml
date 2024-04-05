@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="love.ytlsnb.ad.mapper.U2ABehaviorMapper">
+
+    <select id="listLikedAdIdsByUserId" resultType="java.lang.Long">
+        select advertisement_id
+        from tb_u2a_behavior
+        where user_id = #{userId}
+          and type > 0;
+    </select>
+    <select id="getAdSumScoreByAdId" resultType="java.math.BigDecimal">
+        select sum(tb2.score)
+        from tb_u2a_behavior tb1,
+             tb_behavior_category tb2
+        where tb1.type = tb2.type
+          and tb1.advertisement_id = #{adId}
+          and tb2.is_deleted = 0;
+    </select>
+    <select id="getScoreByUserIdAndAdId" resultType="java.math.BigDecimal">
+        select tb2.score
+        from tb_u2a_behavior tb1,
+             tb_behavior_category tb2
+        where tb1.type = tb2.type
+          and tb1.user_id = #{userId}
+          and tb1.advertisement_id = #{adId}
+          and tb2.is_deleted = 0;
+    </select>
+    <select id="listScoreByUserId" resultType="love.ytlsnb.model.ad.dto.UserBehaviorScoreDTO">
+        select tb1.user_id,
+               tb1.advertisement_id,
+               tb2.score
+        from tb_u2a_behavior tb1,
+             tb_behavior_category tb2
+        where tb1.type = tb2.type
+          and tb1.user_id = #{userId}
+          and tb2.is_deleted = 0;
+    </select>
+    <select id="listScoreByAdId" resultType="love.ytlsnb.model.ad.dto.UserBehaviorScoreDTO">
+        select tb1.user_id,
+               tb1.advertisement_id,
+               tb2.score
+        from tb_u2a_behavior tb1,
+             tb_behavior_category tb2
+        where tb1.type = tb2.type
+          and tb1.advertisement_id = #{adId}
+          and tb2.is_deleted = 0;
+    </select>
+</mapper>

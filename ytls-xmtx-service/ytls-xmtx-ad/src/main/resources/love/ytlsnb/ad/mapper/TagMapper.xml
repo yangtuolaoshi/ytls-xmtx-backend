@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="love.ytlsnb.ad.mapper.TagMapper">
+
+    <select id="listAllTagsByAdvertisementId" resultType="love.ytlsnb.model.ad.po.Tag">
+        select tb1.*
+        from tb_tag tb1,
+             tb_advertisement_tag tb2
+        where tb1.id = tb2.tag_id
+          and tb2.advertisement_id = #{adId}
+          and tb1.is_deleted = 0;
+    </select>
+    <select id="listAllTagsByUserId" resultType="love.ytlsnb.model.ad.po.Tag">
+        select tb1.*
+        from tb_tag tb1,
+             tb_user_tag tb2
+        where tb1.id = tb2.tag_id
+          and tb2.user_id = #{userId}
+          and tb1.is_deleted = 0;
+    </select>
+</mapper>

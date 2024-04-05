@@ -33,6 +33,9 @@ public interface UserClient {
     @GetMapping("/api/user/detail/{id}")
     Result<UserVO> getUserVOById(@PathVariable Long id);
 
+    @GetMapping("/api/user/list")
+    public Result<List<User>> list();
+
     @GetMapping("/api/user/listByConditions")
     PageResult<List<UserVO>> listByConditions(@SpringQueryMap UserQueryDTO userQueryDTO);
 
@@ -40,4 +43,7 @@ public interface UserClient {
     Result<Boolean> addPoint(@RequestParam int reward);
     @PostMapping("/api/user/exchangeReward/{rewardId}")
     Result exchangeReward(@PathVariable Long rewardId);
+
+    @GetMapping("/api/user/list/{total}/{index}")
+    Result<List<User>> listBySharding(@PathVariable Integer total, @PathVariable Integer index);
 }

@@ -11,6 +11,7 @@ import love.ytlsnb.model.school.vo.DeptVO;
 import love.ytlsnb.school.service.DeptService;
 import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,7 +59,7 @@ public class DeptController {
     }
 
     @GetMapping("/page")
-    public PageResult<List<DeptVO>> getPageByCondition(DeptInsertDTO deptQueryDTO, int page, int size){
+    public PageResult<List<DeptVO>> getPageByCondition(@SpringQueryMap DeptInsertDTO deptQueryDTO, int page, int size){
         log.info("分页查询奖品:{}",deptQueryDTO);
         return deptService.getPageByCondition(deptQueryDTO, page, size);
 
