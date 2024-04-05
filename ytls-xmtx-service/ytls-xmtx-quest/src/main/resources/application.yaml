@@ -41,3 +41,5 @@ feign:
     config:
       default: # 表示全局生效
         loggerLevel: FULL
+es:
+  url: 121.41.90.44:9200

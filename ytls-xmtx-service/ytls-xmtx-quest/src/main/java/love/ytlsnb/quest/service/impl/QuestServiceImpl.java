@@ -1,11 +1,13 @@
 package love.ytlsnb.quest.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.utils.UserHolder;
 import love.ytlsnb.model.common.PageResult;
+import love.ytlsnb.model.quest.doc.QuestScheduleDoc;
 import love.ytlsnb.model.quest.dto.QuestDTO;
 import love.ytlsnb.model.quest.dto.QuestQueryDTO;
 import love.ytlsnb.model.quest.po.*;
@@ -20,10 +22,18 @@ import love.ytlsnb.quest.service.QuestScheduleClockInMethodService;
 import love.ytlsnb.quest.service.QuestScheduleService;
 import love.ytlsnb.quest.service.QuestService;
 import love.ytlsnb.quest.utils.QuestUtil;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -64,6 +74,9 @@ public class QuestServiceImpl implements QuestService {
 
     @Autowired
     private QuestLocationPhotoService questLocationPhotoService;
+
+    @Autowired
+    private RestHighLevelClient client;
 
     @Override
     public PageResult<List<QuestVo>> getPageByCondition(QuestQueryDTO questQueryDTO, int page, int size) {
@@ -134,6 +147,7 @@ public class QuestServiceImpl implements QuestService {
     public Long add(QuestDTO questDTO) {
         Long schoolId = questDTO.getSchoolId();
         questDTO.setRequiredScheduleNum(1);// 目前添加任务时默认设置完成任务所需进度为1
+        QuestScheduleDoc questScheduleDoc = new QuestScheduleDoc();
         // 检查任务的参数
         QuestUtil.checkQuestParams(questDTO);
         // 检查前置任务存不存在
@@ -195,12 +209,31 @@ public class QuestServiceImpl implements QuestService {
             questSchedule.setLocationId(locationId);// 进度地点ID
             List<String> urls = questDTO.getLocationPhotoUrls();
             questLocationPhotoService.addBatchByUrls(urls, locationId);
+            // 索引表
+            BeanUtil.copyProperties(questLocation, questScheduleDoc);
+            questScheduleDoc.setQuestLocationId(questLocation.getId());
         }
         questSchedule.setQuestId(quest.getId());// 所属任务ID
         questScheduleMapper.insert(questSchedule);
         Long questScheduleId = questSchedule.getId();
         if (questScheduleId == null) {
             throw new BusinessException(SERVER_ERROR, "任务添加失败，请稍后重试");
+        }
+        try {
+            // 索引表
+            BeanUtil.copyProperties(quest, questScheduleDoc);
+            questScheduleDoc.setQuestId(quest.getId());
+            BeanUtil.copyProperties(questInfo, questScheduleDoc);
+            BeanUtil.copyProperties(questSchedule, questScheduleDoc);
+            questScheduleDoc.setQuestScheduleTitle(questSchedule.getScheduleTitle());
+            questScheduleDoc.setQuestScheduleId(questScheduleId);
+            // 插入到ES
+            IndexRequest request = new IndexRequest("quest_schedule");
+            String jsonStr = JSONUtil.toJsonStr(questScheduleDoc);
+            request.source(jsonStr, XContentType.JSON);
+            client.index(request, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         // 进度添加打卡方式
         List<Long> clockMethodIds = questDTO.getClockMethodIds();
@@ -252,6 +285,14 @@ public class QuestServiceImpl implements QuestService {
         Integer treeId = quest.getTreeId();
         questMapper.deleteUpdateLeftValue(leftValue, schoolId, treeId);
         questMapper.deleteUpdateRightValue(rightValue, schoolId, treeId);
+        try {
+            // 删除索引表，根据questId删
+            DeleteByQueryRequest request = new DeleteByQueryRequest("quest_schedule");
+            request.setQuery(QueryBuilders.termQuery("questId", quest.getId()));
+            client.deleteByQuery(request, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return rows > 0;
     }
 

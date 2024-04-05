@@ -1,6 +1,7 @@
 package love.ytlsnb.school.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import love.ytlsnb.model.school.dto.ClazzDeleteDTO;
 import love.ytlsnb.model.school.dto.ClazzInsertDTO;
 import love.ytlsnb.model.school.dto.ClazzQueryDTO;
 import love.ytlsnb.model.school.po.Clazz;
@@ -17,4 +18,10 @@ public interface ClazzService extends IService<Clazz> {
     List<Clazz> listClazzBySchoolId(Long schoolId);
 
     List<Clazz> listClazzByCondition(ClazzQueryDTO clazzQueryDTO);
+
+    Boolean updateClazz(ClazzInsertDTO clazzInsertDTO);
+
+    Boolean deleteClazz(ClazzDeleteDTO clazzDeleteDTO);
+
+    Clazz getClazzById(Long clazzId);
 }

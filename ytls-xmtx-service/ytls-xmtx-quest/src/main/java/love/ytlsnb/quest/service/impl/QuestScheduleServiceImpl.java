@@ -1,11 +1,13 @@
 package love.ytlsnb.quest.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import love.ytlsnb.common.exception.BusinessException;
 import love.ytlsnb.common.utils.UserHolder;
 import love.ytlsnb.model.common.PageResult;
+import love.ytlsnb.model.quest.doc.QuestScheduleDoc;
 import love.ytlsnb.model.quest.dto.MapFilterDTO;
 import love.ytlsnb.model.quest.dto.QuestDTO;
 import love.ytlsnb.model.quest.po.*;
@@ -16,10 +18,17 @@ import love.ytlsnb.quest.service.QuestLocationPhotoService;
 import love.ytlsnb.quest.service.QuestScheduleClockInMethodService;
 import love.ytlsnb.quest.service.QuestScheduleService;
 import love.ytlsnb.quest.utils.QuestUtil;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -35,6 +44,9 @@ import static love.ytlsnb.common.constants.ResultCodes.*;
 public class QuestScheduleServiceImpl implements QuestScheduleService {
     @Autowired
     private QuestMapper questMapper;
+
+    @Autowired
+    private QuestInfoMapper questInfoMapper;
 
     @Autowired
     private QuestScheduleMapper questScheduleMapper;
@@ -60,6 +72,9 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
     @Autowired
     private QuestScheduleClockInMethodService questScheduleClockInMethodService;
 
+    @Autowired
+    private RestHighLevelClient client;
+
     /**
      * 检查任务表单数据
      *
@@ -84,6 +99,7 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
     @Transactional
     @Override
     public Long add(QuestDTO questDTO) {
+        QuestScheduleDoc questScheduleDoc = new QuestScheduleDoc();
         this.checkQuestParams(questDTO);
         // 添加地点
         QuestUtil.checkLocationParams(questDTO);
@@ -99,6 +115,9 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
             questSchedule.setLocationId(locationId);
             List<String> photoUrls = questDTO.getLocationPhotoUrls();
             questLocationPhotoService.addBatchByUrls(photoUrls, locationId);
+            // 索引库
+            questScheduleDoc.setQuestLocationId(locationId);
+            BeanUtil.copyProperties(questLocation, questScheduleDoc);
         }
         // 添加进度
 //        LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
@@ -109,6 +128,27 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
 //        }
         questSchedule.setQuestId(questDTO.getQuestId());
         questScheduleMapper.insert(questSchedule);
+        try {
+            // 索引库
+            // 1. 创建请求对象
+            IndexRequest request = new IndexRequest("quest_schedule");
+            // 2. 准备数据
+            questScheduleDoc.setQuestScheduleId(questSchedule.getId());
+            questScheduleDoc.setQuestScheduleTitle(questSchedule.getScheduleTitle());
+            questScheduleDoc.setQuestScheduleId(questSchedule.getId());
+            Quest quest = questMapper.selectById(questDTO.getQuestId());
+            questScheduleDoc.setQuestId(quest.getId());
+            BeanUtil.copyProperties(quest, questScheduleDoc);
+            QuestInfo questInfo = questInfoMapper.selectById(quest.getInfoId());
+            BeanUtil.copyProperties(questInfo, questScheduleDoc);
+            // 转JSON
+            String jsonStr = JSONUtil.toJsonStr(questScheduleDoc);
+            request.source(jsonStr, XContentType.JSON);
+            // 3. 发送请求
+            client.index(request, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         // 添加打卡方式
         Long questScheduleId = questSchedule.getId();
         List<Long> clockMethodIds = questDTO.getClockMethodIds();
@@ -206,6 +246,14 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
         questLocationPhotoService.deleteByLocationId(locationId);
         // 删除打卡绑定
         questScheduleClockInMethodService.deleteByQuestScheduleId(id);
+        try {
+            // 索引表
+            DeleteByQueryRequest request = new DeleteByQueryRequest("quest_schedule");
+            request.setQuery(QueryBuilders.termQuery("questScheduleId", questSchedule.getId()));
+            client.deleteByQuery(request, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return questScheduleMapper.deleteById(id) > 0;
     }
 
@@ -319,5 +367,10 @@ public class QuestScheduleServiceImpl implements QuestScheduleService {
         List<ClockInMethod> clockInMethods = questScheduleClockInMethodService.getClockInMethodsByQuestScheduleId(id);
         questSchedulePageInfoVO.setClockInMethods(clockInMethods);
         return questSchedulePageInfoVO;
+    }
+
+    @Override
+    public QuestCardVO getNearest(Double longitude, Double latitude) {
+        return null;
     }
 }

@@ -9,7 +9,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import love.ytls.api.school.SchoolClient;
 import love.ytls.api.user.UserClient;
 import love.ytlsnb.common.constants.RedisConstant;
 import love.ytlsnb.common.constants.ResultCodes;
@@ -62,16 +61,6 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
     private StringRedisTemplate redisTemplate;
     @Autowired
     private RedissonClient redissonClient;
-    @Lazy
-    @Autowired
-    private UserClient userClient;
-    @Autowired
-    private AliUtil aliUtil;
-
-    @Value("${xmtx.jwt.coladmin-secret-key}")
-    private String coladminSecretKey;
-    @Value("${xmtx.jwt.user-secret-key}")
-    private String userSecretKey;
 
     /**
      * 学校管理人员登录
@@ -82,8 +71,6 @@ public class ColadminServiceImpl extends ServiceImpl<ColadminMapper, Coladmin> i
      */
     @Override
     public String login(ColadminLoginDTO coladminLoginDTO, HttpServletRequest request) {
-        log.info(coladminSecretKey);
-        log.info(userSecretKey);
         // 校验传入参数
         if (StrUtil.isBlankIfStr(coladminLoginDTO.getUsername()) || StrUtil.isBlankIfStr(coladminLoginDTO.getPassword())) {
             throw new BusinessException(ResultCodes.BAD_REQUEST, "登录账户登录信息不全");

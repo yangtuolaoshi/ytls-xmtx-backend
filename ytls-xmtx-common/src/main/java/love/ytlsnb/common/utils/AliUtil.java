@@ -1,11 +1,9 @@
 package love.ytlsnb.common.utils;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.IdcardUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.aliyun.dysmsapi20170525.Client;
 import com.aliyun.dysmsapi20170525.models.SendSmsRequest;
-import com.aliyun.dysmsapi20170525.models.SendSmsResponse;
 import com.aliyun.facebody20191230.models.*;
 import com.aliyun.ocr20191230.models.RecognizeIdentityCardAdvanceRequest;
 import com.aliyun.ocr20191230.models.RecognizeIdentityCardResponse;
@@ -16,7 +14,6 @@ import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.OSSException;
 import com.aliyun.tea.TeaException;
 import com.aliyun.teaopenapi.models.Config;
-import com.aliyun.teautil.Common;
 import com.aliyun.teautil.models.RuntimeOptions;
 import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.common.constants.ResultCodes;
@@ -25,10 +22,8 @@ import love.ytlsnb.common.properties.*;
 import love.ytlsnb.model.user.dto.IdCard;
 import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.swing.text.DateFormatter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

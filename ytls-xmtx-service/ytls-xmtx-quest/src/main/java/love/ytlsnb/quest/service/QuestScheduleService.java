@@ -92,4 +92,12 @@ public interface QuestScheduleService {
      * @return 进度详情页数据
      */
     QuestSchedulePageInfoVO getQuestScheduleInfoPage(Long id);
+
+    /**
+     * 最近的进度
+     * @param longitude 经度
+     * @param latitude 维度
+     * @return 小卡片数据
+     */
+    QuestCardVO getNearest(Double longitude, Double latitude);
 }

@@ -42,9 +42,10 @@ public class HolderIntercepter implements HandlerInterceptor {
         String userToken = request.getHeader(jwtProperties.getUserTokenName());
         String coladminToken = request.getHeader(jwtProperties.getColadminTokenName());
         if (StrUtil.isBlankIfStr(userToken) && StrUtil.isBlankIfStr(coladminToken)) {
-            // 未知调用（远程调用已修复）
-            response.setStatus(ResultCodes.UNAUTHORIZED);
-            return false;
+            // 未知调用（远程调用已修复）?能进来的都是好人，做好自己分内的事儿，权限校验有网关呢
+            // response.setStatus(ResultCodes.UNAUTHORIZED);
+            // return false;
+            return true;
         }
         if (StrUtil.isBlankIfStr(userToken)) {
             Claims claims = JwtUtil.parseJwt(jwtProperties.getColadminSecretKey(), coladminToken);

@@ -24,16 +24,16 @@ import java.util.List;
 @Component
 @Slf4j
 public class SchoolUtil {
-    @Autowired
+    /*@Autowired
     StringRedisTemplate redisTemplate;
     @Autowired
     UserClient userClient;
     @Autowired
     SchoolClient schoolClient;
 
-    /**
+    *//**
      * 更新所有学校的排行总榜
-     */
+     *//*
     public void updateRankingListTotal() {
         // 获取学校列表
         Result<List<School>> schoolListResult = schoolClient.list();
@@ -119,5 +119,5 @@ public class SchoolUtil {
 //                }
 //            }
         }
-    }
+    }*/
 }

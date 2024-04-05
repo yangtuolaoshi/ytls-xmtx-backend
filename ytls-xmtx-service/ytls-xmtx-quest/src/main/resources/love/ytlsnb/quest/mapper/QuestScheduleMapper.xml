@@ -16,7 +16,7 @@
         LEFT JOIN tb_quest_location l ON s.location_id = l.id
         WHERE
         q.school_id = #{schoolId}
-        and q.is_deleted = 0
+        and s.is_deleted = 0
         <if test="mapFilterDTO.getMain != null and !mapFilterDTO.getMain">
             and type != 0
         </if>

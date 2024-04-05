@@ -110,21 +110,23 @@ public final class QuestUtil {
      * @param questDTO 任务添加表单
      */
     public static void checkLocationParams(QuestDTO questDTO) {
-        String locationName = questDTO.getLocationName();
-        if (locationName == null || "".equals(locationName)) {
-            throw new BusinessException(UNPROCESSABLE_ENTITY, "请输入地点名称");
-        }
-        String locationDescription = questDTO.getLocationDescription();
-        if (locationDescription != null && locationDescription.length() > 256) {
-            throw new BusinessException(UNPROCESSABLE_ENTITY, "地点描述不能超过256个字符");
-        }
-        Double longitude = questDTO.getLongitude();
-        if (longitude == null || longitude > 180 || longitude < 0) {
-            throw new BusinessException(UNPROCESSABLE_ENTITY, "经度非法");
-        }
-        Double latitude = questDTO.getLatitude();
-        if (latitude == null || latitude > 90 || latitude < 0) {
-            throw new BusinessException(UNPROCESSABLE_ENTITY, "纬度非法");
+        if (questDTO.getNeedLocation() == 1) {
+            String locationName = questDTO.getLocationName();
+            if (locationName == null || "".equals(locationName)) {
+                throw new BusinessException(UNPROCESSABLE_ENTITY, "请输入地点名称");
+            }
+            String locationDescription = questDTO.getLocationDescription();
+            if (locationDescription != null && locationDescription.length() > 256) {
+                throw new BusinessException(UNPROCESSABLE_ENTITY, "地点描述不能超过256个字符");
+            }
+            Double longitude = questDTO.getLongitude();
+            if (longitude == null || longitude > 180 || longitude < 0) {
+                throw new BusinessException(UNPROCESSABLE_ENTITY, "经度非法");
+            }
+            Double latitude = questDTO.getLatitude();
+            if (latitude == null || latitude > 90 || latitude < 0) {
+                throw new BusinessException(UNPROCESSABLE_ENTITY, "纬度非法");
+            }
         }
     }
 
