@@ -43,12 +43,15 @@ public interface SchoolClient {
 
     @GetMapping("/coladmin/dept/list/{schoolId}")
     Result<List<Dept>> listDeptBySchoolId(@PathVariable Long schoolId);
+
     @PutMapping("/coladmin/dept/update")
     public Result<Boolean> updateDept(@RequestBody DeptInsertDTO deptInsertDTO);
 
     @DeleteMapping("/coladmin/dept/delete")
-    public Result<Boolean>deleteDept(DeptInsertDTO deptInsertDTO);
+    public Result<Boolean> deleteDept(DeptInsertDTO deptInsertDTO);
 
+    @GetMapping("/coladmin/dept/page")
+    public PageResult<List<DeptVO>> getPageByCondition(@SpringQueryMap DeptInsertDTO deptQueryDTO, @RequestParam int page, @RequestParam int size);
     @RequestMapping(method = RequestMethod.GET, value = "/coladmin/dept/page")
     PageResult<List<DeptVO>> getPageByCondition(
             @SpringQueryMap DeptInsertDTO deptQueryDTO,
@@ -66,9 +69,10 @@ public interface SchoolClient {
 
     @PutMapping("/coladmin/clazz/update")
     Result<Boolean> updateClazz(@RequestBody ClazzInsertDTO clazzInsertDTO);
+
     @GetMapping("/coladmin/clazz/{clazzId}")
     Result<Clazz> getClazzById(@PathVariable Long clazzId);
 
     @DeleteMapping("/coladmin/clazz/delete")
-    Result<Boolean>deleteClazz(ClazzDeleteDTO clazzDeleteDTO);
+    Result<Boolean> deleteClazz(ClazzDeleteDTO clazzDeleteDTO);
 }

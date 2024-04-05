@@ -74,12 +74,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private UserInfoMapper userInfoMapper;
     @Autowired
-    private CommonProperties commonProperties;
-    @Autowired
-    private UserProperties userProperties;
-    @Autowired
-    private JwtProperties jwtProperties;
-    @Autowired
     private PhotoProperties photoProperties;
     @Autowired
     private StringRedisTemplate redisTemplate;
@@ -498,6 +492,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
+    public List<User> listBySharding(Integer total, Integer index) {
+        return userMapper.listBySharding(total, index);
+    }
+
+
+    @Override
     public void sendShortMessage(String phone) throws Exception {
         // 校验手机号
         if (!PhoneUtil.isPhone(phone)) {
@@ -756,8 +756,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         //判断按库存是否充足
         Reward reward = rewardClient.getByRewardId(rewardId).getData();
-        if (reward.getStock()<0){
-            return  Result.fail(403,"库存不足！");
+        if (reward.getStock() < 0) {
+            return Result.fail(403, "库存不足！");
         }
         //库存充足
         //库存-1，兑换量+1，用户积分减去相应量
@@ -767,7 +767,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Long userId = user.getId();
         user.setPoint(user.getPoint() - reward.getCost());
         RewardDTO rewardDTO = new RewardDTO();
-        BeanUtil.copyProperties(reward,rewardDTO);
+        BeanUtil.copyProperties(reward, rewardDTO);
         rewardClient.update(rewardDTO);
         //写入兑换日志
         ExchangeLogDTO exchangeLogDTO = new ExchangeLogDTO();

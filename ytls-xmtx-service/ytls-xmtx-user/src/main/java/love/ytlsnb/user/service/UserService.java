@@ -61,6 +61,8 @@ public interface UserService extends IService<User> {
 
     User getUser();
 
+    List<User> listBySharding(Integer total, Integer index);
+
     /**
      * 添加积分
      * @param reward 任务奖励

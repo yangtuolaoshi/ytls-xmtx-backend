@@ -1,6 +1,7 @@
 package love.ytlsnb.quest.controller;
 
 import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.quest.vo.QuestCardVO;
 import love.ytlsnb.model.quest.vo.QuestScheduleCompletionVO;
 import love.ytlsnb.model.quest.vo.QuestScheduleMapPoint;
 import love.ytlsnb.model.quest.vo.QuestSchedulePageInfoVO;
@@ -45,5 +46,16 @@ public class QuestScheduleController {
     @GetMapping("/infoPage/{id}")
     public Result<QuestSchedulePageInfoVO> getInfoPage(@PathVariable Long id) {
         return Result.ok(questScheduleService.getQuestScheduleInfoPage(id));
+    }
+
+    /**
+     * 最近任务进度
+     * @param longitude 经度
+     * @param latitude 维度
+     * @return 小卡片
+     */
+    @GetMapping("/near")
+    public Result<QuestCardVO> getNearest(Double longitude, Double latitude) {
+        return Result.ok(questScheduleService.getNearest(longitude, latitude));
     }
 }

@@ -75,7 +75,6 @@ public class DeptServiceImpl extends ServiceImpl<DeptMapper, Dept> implements De
 
     /**
      * 查询学院
-     * @param schoolId
      * @return
      */
     @Override
