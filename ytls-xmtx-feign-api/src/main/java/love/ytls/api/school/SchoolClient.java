@@ -1,6 +1,8 @@
 package love.ytls.api.school;
 
 import love.ytlsnb.model.common.PageResult;
+import love.ytlsnb.model.reward.dto.RewardQueryDTO;
+import love.ytlsnb.model.reward.vo.RewardVO;
 import love.ytlsnb.model.school.dto.ClazzDeleteDTO;
 import love.ytlsnb.model.school.dto.ClazzInsertDTO;
 import love.ytlsnb.model.school.dto.DeptInsertDTO;
@@ -50,6 +52,11 @@ public interface SchoolClient {
 
     @GetMapping("/coladmin/dept/page")
     public PageResult<List<DeptVO>> getPageByCondition(@SpringQueryMap DeptInsertDTO deptQueryDTO, @RequestParam int page, @RequestParam int size);
+    @RequestMapping(method = RequestMethod.GET, value = "/coladmin/dept/page")
+    PageResult<List<DeptVO>> getPageByCondition(
+            @SpringQueryMap DeptInsertDTO deptQueryDTO,
+            @RequestParam int page,
+            @RequestParam int size);
 
     @GetMapping("/coladmin/dept/{deptId}")
     Result<Dept> selectByDeptId(@PathVariable Long deptId);
