@@ -4,14 +4,14 @@ import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.quest.dto.QuestQueryDTO;
 import love.ytlsnb.model.quest.vo.QuestVo;
-import love.ytlsnb.model.reward.dto.ExchangeLogDTO;
-import love.ytlsnb.model.reward.dto.RewardDTO;
-import love.ytlsnb.model.reward.dto.RewardQueryDTO;
+import love.ytlsnb.model.reward.dto.*;
 import love.ytlsnb.model.reward.po.Reward;
+import love.ytlsnb.model.reward.vo.ExchangeLogVO;
 import love.ytlsnb.model.reward.vo.RewardVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -44,6 +44,24 @@ public interface RewardClient {
     @GetMapping("/api/reward/{id}")
     Result<Reward> getByRewardId(@PathVariable Long id);
 
-    @PostMapping("/api/reward/add/exchange")
+    @PostMapping("/api/exchange/add/exchange")
     Result addExchangeLog(ExchangeLogDTO exchangeLogDTO);
+
+    @DeleteMapping("/api/reward/delWithPho/{id}")
+    public Result deleteWithPhotoById(@PathVariable Long id);
+
+    @DeleteMapping("/api/reward/photo/delete")
+    public Result deletePhoto(RewardPhotoDTO rewardPhotoDTO);
+
+    @PostMapping("/api/reward/uploadPhotos")
+    public Result<String> uploadPhotos(MultipartFile file) ;
+
+    @RequestMapping(method = RequestMethod.GET,value = "api/exchange/page")
+    public PageResult<List<ExchangeLogVO>> getPageByCondition(
+            @SpringQueryMap ExchangeLogQueryDTO exchangeLogQueryDTO,
+            @RequestParam int page,
+            @RequestParam int size);
+
+    @GetMapping("/api/exchange/{id}")
+    public Result<ExchangeLogVO> selectById(@PathVariable Long id);
 }
