@@ -4,9 +4,10 @@ import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
 import love.ytlsnb.model.quest.dto.QuestQueryDTO;
 import love.ytlsnb.model.quest.vo.QuestVo;
-import love.ytlsnb.model.reward.dto.*;
+import love.ytlsnb.model.reward.dto.ExchangeLogDTO;
+import love.ytlsnb.model.reward.dto.RewardDTO;
+import love.ytlsnb.model.reward.dto.RewardQueryDTO;
 import love.ytlsnb.model.reward.po.Reward;
-import love.ytlsnb.model.reward.vo.ExchangeLogVO;
 import love.ytlsnb.model.reward.vo.RewardVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
@@ -45,23 +46,4 @@ public interface RewardClient {
 
     @PostMapping("/api/reward/add/exchange")
     Result addExchangeLog(ExchangeLogDTO exchangeLogDTO);
-
-    @DeleteMapping("/photo/delete")
-    Result deletePhoto(RewardPhotoDTO rewardPhotoDTO);
-
-    @DeleteMapping("/{id}")
-    Result deleteWithPhotoById(@PathVariable Long id);
-
-
-
-    @RequestMapping(method = RequestMethod.GET,value = "api/reward/exchangeLog/page")
-    PageResult<List<ExchangeLogVO>> getPageByCondition(
-            @SpringQueryMap ExchangeLogQueryDTO exchangeLogQueryDTO,
-            @RequestParam int page,
-            @RequestParam int size);
-
-
-    @GetMapping("api/reward/exchangeLog/{id}")
-    Result<ExchangeLogVO> selectById(@PathVariable Long id);
-
 }

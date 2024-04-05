@@ -2,9 +2,10 @@ package love.ytlsnb.reward.feign;
 
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
-import love.ytlsnb.model.reward.dto.*;
+import love.ytlsnb.model.reward.dto.ExchangeLogDTO;
+import love.ytlsnb.model.reward.dto.RewardDTO;
+import love.ytlsnb.model.reward.dto.RewardQueryDTO;
 import love.ytlsnb.model.reward.po.Reward;
-import love.ytlsnb.model.reward.vo.ExchangeLogVO;
 import love.ytlsnb.model.reward.vo.RewardVO;
 import love.ytlsnb.reward.service.ExchangeLogService;
 import love.ytlsnb.reward.service.RewardService;
@@ -87,28 +88,5 @@ public class RewardClient {
     public Result addExchangeLog(ExchangeLogDTO exchangeLogDTO){
         exchangeLogService.addExchangeLog(exchangeLogDTO);
         return Result.ok();
-    }
-
-    @DeleteMapping("/photo/delete")
-    public Result deletePhoto(RewardPhotoDTO rewardPhotoDTO){
-        rewardService.deleteByPhoto(rewardPhotoDTO);
-        return Result.ok();
-    }
-    @DeleteMapping("/{id}")
-    public Result deleteWithPhotoById(@PathVariable Long id){
-        rewardService.deleteWithPhotoById(id);
-        return Result.ok();
-
-    }
-
-
-    @GetMapping("/exchangeLog/page")
-    public PageResult<List<ExchangeLogVO>> getPageByCondition(ExchangeLogQueryDTO exchangeLogQueryDTO, int page, int size){
-        return exchangeLogService.getPageByCondition(exchangeLogQueryDTO,page,size);
-    }
-
-    @GetMapping("/exchangeLog/{id}")
-    public Result<ExchangeLogVO> selectById(@PathVariable Long id){
-        return Result.ok(exchangeLogService.selectById(id));
     }
 }
