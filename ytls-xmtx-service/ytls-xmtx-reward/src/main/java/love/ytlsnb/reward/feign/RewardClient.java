@@ -2,9 +2,10 @@ package love.ytlsnb.reward.feign;
 
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
-import love.ytlsnb.model.reward.dto.*;
+import love.ytlsnb.model.reward.dto.ExchangeLogDTO;
+import love.ytlsnb.model.reward.dto.RewardDTO;
+import love.ytlsnb.model.reward.dto.RewardQueryDTO;
 import love.ytlsnb.model.reward.po.Reward;
-import love.ytlsnb.model.reward.vo.ExchangeLogVO;
 import love.ytlsnb.model.reward.vo.RewardVO;
 import love.ytlsnb.reward.service.ExchangeLogService;
 import love.ytlsnb.reward.service.RewardService;
