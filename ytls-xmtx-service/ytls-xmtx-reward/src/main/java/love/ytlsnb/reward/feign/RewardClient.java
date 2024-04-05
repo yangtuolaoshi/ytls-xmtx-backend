@@ -2,15 +2,15 @@ package love.ytlsnb.reward.feign;
 
 import love.ytlsnb.model.common.PageResult;
 import love.ytlsnb.model.common.Result;
-import love.ytlsnb.model.reward.dto.ExchangeLogDTO;
-import love.ytlsnb.model.reward.dto.RewardDTO;
-import love.ytlsnb.model.reward.dto.RewardQueryDTO;
+import love.ytlsnb.model.reward.dto.*;
 import love.ytlsnb.model.reward.po.Reward;
+import love.ytlsnb.model.reward.vo.ExchangeLogVO;
 import love.ytlsnb.model.reward.vo.RewardVO;
 import love.ytlsnb.reward.service.ExchangeLogService;
 import love.ytlsnb.reward.service.RewardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -60,17 +60,18 @@ public class RewardClient {
         return Result.ok(rewardService.update(rewardDTO));
     }
 
-    /**
-     * 根据id删除奖品
-     * @param id
-     * @return
-     */
-    @DeleteMapping("/{id}")
-    public Result deleteById(@PathVariable Long id){
-        rewardService.deleteWithPhotoById(id);
-        return Result.ok();
-
-    }
+//    /**
+//     * 根据id删除奖品
+//     * @param id
+//     * @return
+//     */
+//    @DeleteMapping("delWithPho/{id}")
+//    public Result deleteById(@PathVariable Long id){
+//
+//        rewardService.deleteWithPhotoById(id);
+//        return Result.ok();
+//
+//    }
 
     @GetMapping("/{schoolId}")
     public Result<List<Reward>> getPageBySchoolId(@PathVariable Long schoolId){
@@ -78,7 +79,7 @@ public class RewardClient {
         return Result.ok(rewards);
     }
 
-    @GetMapping("/id")
+    @GetMapping("/{id}")
     public Result<Reward> getByRewardId(@PathVariable Long id){
         Reward reward = rewardService.getById(id);
         return Result.ok(reward);
@@ -88,5 +89,33 @@ public class RewardClient {
     public Result addExchangeLog(ExchangeLogDTO exchangeLogDTO){
         exchangeLogService.addExchangeLog(exchangeLogDTO);
         return Result.ok();
+    }
+    @DeleteMapping("delWithPho/{id}")
+    public Result deleteWithPhotoById(@PathVariable Long id){
+        rewardService.deleteWithPhotoById(id);
+        return Result.ok();
+
+    }
+
+    @DeleteMapping("/photo/delete")
+    public Result deletePhoto(RewardPhotoDTO rewardPhotoDTO){
+        rewardService.deleteByPhoto(rewardPhotoDTO);
+        return Result.ok();
+    }
+
+    @PostMapping("/uploadPhotos")
+    public Result<String> uploadPhotos(MultipartFile file) {
+        return Result.ok(rewardService.upload(file));
+    }
+
+
+    @GetMapping("exchangeLog/page")
+    public PageResult<List<ExchangeLogVO>> getPageByCondition(ExchangeLogQueryDTO exchangeLogQueryDTO, int page, int size){
+        return exchangeLogService.getPageByCondition(exchangeLogQueryDTO,page,size);
+    }
+
+    @GetMapping("select/{id}")
+    public Result<ExchangeLogVO> selectById(@PathVariable Long id){
+        return Result.ok(exchangeLogService.selectById(id));
     }
 }

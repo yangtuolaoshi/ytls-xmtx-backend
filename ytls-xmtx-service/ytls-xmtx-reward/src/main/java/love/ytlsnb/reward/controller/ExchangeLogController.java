@@ -26,28 +26,30 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/exchange")
 public class ExchangeLogController {
-
-    @Autowired
-    private ExchangeLogService exchangeLogService;
-
-    @PostMapping("/add")
-    public Result addExchangeLog(ExchangeLogDTO exchangeLogDTO){
-        log.info("根据兑换情况添加的奖品情况{}",exchangeLogDTO);
-        exchangeLogService.addExchangeLog(exchangeLogDTO);
-        return Result.ok();
-    }
-
-    @GetMapping("/page")
-    public PageResult<List<ExchangeLogVO>> getPageByCondition(ExchangeLogQueryDTO exchangeLogQueryDTO, int page, int size){
-        log.info("分页查询奖品兑换情况：{}",exchangeLogQueryDTO);
-        return exchangeLogService.getPageByCondition(exchangeLogQueryDTO,page,size);
-    }
-
-    @GetMapping("/{id}")
-    public Result<ExchangeLogVO> selectById(@PathVariable Long id){
-
-        return Result.ok(exchangeLogService.selectById(id));
-    }
-
 }
 
+//
+//    @Autowired
+//    private ExchangeLogService exchangeLogService;
+//
+//    @PostMapping("/add")
+//    public Result addExchangeLog(ExchangeLogDTO exchangeLogDTO){
+//        log.info("根据兑换情况添加的奖品情况{}",exchangeLogDTO);
+//        exchangeLogService.addExchangeLog(exchangeLogDTO);
+//        return Result.ok();
+//    }
+//
+//    @GetMapping("/page")
+//    public PageResult<List<ExchangeLogVO>> getPageByCondition(ExchangeLogQueryDTO exchangeLogQueryDTO, int page, int size){
+//        log.info("分页查询奖品兑换情况：{}",exchangeLogQueryDTO);
+//        return exchangeLogService.getPageByCondition(exchangeLogQueryDTO,page,size);
+//    }
+//
+//    @GetMapping("/{id}")
+//    public Result<ExchangeLogVO> selectById(@PathVariable Long id){
+//
+//        return Result.ok(exchangeLogService.selectById(id));
+//    }
+//
+//}
+//
