@@ -1,0 +1,21 @@
+xxl:
+  job:
+    admin:
+      addresses: http://139.196.230.249:9001/xxl-job-admin
+    executor:
+      appname: xmtx-ad-executor
+      # ip:
+      port: 9999
+      logpath: /data/applogs/xxl-job/jobhandler
+      logretentiondays: 30
+    accessToken: 666XMTX_xmtx_XMTX666
+spring:
+  rabbitmq:
+    host: 121.41.90.44    # RabbitMQ IP地址
+    port: 5672                # 服务端口
+    username: root        # 用户名
+    password: 1234        # 密码
+    virtual-host: my_vhost            # 虚拟主机
+    listener:
+      simple:
+        prefetch: 1            # 当前的每个监听器的预取值为一，即处理完一个后拉取下一个

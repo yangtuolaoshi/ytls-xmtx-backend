@@ -1,29 +1,31 @@
-//package love.ytlsnb.reward.controller;
-//
-//import lombok.extern.slf4j.Slf4j;
-//import love.ytlsnb.model.common.PageResult;
-//import love.ytlsnb.model.common.Result;
-//import love.ytlsnb.model.reward.dto.RewardDTO;
-//import love.ytlsnb.model.reward.dto.RewardPhotoDTO;
-//import love.ytlsnb.model.reward.dto.RewardQueryDTO;
-//import love.ytlsnb.model.reward.po.Reward;
-//import love.ytlsnb.model.reward.po.RewardPhoto;
-//import love.ytlsnb.model.reward.vo.RewardVO;
-//import love.ytlsnb.reward.service.RewardService;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.web.bind.annotation.*;
-//import org.springframework.web.multipart.MultipartFile;
-//
-//import java.util.List;
-//
-///**
-// * @author ula
-// * @date 2024/2/6 14:22
-// */
-//@Slf4j
-//@RestController
-//@RequestMapping("/reward")
-//public class RewardController {
+package love.ytlsnb.reward.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import love.ytlsnb.model.common.PageResult;
+import love.ytlsnb.model.common.Result;
+import love.ytlsnb.model.reward.dto.RewardDTO;
+import love.ytlsnb.model.reward.dto.RewardPhotoDTO;
+import love.ytlsnb.model.reward.dto.RewardQueryDTO;
+import love.ytlsnb.model.reward.po.Reward;
+import love.ytlsnb.model.reward.po.RewardPhoto;
+import love.ytlsnb.model.reward.vo.RewardVO;
+import love.ytlsnb.reward.service.RewardService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+/**
+ * @author ula
+ * @date 2024/2/6 14:22
+ */
+@Slf4j
+@RestController
+@RequestMapping("/reward")
+public class RewardController {
+}
+
 //    @Autowired
 //    private RewardService rewardService;
 //

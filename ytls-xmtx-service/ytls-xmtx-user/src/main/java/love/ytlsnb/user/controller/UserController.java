@@ -131,6 +131,13 @@ public class UserController {
         return Result.ok(userVO);
     }
 
+    @GetMapping("/list")
+    public Result<List<User>> list() {
+        log.info("查询所有用户");
+        List<User> userList = userService.list();
+        return Result.ok(userList);
+    }
+
     @GetMapping("/listByConditions")
     public PageResult<List<UserVO>> listByConditions(UserQueryDTO userQueryDTO) {
         log.info("查询用户，userQueryDTO:{}", userQueryDTO);
@@ -139,6 +146,13 @@ public class UserController {
                 userQueryDTO.getPageSize(),
                 userVOList,
                 (long) userVOList.size());
+    }
+
+    @GetMapping("/list/{total}/{index}")
+    public Result<List<User>> listBySharding(@PathVariable Integer total, @PathVariable Integer index) {
+        log.info("根据分片详情查询数据");
+        List<User> userList = userService.listBySharding(total, index);
+        return Result.ok(userList);
     }
 
     @LogOperation(Operator.USER)
@@ -250,15 +264,15 @@ public class UserController {
         return Result.ok();
     }
 
-    /**
-     * 用户兑换奖品
-     * @param rewardId
-     * @return
-     */
-    @PostMapping("/exchangeReward/{rewardId}")
-    public Result exchangeReward(@PathVariable Long rewardId){
-        log.info("兑换奖品:",rewardId);
-        userService.exchangeReward(rewardId);
-        return Result.ok();
-    }
+//    /**
+//     * 用户兑换奖品
+//     * @param rewardId
+//     * @return
+//     */
+//    @PostMapping("/exchangeReward/{rewardId}")
+//    public Result exchangeReward(@PathVariable Long rewardId){
+//        log.info("兑换奖品:",rewardId);
+//        userService.exchangeReward(rewardId);
+//        return Result.ok();
+//    }
 }
