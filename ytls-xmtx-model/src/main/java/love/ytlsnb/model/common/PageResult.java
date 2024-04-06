@@ -5,8 +5,8 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 表现层分页结果封装
- * @param <T>
  *
+ * @param <T>
  * @author 金泓宇
  * @date 2024/01/21
  */
@@ -26,11 +26,23 @@ public class PageResult<T> extends Result<T> {
     /**
      * 总数
      */
-    private Integer total;
+    private Long total;
 
-    public PageResult(Integer page, Integer size, Integer total) {
+    public PageResult() {
+    }
+
+    public PageResult(Integer page, Integer size, Long total) {
+        super();
         this.page = page;
         this.size = size;
+        this.total = total;
+    }
+
+    public PageResult(Integer page, Integer size, T data, Long total) {
+        super();
+        this.page = page;
+        this.size = size;
+        this.setData(data);
         this.total = total;
     }
 }

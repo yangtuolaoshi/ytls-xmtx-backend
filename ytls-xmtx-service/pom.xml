@@ -8,11 +8,14 @@
         <version>0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>ytls-xmtx-service</artifactId>
     <packaging>pom</packaging>
     <modules>
         <module>ytls-xmtx-user</module>
+        <module>ytls-xmtx-quest</module>
+        <module>ytls-xmtx-school</module>
+        <module>ytls-xmtx-reward</module>
+        <module>ytls-xmtx-ad</module>
     </modules>
 
     <properties>
@@ -26,12 +29,45 @@
             <artifactId>ytls-xmtx-model</artifactId>
         </dependency>
         <dependency>
+            <groupId>love.ytls-nb</groupId>
+            <artifactId>ytls-xmtx-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>love.ytls-nb</groupId>
+            <artifactId>ytls-xmtx-feign-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.xuxueli</groupId>
+            <artifactId>xxl-job-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+        <!--AMQP依赖，包含RabbitMQ-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -57,5 +93,21 @@
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-extension</artifactId>
+            <version>3.5.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.12.1</version>
+        </dependency>
+
+
     </dependencies>
 </project>

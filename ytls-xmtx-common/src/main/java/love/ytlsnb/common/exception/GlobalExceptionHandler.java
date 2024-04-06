@@ -1,5 +1,6 @@
 package love.ytlsnb.common.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import love.ytlsnb.model.common.Result;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,6 +13,7 @@ import static love.ytlsnb.common.constants.ResultCodes.SERVER_ERROR;
  * @author 金泓宇
  * @date 2024/01/21
  */
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     /**
@@ -21,12 +23,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result<Object> doException(Exception e) {
         e.printStackTrace();
+        log.error("An unexpected exception occurred...");
         return Result.fail(SERVER_ERROR, "系统开小差了，请稍后再试...");
     }
 
     @ExceptionHandler(BusinessException.class)
     public Result<Object> doBusinessException(BusinessException e) {
-        e.printStackTrace();
+        log.error(e.getMessage());
         return Result.fail(e.getCode(), e.getMessage());
     }
 }
