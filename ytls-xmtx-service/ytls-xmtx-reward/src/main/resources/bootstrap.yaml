@@ -17,7 +17,7 @@ spring:
         server-addr: 139.196.230.249:8848 # Nacos地址
         file-extension: yaml # 文件后缀名
       discovery:
-        group: xmtx-dev
+        group: xmtx-sit
   data:
     redis:
       host: 139.196.230.249
