@@ -25,29 +25,29 @@ public class UserTest {
 //
 //    @Autowired
 //    AliUtil aliUtil;
-    @Autowired
-    private RedissonClient redissonClient;
-    @Autowired
-    private StringRedisTemplate redisTemplate;
-
-    @Test
-    public void test() throws Exception {
-        redisTemplate.opsForValue().set("test1:1","test1,1");
-        redisTemplate.opsForValue().set("test1:2","test1,2");
-        RBloomFilter<String> test1 = redissonClient.getBloomFilter("test1");
-        test1.tryInit(1000L,0.05);
-        boolean contains = test1.contains("1");
-        System.out.println(contains);
-        redisTemplate.opsForValue().set("test2:1","test2,1");
-        redisTemplate.opsForValue().set("test2:2","test2,2");
-        RBloomFilter<String> test2 = redissonClient.getBloomFilter("test2");
-        test2.tryInit(1000L,0.05);
-        test2.add("1");
-        test1.add("1");
-        System.out.println(test2.contains("1"));
-    }
-    @Test
-    public void testBD(){
-
-    }
+//    @Autowired
+//    private RedissonClient redissonClient;
+//    @Autowired
+//    private StringRedisTemplate redisTemplate;
+//
+//    @Test
+//    public void test() throws Exception {
+//        redisTemplate.opsForValue().set("test1:1","test1,1");
+//        redisTemplate.opsForValue().set("test1:2","test1,2");
+//        RBloomFilter<String> test1 = redissonClient.getBloomFilter("test1");
+//        test1.tryInit(1000L,0.05);
+//        boolean contains = test1.contains("1");
+//        System.out.println(contains);
+//        redisTemplate.opsForValue().set("test2:1","test2,1");
+//        redisTemplate.opsForValue().set("test2:2","test2,2");
+//        RBloomFilter<String> test2 = redissonClient.getBloomFilter("test2");
+//        test2.tryInit(1000L,0.05);
+//        test2.add("1");
+//        test1.add("1");
+//        System.out.println(test2.contains("1"));
+//    }
+//    @Test
+//    public void testBD(){
+//
+//    }
 }

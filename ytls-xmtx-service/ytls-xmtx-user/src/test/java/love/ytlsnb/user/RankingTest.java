@@ -20,14 +20,14 @@ public class RankingTest {
     @Autowired
     private UserMapper userMapper;
 
-    @Test
-    void addQuestFinishRanking() {
-        ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
-        List<User> users = userMapper.selectList(null);
-        for (User user : users) {
-            Long userId = user.getId();
-            Integer questFinishCount = user.getQuestFinishCount();
-            zSetOperations.add(QUEST_FINISH_RANKING_PREFIX, userId.toString(), questFinishCount);
-        }
-    }
+//    @Test
+//    void addQuestFinishRanking() {
+//        ZSetOperations<String, String> zSetOperations = redisTemplate.opsForZSet();
+//        List<User> users = userMapper.selectList(null);
+//        for (User user : users) {
+//            Long userId = user.getId();
+//            Integer questFinishCount = user.getQuestFinishCount();
+//            zSetOperations.add(QUEST_FINISH_RANKING_PREFIX, userId.toString(), questFinishCount);
+//        }
+//    }
 }

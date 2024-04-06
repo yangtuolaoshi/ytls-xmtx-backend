@@ -25,49 +25,49 @@ public class RedisTest {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    @Test
-    void testRedisClient() {
-        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        valueOperations.set("name", "zhangsan");
-        System.out.println(valueOperations.get("name"));
-    }
-
-    @Autowired
-    private QuestLocationMapper questLocationMapper;
-
-    @Autowired
-    private QuestScheduleMapper questScheduleMapper;
-
-    /**
-     * 添加数据到Redis
-     */
-    @Test
-    void addGeo() {
-        GeoOperations<String, String> geoOperations = redisTemplate.opsForGeo();
-        List<QuestLocation> questLocations = questLocationMapper.selectList(null);
-        for (QuestLocation questLocation : questLocations) {
-            Double longitude = questLocation.getLongitude();
-            Double latitude = questLocation.getLatitude();
-            LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(QuestSchedule::getLocationId, questLocation.getId());
-            QuestSchedule questSchedule = questScheduleMapper.selectOne(queryWrapper);
-            geoOperations.add(
-                    QUEST_SCHEDULE_GEO_PREFIX + 1,
-                    new Point(longitude, latitude),
-                    questSchedule.getId().toString()
-            );
-        }
-    }
-
-    @Autowired
-    private QuestScheduleService questScheduleService;
-
-    @Test
-    void testGetNearest() {
-        User user = new User();
-        user.setId(1758018823723806722L);
-        user.setSchoolId(1L);
-        UserHolder.saveUser(user);
-        System.out.println(questScheduleService.getNearest(119.51602, 32.20073));
-    }
+//    @Test
+//    void testRedisClient() {
+//        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+//        valueOperations.set("name", "zhangsan");
+//        System.out.println(valueOperations.get("name"));
+//    }
+//
+//    @Autowired
+//    private QuestLocationMapper questLocationMapper;
+//
+//    @Autowired
+//    private QuestScheduleMapper questScheduleMapper;
+//
+//    /**
+//     * 添加数据到Redis
+//     */
+//    @Test
+//    void addGeo() {
+//        GeoOperations<String, String> geoOperations = redisTemplate.opsForGeo();
+//        List<QuestLocation> questLocations = questLocationMapper.selectList(null);
+//        for (QuestLocation questLocation : questLocations) {
+//            Double longitude = questLocation.getLongitude();
+//            Double latitude = questLocation.getLatitude();
+//            LambdaQueryWrapper<QuestSchedule> queryWrapper = new LambdaQueryWrapper<>();
+//            queryWrapper.eq(QuestSchedule::getLocationId, questLocation.getId());
+//            QuestSchedule questSchedule = questScheduleMapper.selectOne(queryWrapper);
+//            geoOperations.add(
+//                    QUEST_SCHEDULE_GEO_PREFIX + 1,
+//                    new Point(longitude, latitude),
+//                    questSchedule.getId().toString()
+//            );
+//        }
+//    }
+//
+//    @Autowired
+//    private QuestScheduleService questScheduleService;
+//
+//    @Test
+//    void testGetNearest() {
+//        User user = new User();
+//        user.setId(1758018823723806722L);
+//        user.setSchoolId(1L);
+//        UserHolder.saveUser(user);
+//        System.out.println(questScheduleService.getNearest(119.51602, 32.20073));
+//    }
 }

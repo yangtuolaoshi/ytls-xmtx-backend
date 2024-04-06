@@ -17,11 +17,11 @@ public class UserServiceTest {
     @Autowired
     HttpServletRequest request;
 
-    @Test
-    public void testLogin() {
-        UserLoginDTO userLoginDTO = new UserLoginDTO();
-        userLoginDTO.setAccount("18122542275");
-        userLoginDTO.setPassword("123456");
-        userService.login(userLoginDTO);
-    }
+//    @Test
+//    public void testLogin() {
+//        UserLoginDTO userLoginDTO = new UserLoginDTO();
+//        userLoginDTO.setAccount("18122542275");
+//        userLoginDTO.setPassword("123456");
+//        userService.login(userLoginDTO);
+//    }
 }

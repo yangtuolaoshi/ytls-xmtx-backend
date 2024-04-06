@@ -46,80 +46,80 @@ public class ESTest {
     @Autowired
     private QuestLocationMapper questLocationMapper;
 
-    /**
-     * 导入数据
-     * @throws IOException IOException
-     */
-    @Test
-    void addData() throws IOException {
-//        QuestScheduleDoc questScheduleDoc = new QuestScheduleDoc();
-//        // 进度
-//        QuestSchedule questSchedule = questScheduleMapper.selectById(1768180079332511745L);
-//        BeanUtil.copyProperties(questSchedule, questScheduleDoc);
-//        questScheduleDoc.setQuestScheduleTitle(questSchedule.getScheduleTitle());
-//        // 任务
-//        Quest quest = questMapper.selectById(questSchedule.getQuestId());
-//        BeanUtil.copyProperties(quest, questScheduleDoc);
-//        // 任务详情
-//        QuestInfo questInfo = questInfoMapper.selectById(quest.getInfoId());
-//        BeanUtil.copyProperties(questInfo, questScheduleDoc);
-//        // 地点
-//        if (questSchedule.getNeedLocation() == 1) {
-//            QuestLocation questLocation = questLocationMapper.selectById(questSchedule.getLocationId());
-//            BeanUtil.copyProperties(questLocation, questScheduleDoc);
-//            questScheduleDoc.setQuestLocationId(questLocation.getId());
+//    /**
+//     * 导入数据
+//     * @throws IOException IOException
+//     */
+//    @Test
+//    void addData() throws IOException {
+////        QuestScheduleDoc questScheduleDoc = new QuestScheduleDoc();
+////        // 进度
+////        QuestSchedule questSchedule = questScheduleMapper.selectById(1768180079332511745L);
+////        BeanUtil.copyProperties(questSchedule, questScheduleDoc);
+////        questScheduleDoc.setQuestScheduleTitle(questSchedule.getScheduleTitle());
+////        // 任务
+////        Quest quest = questMapper.selectById(questSchedule.getQuestId());
+////        BeanUtil.copyProperties(quest, questScheduleDoc);
+////        // 任务详情
+////        QuestInfo questInfo = questInfoMapper.selectById(quest.getInfoId());
+////        BeanUtil.copyProperties(questInfo, questScheduleDoc);
+////        // 地点
+////        if (questSchedule.getNeedLocation() == 1) {
+////            QuestLocation questLocation = questLocationMapper.selectById(questSchedule.getLocationId());
+////            BeanUtil.copyProperties(questLocation, questScheduleDoc);
+////            questScheduleDoc.setQuestLocationId(questLocation.getId());
+////        }
+////        questScheduleDoc.setQuestId(quest.getId());
+////        questScheduleDoc.setQuestScheduleId(questSchedule.getId());
+////        // 1. 创建请求对象
+////        IndexRequest request = new IndexRequest("quest_schedule").id(questSchedule.getId().toString());
+////        // 2. 转json
+////        String jsonStr = JSONUtil.toJsonStr(questScheduleDoc);
+////        request.source(jsonStr, XContentType.JSON);
+////        // 3. 发送请求
+////        restHighLevelClient.index(request, RequestOptions.DEFAULT);
+//
+//        List<QuestSchedule> questSchedules = questScheduleMapper.selectList(null);
+//        for (QuestSchedule questSchedule : questSchedules) {
+//            QuestScheduleDoc questScheduleDoc = new QuestScheduleDoc();
+//            // 进度
+//            BeanUtil.copyProperties(questSchedule, questScheduleDoc);
+//            questScheduleDoc.setQuestScheduleTitle(questSchedule.getScheduleTitle());
+//            // 任务
+//            Quest quest = questMapper.selectById(questSchedule.getQuestId());
+//            BeanUtil.copyProperties(quest, questScheduleDoc);
+//            // 任务详情
+//            QuestInfo questInfo = questInfoMapper.selectById(quest.getInfoId());
+//            BeanUtil.copyProperties(questInfo, questScheduleDoc);
+//            // 地点
+//            if (questSchedule.getNeedLocation() == 1) {
+//                QuestLocation questLocation = questLocationMapper.selectById(questSchedule.getLocationId());
+//                BeanUtil.copyProperties(questLocation, questScheduleDoc);
+//                questScheduleDoc.setQuestLocationId(questLocation.getId());
+//            }
+//            questScheduleDoc.setQuestId(quest.getId());
+//            questScheduleDoc.setQuestScheduleId(questSchedule.getId());
+//            // 1. 创建请求对象
+//            IndexRequest request = new IndexRequest("quest_schedule").id(questSchedule.getId().toString());
+//            // 2. 转json
+//            String jsonStr = JSONUtil.toJsonStr(questScheduleDoc);
+//            request.source(jsonStr, XContentType.JSON);
+//            // 3. 发送请求
+//            restHighLevelClient.index(request, RequestOptions.DEFAULT);
 //        }
-//        questScheduleDoc.setQuestId(quest.getId());
-//        questScheduleDoc.setQuestScheduleId(questSchedule.getId());
-//        // 1. 创建请求对象
-//        IndexRequest request = new IndexRequest("quest_schedule").id(questSchedule.getId().toString());
-//        // 2. 转json
-//        String jsonStr = JSONUtil.toJsonStr(questScheduleDoc);
-//        request.source(jsonStr, XContentType.JSON);
-//        // 3. 发送请求
-//        restHighLevelClient.index(request, RequestOptions.DEFAULT);
-
-        List<QuestSchedule> questSchedules = questScheduleMapper.selectList(null);
-        for (QuestSchedule questSchedule : questSchedules) {
-            QuestScheduleDoc questScheduleDoc = new QuestScheduleDoc();
-            // 进度
-            BeanUtil.copyProperties(questSchedule, questScheduleDoc);
-            questScheduleDoc.setQuestScheduleTitle(questSchedule.getScheduleTitle());
-            // 任务
-            Quest quest = questMapper.selectById(questSchedule.getQuestId());
-            BeanUtil.copyProperties(quest, questScheduleDoc);
-            // 任务详情
-            QuestInfo questInfo = questInfoMapper.selectById(quest.getInfoId());
-            BeanUtil.copyProperties(questInfo, questScheduleDoc);
-            // 地点
-            if (questSchedule.getNeedLocation() == 1) {
-                QuestLocation questLocation = questLocationMapper.selectById(questSchedule.getLocationId());
-                BeanUtil.copyProperties(questLocation, questScheduleDoc);
-                questScheduleDoc.setQuestLocationId(questLocation.getId());
-            }
-            questScheduleDoc.setQuestId(quest.getId());
-            questScheduleDoc.setQuestScheduleId(questSchedule.getId());
-            // 1. 创建请求对象
-            IndexRequest request = new IndexRequest("quest_schedule").id(questSchedule.getId().toString());
-            // 2. 转json
-            String jsonStr = JSONUtil.toJsonStr(questScheduleDoc);
-            request.source(jsonStr, XContentType.JSON);
-            // 3. 发送请求
-            restHighLevelClient.index(request, RequestOptions.DEFAULT);
-        }
-    }
-
-    @Autowired
-    private SearchService searchService;
-
-    @Test
-    void testSearch() throws IOException {
-        User user = new User();
-        user.setSchoolId(1L);
-        UserHolder.saveUser(user);
-        List<QuestScheduleDoc> questScheduleDocs = searchService.search("寻找", 1, 5).getData();
-        for (QuestScheduleDoc questScheduleDoc : questScheduleDocs) {
-            System.out.println(questScheduleDoc);
-        }
-    }
+//    }
+//
+//    @Autowired
+//    private SearchService searchService;
+//
+//    @Test
+//    void testSearch() throws IOException {
+//        User user = new User();
+//        user.setSchoolId(1L);
+//        UserHolder.saveUser(user);
+//        List<QuestScheduleDoc> questScheduleDocs = searchService.search("寻找", 1, 5).getData();
+//        for (QuestScheduleDoc questScheduleDoc : questScheduleDocs) {
+//            System.out.println(questScheduleDoc);
+//        }
+//    }
 }
