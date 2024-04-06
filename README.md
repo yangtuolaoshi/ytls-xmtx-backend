@@ -7,6 +7,8 @@
 管理平台前端仓库：XXX
 
 APP前端仓库：XXX
+
+APP下载地址：链接：https://pan.baidu.com/s/1_ln-ridtsU-ECpFbjLjUIw  提取码：6666（由于经费不足，目前只上线了部分服务）
 ### 核心功能
 1. 任务
 
